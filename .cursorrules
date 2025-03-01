@@ -1,0 +1,6 @@
+Whenever you generate tests, we want to see them fail, so that 
+we know that they are effective. After seeing them fail, please 
+implement the code to make them pass.  Never trust a test we didn't
+see fail.
+
+Use stretchr/testify for writing tests
