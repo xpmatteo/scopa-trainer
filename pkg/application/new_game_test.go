@@ -36,11 +36,7 @@ func (s *NewGameTestSuite) TestStartNewGame() {
 	// When the player clicks the "New Game" button
 	updatedModel := s.service.StartNewGame()
 
-	// Then a new game should be initialized with:
-	// - 4 cards on the table
-	// - 10 cards in the player's hand
-	// - The "New Game" button should be hidden
-	assert.Equal(s.T(), 4, len(updatedModel.TableCards), "Table should have 4 cards")
+	assert.Equal(s.T(), 0, len(updatedModel.TableCards), "Table should have no cards")
 	assert.Equal(s.T(), 10, len(updatedModel.PlayerHand), "Player should have 10 cards")
 	assert.False(s.T(), updatedModel.ShowNewGameButton, "New Game button should be hidden after starting a game")
 }

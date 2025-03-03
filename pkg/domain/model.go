@@ -44,16 +44,13 @@ func NewGameState() GameState {
 	deck := NewDeck()
 	shuffledDeck := ShuffleDeck(deck)
 
-	// Deal 3 cards to the table
-	tableCards, remainingDeck := DealCards(shuffledDeck, 4)
-
-	// Deal 3 cards to each player
-	playerHand, remainingDeck := DealCards(remainingDeck, 10)
+	// Deal cards to each player
+	playerHand, remainingDeck := DealCards(shuffledDeck, 10)
 	aiHand, remainingDeck := DealCards(remainingDeck, 10)
 
 	return GameState{
 		Deck:       remainingDeck,
-		TableCards: tableCards,
+		TableCards: []Card{},
 		PlayerHand: playerHand,
 		AIHand:     aiHand,
 		PlayerTurn: true, // Player goes first by default

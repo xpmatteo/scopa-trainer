@@ -41,11 +41,6 @@ func (h *Handler) HandleIndex(w http.ResponseWriter, r *http.Request) {
 
 // HandleNewGame handles the request to start a new game
 func (h *Handler) HandleNewGame(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	model := h.service.StartNewGame()
 	if err := h.template.Execute(w, model); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
