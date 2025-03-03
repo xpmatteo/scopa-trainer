@@ -10,10 +10,7 @@ type Card struct {
 
 // GameState represents the current state of the game
 type GameState struct {
-	Deck       []Card
-	TableCards []Card
-	PlayerHand []Card
-	AIHand     []Card
+	Deck       *Deck
 	PlayerTurn bool
 }
 
@@ -41,18 +38,15 @@ func NewUIModel() UIModel {
 
 // NewGameState initializes a new game state
 func NewGameState() GameState {
-	deck := OldNewDeck()
-	shuffledDeck := ShuffleDeck(deck)
+	deck := NewDeck()
+	deck.Shuffle()
 
 	// Deal cards to each player
-	playerHand, remainingDeck := DealCards(shuffledDeck, 10)
-	aiHand, remainingDeck := DealCards(remainingDeck, 10)
+	deck.DealCards(DeckLocation, PlayerHandLocation, 10)
+	deck.DealCards(DeckLocation, AIHandLocation, 10)
 
 	return GameState{
-		Deck:       remainingDeck,
-		TableCards: []Card{},
-		PlayerHand: playerHand,
-		AIHand:     aiHand,
+		Deck:       deck,
 		PlayerTurn: true, // Player goes first by default
 	}
 }

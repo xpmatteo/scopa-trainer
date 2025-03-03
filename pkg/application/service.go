@@ -31,8 +31,8 @@ func (s *GameService) StartNewGame() domain.UIModel {
 
 	// Update the UI model
 	s.model.ShowNewGameButton = false
-	s.model.TableCards = s.gameState.TableCards
-	s.model.PlayerHand = s.gameState.PlayerHand
+	s.model.TableCards = s.gameState.Deck.CardsAt(domain.TableLocation)
+	s.model.PlayerHand = s.gameState.Deck.CardsAt(domain.AIHandLocation)
 	s.model.GameInProgress = true
 	s.model.PlayerTurn = s.gameState.PlayerTurn
 

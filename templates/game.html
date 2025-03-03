@@ -76,31 +76,31 @@
     <div class="game-prompt">
         {{.GamePrompt}}
     </div>
-    
+
     {{if .ShowNewGameButton}}
     <form action="/new-game" method="post">
         <button type="submit" class="new-game-button">New Game</button>
     </form>
     {{end}}
-    
+
     {{if .GameInProgress}}
     <div class="card-area table-area">
         <h2>Table Cards ({{len .TableCards}})</h2>
         <div style="display: flex; flex-wrap: wrap;">
             {{range .TableCards}}
-            <div class="card {{.Suit | lower}}">
+            <div class="card {{.Suit}}">
                 <div class="card-rank">{{.Rank}}</div>
                 <div class="card-suit">{{.Name}} di {{.Suit}}</div>
             </div>
             {{end}}
         </div>
     </div>
-    
+
     <div class="card-area hand-area">
         <h2>Your Hand ({{len .PlayerHand}})</h2>
         <div style="display: flex; flex-wrap: wrap;">
             {{range .PlayerHand}}
-            <div class="card {{.Suit | lower}}">
+            <div class="card {{.Suit}}">
                 <div class="card-rank">{{.Rank}}</div>
                 <div class="card-suit">{{.Name}} di {{.Suit}}</div>
             </div>
@@ -109,4 +109,4 @@
     </div>
     {{end}}
 </body>
-</html> 
+</html>
