@@ -5,40 +5,18 @@ import (
 	"time"
 )
 
-// Suit constants
-const (
-	Coppe   = "Coppe"
-	Denari  = "Denari"
-	Bastoni = "Bastoni"
-	Spade   = "Spade"
-)
-
-// Rank name mapping
-var rankNames = map[int]string{
-	1:  "Asso",
-	2:  "Due",
-	3:  "Tre",
-	4:  "Quattro",
-	5:  "Cinque",
-	6:  "Sei",
-	7:  "Sette",
-	8:  "Fante",
-	9:  "Cavallo",
-	10: "Re",
-}
-
 // NewDeck creates a standard 40-card Italian deck
 func NewDeck() []Card {
-	suits := []string{Coppe, Denari, Bastoni, Spade}
+	suits := []Suit{Coppe, Denari, Bastoni, Spade}
 	deck := make([]Card, 0, 40)
 
 	for _, suit := range suits {
-		for rank := 1; rank <= 10; rank++ {
+		for rank := Rank(1); rank <= 10; rank++ {
 			card := Card{
 				Suit:  suit,
 				Rank:  rank,
 				Name:  rankNames[rank],
-				Value: rank,
+				Value: int(rank),
 			}
 			deck = append(deck, card)
 		}

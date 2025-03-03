@@ -2,8 +2,8 @@ package domain
 
 // Card represents a playing card in the Italian deck
 type Card struct {
-	Suit  string
-	Rank  int
+	Suit  Suit
+	Rank  Rank
 	Name  string
 	Value int
 }

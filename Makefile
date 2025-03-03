@@ -20,9 +20,9 @@ serve:
 
 # Clean removes build artifacts
 clean:
-	rm -rf $(BUILD_DIR) 
+	rm -rf $(BUILD_DIR)
 
 # Save repo contents to an AI-friendly single file
 # Install repomix with `npm install -g repomix`
-repomix:
+bundle:
 	repomix -i spec.md
