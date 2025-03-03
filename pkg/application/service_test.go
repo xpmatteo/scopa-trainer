@@ -9,5 +9,5 @@ import (
 func TestNewGameService(t *testing.T) {
 	service := NewGameService()
 	model := service.GetUIModel()
-	assert.Equal(t, "hello player", model.GamePrompt)
+	assert.Equal(t, "Welcome to Scopa Trainer! Click 'New Game' to start playing.", model.GamePrompt)
 }

@@ -16,7 +16,7 @@ build: clean
 
 # Serve runs the application without building a binary
 serve:
-	go run $(MAIN_FILE)
+	air
 
 # Clean removes build artifacts
 clean:
