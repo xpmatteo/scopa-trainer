@@ -1,8 +1,8 @@
-.PHONY: test build serve clean
+.PHONY: test build serve clean repomix
 
 # Variables
 APP_NAME := scopa-trainer
-BUILD_DIR := ./build
+BUILD_DIR := ./tmp
 MAIN_FILE := ./cmd/main.go
 
 # Test runs all tests
@@ -21,3 +21,8 @@ serve:
 # Clean removes build artifacts
 clean:
 	rm -rf $(BUILD_DIR) 
+
+# Save repo contents to an AI-friendly single file
+# Install repomix with `npm install -g repomix`
+repomix:
+	repomix -i spec.md
