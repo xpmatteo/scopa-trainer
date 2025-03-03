@@ -16,11 +16,97 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
+        .new-game-button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .card-area {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #006400;
+            border-radius: 10px;
+            min-height: 200px;
+            color: white;
+        }
+        .table-area {
+            margin-bottom: 20px;
+        }
+        .hand-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .card {
+            width: 80px;
+            height: 120px;
+            background-color: white;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: black;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            cursor: pointer;
+            margin: 5px;
+        }
+        .card.coppe { color: blue; }
+        .card.denari { color: gold; }
+        .card.bastoni { color: green; }
+        .card.spade { color: black; }
+        .card-rank {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .card-suit {
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
     <div class="game-prompt">
         {{.GamePrompt}}
     </div>
+    
+    {{if .ShowNewGameButton}}
+    <form action="/new-game" method="post">
+        <button type="submit" class="new-game-button">New Game</button>
+    </form>
+    {{end}}
+    
+    {{if .GameInProgress}}
+    <div class="card-area table-area">
+        <h2>Table Cards ({{len .TableCards}})</h2>
+        <div style="display: flex; flex-wrap: wrap;">
+            {{range .TableCards}}
+            <div class="card {{.Suit | lower}}">
+                <div class="card-rank">{{.Rank}}</div>
+                <div class="card-suit">{{.Name}} di {{.Suit}}</div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+    
+    <div class="card-area hand-area">
+        <h2>Your Hand ({{len .PlayerHand}})</h2>
+        <div style="display: flex; flex-wrap: wrap;">
+            {{range .PlayerHand}}
+            <div class="card {{.Suit | lower}}">
+                <div class="card-rank">{{.Rank}}</div>
+                <div class="card-suit">{{.Name}} di {{.Suit}}</div>
+            </div>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
 </body>
 </html> 
