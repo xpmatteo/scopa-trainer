@@ -1,3 +1,5 @@
-*.wasm
-*.wasm.map
-*.wasm.map.gz
+tmp
+.idea
+.vscode
+server
+main
