@@ -5,4 +5,9 @@ see fail.
 
 Use stretchr/testify for writing tests
 
-Avoid string and int as types in domain objects; create small types 
+Avoid using Suites in test files
+
+Prefer table-driven tests
+
+Avoid string and int as types in domain objects; create small types
+

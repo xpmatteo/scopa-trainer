@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-// NewDeck creates a standard 40-card Italian deck
-func NewDeck() []Card {
+// OldNewDeck creates a standard 40-card Italian deck
+func OldNewDeck() []Card {
 	suits := []Suit{Coppe, Denari, Bastoni, Spade}
 	deck := make([]Card, 0, 40)
 

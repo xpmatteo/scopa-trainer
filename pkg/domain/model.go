@@ -41,7 +41,7 @@ func NewUIModel() UIModel {
 
 // NewGameState initializes a new game state
 func NewGameState() GameState {
-	deck := NewDeck()
+	deck := OldNewDeck()
 	shuffledDeck := ShuffleDeck(deck)
 
 	// Deal cards to each player
