@@ -1,0 +1,37 @@
+---
+description: Guidelines for the "Green" phase of TDD
+globs: **/*.go
+alwaysApply: false
+---
+# The "Green" Phase of TDD
+
+The "Green" phase is the second step in the TDD cycle where you make the failing test pass.
+
+## When implementing to make a test pass:
+
+- Focus on making the test pass with the simplest possible implementation
+- Don't worry about elegance or optimization yet - that comes in the refactor phase
+- Write just enough code to make the test pass, no more
+- It's okay to use hard-coded returns if that makes the test pass
+- Prioritize getting to green quickly over writing perfect code
+- If the implementation is becoming complex, consider if you need to break down the test
+- Keep the implementation focused on the specific behavior being tested
+- Avoid the temptation to implement features not yet covered by tests
+
+## Common mistakes to avoid:
+
+- Implementing more than what's needed to pass the current test
+- Mixing refactoring with making the test pass
+- Copying actual values into expected values in the test
+- Changing the test to match the implementation (instead of vice versa)
+- Ignoring failing tests or commenting them out
+- Implementing features that aren't yet covered by tests
+- Writing complex, optimized code before proving it works
+
+## Remember:
+
+- The goal is to get to a passing test as quickly as possible
+- "Make it work, make it right, make it fast" - in that order
+- You'll have a chance to improve the code in the refactoring phase
+- The simplest solution that passes the test is the right solution for now
+- If you can't make the test pass easily, you might need to rethink your test 

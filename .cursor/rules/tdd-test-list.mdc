@@ -1,0 +1,47 @@
+---
+description: Guidelines for creating a Test List in TDD
+globs: **/*_test.go
+alwaysApply: false
+---
+# Creating a Test List in TDD
+
+The Test List is the first step in the TDD process, where you identify all the behaviors you need to implement.
+
+## When creating a Test List:
+
+- List all expected variants in the new behavior
+- Focus on behavioral analysis, not implementation details
+- Include both basic cases and edge cases
+- Consider how the behavior should work in different scenarios
+- Think about error conditions and boundary cases
+- Consider performance requirements if relevant
+- Include tests that verify the behavior doesn't break existing functionality
+- Organize tests from simple to complex when possible
+
+## Common mistakes to avoid:
+
+- Mixing in implementation design decisions
+- Being too vague about expected behaviors
+- Forgetting edge cases or error conditions
+- Trying to design the entire system upfront
+- Creating tests that are too large or test too many things at once
+- Skipping the test list and jumping straight to coding
+- Not considering how behaviors interact with each other
+
+## Remember:
+
+- The Test List is a living document - add to it as you discover new cases
+- You don't need to implement all tests at once
+- The order of implementing tests matters - start simple
+- A good Test List helps you know when you're done
+- The Test List helps you focus on behavior, not implementation
+- Creating a Test List is analysis, but behavioral analysis
+
+Example Test List format:
+```
+[ ] Basic case: user logs in with valid credentials
+[ ] Error case: user logs in with invalid password
+[ ] Error case: user account is locked
+[ ] Edge case: password expires during session
+[ ] Performance: login completes in under 500ms
+``` 

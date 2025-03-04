@@ -1,13 +1,20 @@
 ---
 description: When in the "red" phase of TDD
-globs: *.go
+globs: **/*_test.go
 alwaysApply: false
 ---
-# When you are about to write new functionality
+# When in the "Red" Phase of TDD
 
-- Write tests for how the feature should work
-- Write a minimal implementation that makes the tests compile
-- Do not write the correct implementation yet
-- Execute the test
-- If they fail, check that they fail for the right reason, eg an assertion fails
-- If they fail because of compilation errors, fix the compilation error and run them again
+When you're about to write new functionality, follow these steps:
+
+- Create a test list of all the behaviors you need to implement
+- Pick one behavior to test first (choose carefully - order matters)
+- Write a test that clearly expresses the expected behavior
+- Include proper assertions that verify the expected outcome
+- Write the minimal implementation that makes the test compile
+- Do not write the correct implementation yet - that comes in the green phase
+- Execute the test and verify it fails for the right reason
+- If it fails due to compilation errors, fix those and run again
+- Once you have a properly failing test, move to the green phase
+
+Remember: The red phase is about defining the behavior you want, not implementing it. Focus on writing a clear, expressive test that communicates your intent.

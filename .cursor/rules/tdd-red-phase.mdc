@@ -1,0 +1,39 @@
+---
+description: Guidelines for the "Red" phase of TDD
+globs: **/*_test.go
+alwaysApply: false
+---
+# The "Red" Phase of TDD
+
+The "Red" phase is the first step in the TDD cycle where you write a failing test.
+
+## When writing a failing test:
+
+- Focus on one specific behavior from your test list
+- Write the test before implementing the functionality
+- Make sure the test is readable and expresses intent clearly
+- Include proper assertions that verify the expected behavior
+- Ensure the test fails for the right reason (not due to syntax errors)
+- Keep the test simple and focused on a single aspect of behavior
+- Consider working backwards from the assertions
+- Focus on the interface, not the implementation
+
+## Common mistakes to avoid:
+
+- Writing tests that don't actually assert anything
+- Testing multiple behaviors in a single test
+- Writing tests that are too complex or hard to understand
+- Implementing functionality before writing the test
+- Writing tests that pass immediately without failing first
+- Focusing too much on implementation details rather than behavior
+- Writing tests for code that already exists (unless adding test coverage)
+
+## Remember:
+
+A good failing test should clearly communicate:
+- What functionality is being tested
+- What inputs are being provided
+- What output or behavior is expected
+- Why the test is important
+
+The test should fail because the functionality doesn't exist yet, not because the test itself is incorrect. 
