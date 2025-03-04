@@ -1,0 +1,67 @@
+---
+description: Best practices for domain modeling in Go
+globs: **/*.go
+alwaysApply: false
+---
+# Go Domain Modeling Best Practices
+
+When modeling domains in Go, follow these guidelines:
+
+- Avoid primitive obsession - don't use `string` and `int` directly in domain objects
+- Create small, specialized types that represent domain concepts
+- Use type aliases with methods for domain primitives
+- Implement validation at construction time for domain types
+- Use value objects for immutable concepts
+- Use entities for objects with identity and mutable state
+- Implement the Stringer interface for custom domain types
+- Use composition over inheritance
+- Keep domain logic separate from infrastructure concerns
+- Consider using the repository pattern for data access
+
+Example of avoiding primitive obsession:
+
+```go
+// Instead of this:
+type User struct {
+    ID       int
+    Email    string
+    Password string
+}
+
+// Do this:
+type UserID int
+
+func NewUserID(id int) (UserID, error) {
+    if id <= 0 {
+        return 0, errors.New("user ID must be positive")
+    }
+    return UserID(id), nil
+}
+
+type Email string
+
+func NewEmail(email string) (Email, error) {
+    if !isValidEmail(email) {
+        return "", errors.New("invalid email format")
+    }
+    return Email(email), nil
+}
+
+type Password string
+
+func NewPassword(password string) (Password, error) {
+    if len(password) < 8 {
+        return "", errors.New("password must be at least 8 characters")
+    }
+    // Hash password in a real implementation
+    return Password(password), nil
+}
+
+type User struct {
+    ID       UserID
+    Email    Email
+    Password Password
+}
+```
+
+Remember: Good domain modeling leads to more maintainable and bug-resistant code. 

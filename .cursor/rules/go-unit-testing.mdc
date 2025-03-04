@@ -1,0 +1,42 @@
+---
+description: When creating a new unit test in Go
+globs: **/*_test.go
+alwaysApply: false
+---
+# Go Unit Testing Best Practices
+
+When writing unit tests in Go, follow these guidelines:
+
+- Use the `stretchr/testify` package for assertions and mocks
+- Avoid using test Suites - prefer flat test organization
+- Use table-driven tests for testing multiple scenarios
+- Make sure tests fail first before implementing the code to make them pass
+- Write descriptive test names using the format `TestSubject_Scenario_ExpectedResult`
+- Keep test files alongside the code they test with the naming pattern `filename_test.go`
+- Test exported functions and methods, not internal implementation details
+- Use subtests with `t.Run()` for better organization and selective test execution
+
+Example of a table-driven test:
+
+```go
+func TestCalculate_MultipleInputs_ReturnsExpectedResults(t *testing.T) {
+    tests := []struct {
+        name     string
+        input    int
+        expected int
+    }{
+        {"zero input", 0, 0},
+        {"positive input", 5, 10},
+        {"negative input", -5, -10},
+    }
+    
+    for _, test := range tests {
+        t.Run(test.name, func(t *testing.T) {
+            result := Calculate(test.input)
+            assert.Equal(t, test.expected, result)
+        })
+    }
+}
+```
+
+Remember: Never trust a test you haven't seen fail. 

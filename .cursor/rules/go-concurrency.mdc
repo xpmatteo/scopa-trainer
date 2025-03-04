@@ -1,0 +1,55 @@
+---
+description: Best practices for concurrency in Go
+globs: **/*.go
+alwaysApply: false
+---
+# Go Concurrency Best Practices
+
+When writing concurrent code in Go, follow these guidelines:
+
+- Use goroutines for concurrent operations, but be mindful of their lifecycle
+- Use channels for communication between goroutines
+- Follow the "Don't communicate by sharing memory; share memory by communicating" principle
+- Use `sync.WaitGroup` to wait for multiple goroutines to complete
+- Use `context` package for cancellation and timeouts
+- Use `select` for handling multiple channel operations
+- Use buffered channels when appropriate to prevent blocking
+- Use the `sync` package for low-level synchronization when necessary
+- Be careful with goroutine leaks - ensure all goroutines can terminate
+- Consider using worker pools for limiting concurrency
+
+Example of proper goroutine and channel usage:
+
+```go
+func ProcessItems(items []Item) error {
+    var wg sync.WaitGroup
+    errCh := make(chan error, len(items))
+    
+    for _, item := range items {
+        wg.Add(1)
+        go func(i Item) {
+            defer wg.Done()
+            if err := processItem(i); err != nil {
+                errCh <- err
+            }
+        }(item)
+    }
+    
+    wg.Wait()
+    close(errCh)
+    
+    // Collect errors
+    var errs []error
+    for err := range errCh {
+        errs = append(errs, err)
+    }
+    
+    if len(errs) > 0 {
+        return fmt.Errorf("encountered %d errors during processing", len(errs))
+    }
+    
+    return nil
+}
+```
+
+Remember: Concurrency is not parallelism. Concurrency is about structure, parallelism is about execution. 

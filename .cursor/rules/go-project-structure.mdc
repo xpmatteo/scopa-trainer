@@ -1,0 +1,40 @@
+---
+description: Best practices for Go project structure and organization
+globs: **/*.go
+alwaysApply: false
+---
+# Go Project Structure Best Practices
+
+When organizing Go projects, follow these guidelines:
+
+- Use the standard Go project layout as a starting point
+- Group related functionality into packages
+- Keep package names short, clear, and lowercase
+- Avoid package name collisions with standard library
+- Use `internal/` directory for code that shouldn't be imported by other projects
+- Use `cmd/` directory for executable applications
+- Use `pkg/` directory for code that can be imported by external applications
+- Keep `main.go` files simple, delegating to packages
+- Use Go modules for dependency management
+
+Example of a well-structured Go project:
+
+```
+myproject/
+├── cmd/
+│   └── myapp/
+│       └── main.go
+├── internal/
+│   ├── auth/
+│   │   └── auth.go
+│   └── database/
+│       └── database.go
+├── pkg/
+│   └── utils/
+│       └── utils.go
+├── go.mod
+├── go.sum
+└── README.md
+```
+
+Remember: Good project structure makes your code more maintainable and easier to understand. 
