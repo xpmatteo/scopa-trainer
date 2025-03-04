@@ -1,0 +1,13 @@
+---
+description: When in the "red" phase of TDD
+globs: *.go
+alwaysApply: false
+---
+# When you are about to write new functionality
+
+- Write tests for how the feature should work
+- Write a minimal implementation that makes the tests compile
+- Do not write the correct implementation yet
+- Execute the test
+- If they fail, check that they fail for the right reason, eg an assertion fails
+- If they fail because of compilation errors, fix the compilation error and run them again
