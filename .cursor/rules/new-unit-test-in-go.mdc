@@ -1,0 +1,13 @@
+---
+description: When creating a new unit test in Go
+globs: *.go
+alwaysApply: false
+---
+
+# Your rule content
+
+- Organize the test body with the Arrange/Act/Assert pattern
+- Use require.NoError instead of assert.NoError in the Arrange section
+- Use stretchr/testify for assertions
+- Avoid using Suite
+- Prefer table-driven tests
