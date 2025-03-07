@@ -1,0 +1,60 @@
+---
+description: Write clear and effective comments for Go code documentation
+globs: **/*.go
+---
+
+# Go Commentary Guidelines
+
+## Context
+- Go uses doc comments to generate documentation
+- Comments before declarations (with no blank line) become doc comments
+- godoc processes these comments to create package documentation
+
+## Requirements
+- Begin package comments with "Package [name]" and explain package purpose
+- Write doc comments for all exported functions, types, and variables
+- Use complete sentences with proper punctuation
+- Focus on what the code does, not how it does it
+- Use line comments (// comment) for most comments
+- Use block comments (/* comment */) for package comments or to disable code
+
+## Examples
+<example>
+// Package user provides functionality for managing user accounts.
+package user
+
+// User represents a registered account in the system.
+type User struct {
+	ID   int
+	Name string
+}
+
+// NewUser creates a User with the given name.
+// It returns an error if the name is empty.
+func NewUser(name string) (*User, error) {
+	if name == "" {
+		return nil, errors.New("empty name")
+	}
+	return &User{Name: name}, nil
+}
+</example>
+
+<example type="invalid">
+package user
+
+// this is a user
+type User struct {
+	ID int // the user id
+	Name string // name of user
+}
+
+// creates a new user
+func NewUser(name string) (*User, error) {
+	// check if name is empty
+	if name == "" {
+		return nil, errors.New("empty name")
+	}
+	// return the user
+	return &User{Name: name}, nil
+}
+</example> 

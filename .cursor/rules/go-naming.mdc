@@ -1,0 +1,55 @@
+---
+description: Follow Go naming conventions for clear and idiomatic code
+globs: **/*.go
+---
+
+# Go Naming Conventions
+
+## Context
+- Go has specific naming conventions that affect visibility and readability
+- Names starting with uppercase are exported (visible outside package)
+- Names starting with lowercase are unexported (package-private)
+
+## Requirements
+- Use MixedCaps or mixedCaps for multiword names, not underscores
+- Name packages using short, lowercase, single words
+- Name interfaces with -er suffix for single-method interfaces (Reader, Writer)
+- Name getters without "Get" prefix (user.Name() not user.GetName())
+- Keep acronyms uppercase (HTTP, URL) unless at beginning of unexported name
+
+## Examples
+<example>
+// Good naming
+package user
+
+type User struct {
+	ID int
+	Name string
+}
+
+func (u *User) Name() string {
+	return u.Name
+}
+
+type HTTPClient interface {
+	Do(req *Request) (*Response, error)
+}
+</example>
+
+<example type="invalid">
+// Bad naming
+package UserService
+
+type user_data struct {
+	user_id int
+	UserName string
+}
+
+func (u *user_data) GetUserName() string {
+	return u.UserName
+}
+
+type HttpClient interface {
+	MakeRequest(req *Request) (*Response, error)
+}
+</example> 

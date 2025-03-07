@@ -1,0 +1,67 @@
+---
+description: Write efficient and performant Go code
+globs: **/*.go
+---
+
+# Go Performance Optimization
+
+## Context
+- Go is designed for performance but requires proper usage
+- Premature optimization should be avoided
+- Profile before optimizing
+
+## Requirements
+- Use benchmarks to measure performance
+- Prefer slices over arrays for dynamic collections
+- Preallocate slices when size is known
+- Use strings.Builder for string concatenation
+- Avoid unnecessary memory allocations
+- Use sync.Pool for frequently allocated objects
+- Consider memory layout for cache-friendly code
+- Use buffered I/O for file operations
+
+## Examples
+<example>
+// Good performance practices
+// Preallocate slice with known capacity
+func ProcessItems(count int) []Item {
+	result := make([]Item, 0, count)
+	for i := 0; i < count; i++ {
+		result = append(result, process(i))
+	}
+	return result
+}
+
+// Efficient string building
+func BuildReport(items []Item) string {
+	var sb strings.Builder
+	// Estimate size to avoid reallocations
+	sb.Grow(len(items) * 20)
+	
+	for _, item := range items {
+		fmt.Fprintf(&sb, "Item %d: %s\n", item.ID, item.Name)
+	}
+	return sb.String()
+}
+</example>
+
+<example type="invalid">
+// Bad performance practices
+// Growing slice without preallocation
+func ProcessItems(count int) []Item {
+	var result []Item
+	for i := 0; i < count; i++ {
+		result = append(result, process(i))
+	}
+	return result
+}
+
+// Inefficient string concatenation
+func BuildReport(items []Item) string {
+	report := ""
+	for _, item := range items {
+		report += fmt.Sprintf("Item %d: %s\n", item.ID, item.Name)
+	}
+	return report
+}
+</example> 

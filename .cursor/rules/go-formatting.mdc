@@ -1,0 +1,45 @@
+---
+description: Format Go code according to standard conventions to ensure readability
+globs: **/*.go
+---
+
+# Go Formatting Conventions
+
+## Context
+- Go has strong opinions about code formatting
+- The gofmt tool enforces these conventions automatically
+
+## Requirements
+- Use gofmt to format all Go code
+- Use tabs for indentation, not spaces
+- Follow Go's brace style (opening brace on same line)
+- Do not manually align code elements
+- Let gofmt handle line wrapping and spacing
+
+## Examples
+<example>
+// Good: Let gofmt handle formatting
+type User struct {
+	ID        int
+	Name      string
+	CreatedAt time.Time
+}
+
+if x > 0 {
+	return y
+}
+</example>
+
+<example type="invalid">
+// Bad: Manual alignment and incorrect brace style
+type User struct {
+    ID          int
+    Name        string
+    CreatedAt   time.Time
+}
+
+if x > 0 
+{
+    return y
+}
+</example> 

@@ -1,0 +1,70 @@
+---
+description: Write effective tests for Go code using the testing package
+globs: **/*.go
+---
+
+# Go Testing Practices
+
+## Context
+- Go has built-in testing through the testing package
+- Tests are in *_test.go files alongside the code they test
+- go test runs tests automatically
+
+## Requirements
+- Name test functions as TestXxx with signature func(t *testing.T)
+- Use table-driven tests for testing multiple cases
+- Use t.Errorf() for test failures that should continue execution
+- Use t.Fatalf() for failures that should stop the test
+- Use testify or other assertion packages sparingly
+- Use subtests (t.Run) to organize test cases
+- Write benchmarks for performance-critical code
+- Use example tests for documentation
+
+## Examples
+<example>
+// Good testing practice
+func TestAdd(t *testing.T) {
+	tests := []struct {
+		name     string
+		a, b     int
+		expected int
+	}{
+		{"positive", 2, 3, 5},
+		{"negative", -1, -2, -3},
+		{"mixed", -1, 5, 4},
+	}
+	
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := Add(tc.a, tc.b)
+			if got != tc.expected {
+				t.Errorf("Add(%d, %d) = %d; want %d", tc.a, tc.b, got, tc.expected)
+			}
+		})
+	}
+}
+
+// Example test that serves as documentation
+func ExampleAdd() {
+	sum := Add(1, 2)
+	fmt.Println(sum)
+	// Output: 3
+}
+</example>
+
+<example type="invalid">
+// Bad testing practice
+func TestAdd(t *testing.T) {
+	// Single case, not table-driven
+	result := Add(2, 3)
+	if result != 5 {
+		t.Error("Failed")
+	}
+	
+	// Another case in the same test function
+	result = Add(-1, -2)
+	if result != -3 {
+		t.Error("Failed")
+	}
+}
+</example> 

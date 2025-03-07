@@ -1,0 +1,72 @@
+---
+description: Organize Go code into well-structured packages
+globs: **/*.go
+---
+
+# Go Package Organization
+
+## Context
+- Packages are the basic unit of modularity in Go
+- Good package design improves code organization and reusability
+- Package names are important for usability
+
+## Requirements
+- Use short, lowercase, single-word package names
+- Organize packages by functionality, not by type
+- Avoid package name collisions with standard library
+- Keep package APIs focused and cohesive
+- Export only what is necessary
+- Use internal packages for code not meant for external use
+- Avoid circular dependencies between packages
+
+## Examples
+<example>
+// Good package organization
+// user/user.go
+package user
+
+// User represents a user in the system
+type User struct {
+	ID   int
+	Name string
+}
+
+// New creates a new user
+func New(name string) *User {
+	return &User{Name: name}
+}
+
+// Store defines the interface for user storage
+type Store interface {
+	Save(user *User) error
+	Find(id int) (*User, error)
+}
+</example>
+
+<example type="invalid">
+// Bad package organization
+// models/user.go - organizing by type instead of functionality
+package models
+
+type User struct {
+	ID   int
+	Name string
+}
+
+type Product struct {
+	ID    int
+	Name  string
+	Price float64
+}
+
+// utils/utils.go - unfocused package with mixed responsibilities
+package utils
+
+func FormatUserName(name string) string {
+	// ...
+}
+
+func CalculatePrice(price float64, tax float64) float64 {
+	// ...
+}
+</example> 

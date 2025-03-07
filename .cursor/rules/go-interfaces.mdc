@@ -1,0 +1,58 @@
+---
+description: Design and use interfaces effectively in Go code
+globs: **/*.go
+---
+
+# Go Interface Design
+
+## Context
+- Go interfaces are satisfied implicitly
+- Small interfaces are more reusable
+- Interface composition creates flexible designs
+
+## Requirements
+- Keep interfaces small, preferably one or two methods
+- Define interfaces where they are used, not where types are defined
+- Use interface{} (or any in Go 1.18+) sparingly
+- Accept interfaces, return concrete types
+- Use embedding to compose interfaces
+- Name one-method interfaces with -er suffix (Reader, Writer)
+
+## Examples
+<example>
+// Good interface design
+// io.Reader is a small, focused interface
+type Reader interface {
+	Read(p []byte) (n int, err error)
+}
+
+// Consumer accepts an interface but returns a concrete type
+func ProcessData(r Reader) (*Result, error) {
+	// Use the Reader interface
+	data := make([]byte, 1024)
+	n, err := r.Read(data)
+	if err != nil {
+		return nil, err
+	}
+	
+	// Return concrete type
+	return &Result{Data: data[:n]}, nil
+}
+</example>
+
+<example type="invalid">
+// Bad interface design
+// Too many methods in one interface
+type FileProcessor interface {
+	Open(name string) error
+	Read(p []byte) (n int, err error)
+	Write(p []byte) (n int, err error)
+	Close() error
+	Stat() (FileInfo, error)
+	// ...many more methods
+}
+
+// Returning an interface instead of concrete type
+func CreateProcessor() interface{} {
+	return &defaultProcessor{}
+} 

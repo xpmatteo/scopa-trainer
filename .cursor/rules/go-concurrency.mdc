@@ -1,0 +1,76 @@
+---
+description: Use Go's concurrency primitives correctly and safely
+globs: **/*.go
+---
+
+# Go Concurrency Patterns
+
+## Context
+- Go provides goroutines and channels for concurrent programming
+- Concurrency is not parallelism but enables it
+- "Share memory by communicating, don't communicate by sharing memory"
+
+## Requirements
+- Use goroutines for concurrent operations
+- Use channels to communicate between goroutines
+- Close channels when no more values will be sent
+- Use select for non-blocking operations on channels
+- Use sync.WaitGroup to wait for goroutines to complete
+- Use sync.Mutex for simple mutual exclusion
+- Avoid goroutine leaks by ensuring all goroutines can exit
+
+## Examples
+<example>
+// Good concurrency pattern
+func ProcessItems(items []Item) error {
+	results := make(chan Result)
+	errors := make(chan error)
+	var wg sync.WaitGroup
+	
+	// Start workers
+	for _, item := range items {
+		wg.Add(1)
+		go func(item Item) {
+			defer wg.Done()
+			result, err := processItem(item)
+			if err != nil {
+				errors <- err
+				return
+			}
+			results <- result
+		}(item)
+	}
+	
+	// Close channels when all workers are done
+	go func() {
+		wg.Wait()
+		close(results)
+		close(errors)
+	}()
+	
+	// Collect results and errors
+	for result := range results {
+		// Handle result
+	}
+	
+	// Check for errors
+	for err := range errors {
+		return err
+	}
+	
+	return nil
+}
+</example>
+
+<example type="invalid">
+// Bad concurrency pattern
+func ProcessItems(items []Item) {
+	for _, item := range items {
+		go func() { // Incorrect: item variable captured by closure
+			processItem(item)
+		}()
+	}
+	// No way to know when goroutines complete
+	// No error handling
+}
+</example> 

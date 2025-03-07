@@ -1,0 +1,57 @@
+---
+description: Structure Go projects for maintainability and clarity
+globs: **/*.go
+---
+
+# Go Project Structure
+
+## Context
+- Go projects benefit from consistent organization
+- Structure affects build speed, maintainability, and usability
+- Go modules provide dependency management
+
+## Requirements
+- Use Go modules for dependency management
+- Keep main packages small, with logic in importable packages
+- Place each package in its own directory
+- Use cmd/ directory for multiple executables
+- Use internal/ for private packages
+- Use pkg/ for public packages (optional)
+- Keep related files in the same package
+- Separate integration tests from unit tests
+
+## Examples
+<example>
+// Good project structure
+myproject/
+├── cmd/
+│   ├── server/
+│   │   └── main.go
+│   └── cli/
+│       └── main.go
+├── internal/
+│   ├── auth/
+│   │   ├── auth.go
+│   │   └── auth_test.go
+│   └── db/
+│       ├── db.go
+│       └── db_test.go
+├── pkg/
+│   └── api/
+│       ├── api.go
+│       └── api_test.go
+├── go.mod
+├── go.sum
+└── README.md
+</example>
+
+<example type="invalid">
+// Bad project structure
+myproject/
+├── main.go        // Everything in one file
+├── helpers.go     // Miscellaneous functions
+├── types.go       // All types defined here
+├── constants.go   // All constants defined here
+├── go.mod
+└── go.sum
+</example> 

@@ -1,0 +1,49 @@
+---
+description: Handle errors explicitly and idiomatically in Go code
+globs: **/*.go
+---
+
+# Go Error Handling
+
+## Context
+- Go uses explicit error handling with return values
+- Error handling is a critical part of robust Go code
+- Go has no exceptions or try/catch mechanisms
+
+## Requirements
+- Always check error returns from function calls
+- Return errors rather than using panic for expected error conditions
+- Use custom error types for complex error handling
+- Wrap errors with context using fmt.Errorf("context: %w", err)
+- Use errors.Is() and errors.As() for error checking in Go 1.13+
+- Avoid returning nil values with non-nil errors
+
+## Examples
+<example>
+// Good error handling
+func ReadConfig(path string) (*Config, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("reading config file: %w", err)
+	}
+	
+	var config Config
+	if err := json.Unmarshal(data, &config); err != nil {
+		return nil, fmt.Errorf("parsing config: %w", err)
+	}
+	
+	return &config, nil
+}
+</example>
+
+<example type="invalid">
+// Bad error handling
+func ReadConfig(path string) *Config {
+	data, _ := os.ReadFile(path) // Ignoring error
+	
+	var config Config
+	json.Unmarshal(data, &config) // Ignoring error
+	
+	return &config
+}
+</example> 
