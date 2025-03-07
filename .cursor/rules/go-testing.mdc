@@ -12,11 +12,10 @@ globs: **/*.go
 
 ## Requirements
 - Name test functions as TestXxx with signature func(t *testing.T)
-- Use table-driven tests for testing multiple cases
-- Use t.Errorf() for test failures that should continue execution
-- Use t.Fatalf() for failures that should stop the test
-- Use testify or other assertion packages sparingly
-- Use subtests (t.Run) to organize test cases
+- Prefer table-driven tests for testing multiple cases
+- Write assertions with testify
+- Use the require.Xxx assertions for failures that should stop the test
+- Avoid test Suite
 - Write benchmarks for performance-critical code
 - Use example tests for documentation
 
@@ -34,12 +33,10 @@ func TestAdd(t *testing.T) {
 		{"mixed", -1, 5, 4},
 	}
 	
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			got := Add(tc.a, tc.b)
-			if got != tc.expected {
-				t.Errorf("Add(%d, %d) = %d; want %d", tc.a, tc.b, got, tc.expected)
-			}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			actual := Add(test.a, test.b)
+			assert.Equal(t, test.expected, actual)
 		})
 	}
 }
