@@ -1,6 +1,8 @@
 package application
 
 import (
+	"sort"
+
 	"github.com/xpmatteo/scopa-trainer/pkg/domain"
 )
 
@@ -29,10 +31,21 @@ func (s *GameService) StartNewGame() domain.UIModel {
 	gameState := domain.NewGameState()
 	s.gameState = &gameState
 
+	// Get player hand and sort it by rank first, then by suit
+	playerHand := s.gameState.Deck.CardsAt(domain.AIHandLocation)
+	sort.Slice(playerHand, func(i, j int) bool {
+		// First compare by rank
+		if playerHand[i].Rank != playerHand[j].Rank {
+			return playerHand[i].Rank < playerHand[j].Rank
+		}
+		// If ranks are equal, compare by suit
+		return string(playerHand[i].Suit) < string(playerHand[j].Suit)
+	})
+
 	// Update the UI model
 	s.model.ShowNewGameButton = false
 	s.model.TableCards = s.gameState.Deck.CardsAt(domain.TableLocation)
-	s.model.PlayerHand = s.gameState.Deck.CardsAt(domain.AIHandLocation)
+	s.model.PlayerHand = playerHand
 	s.model.GameInProgress = true
 	s.model.PlayerTurn = s.gameState.PlayerTurn
 
