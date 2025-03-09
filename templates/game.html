@@ -58,6 +58,12 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             cursor: pointer;
             margin: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card.selected {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            border: 2px solid yellow;
         }
         .card.coppe { color: blue; }
         .card.denari { color: gold; }
@@ -100,7 +106,7 @@
         <h2>Your Hand ({{len .PlayerHand}})</h2>
         <div style="display: flex; flex-wrap: wrap;">
             {{range .PlayerHand}}
-            <div class="card {{.Suit}}">
+            <div class="card {{.Suit}} {{if eq . $.SelectedCard}}selected{{end}}" onclick="selectCard('{{.Suit}}', '{{.Rank}}')">
                 <div class="card-rank">{{.Rank}}</div>
                 <div class="card-suit">{{.Name}} di {{.Suit}}</div>
             </div>
@@ -108,5 +114,11 @@
         </div>
     </div>
     {{end}}
+
+    <script>
+        function selectCard(suit, rank) {
+            window.location.href = `/select-card?suit=${suit}&rank=${rank}`;
+        }
+    </script>
 </body>
 </html>

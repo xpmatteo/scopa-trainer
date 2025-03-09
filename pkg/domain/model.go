@@ -22,7 +22,10 @@ type UIModel struct {
 	PlayerHand        []Card
 	GameInProgress    bool
 	PlayerTurn        bool
+	SelectedCard      Card
 }
+
+var NO_CARD_SELECTED = Card{}
 
 // NewUIModel creates a new UI model with initial state
 func NewUIModel() UIModel {
@@ -33,6 +36,7 @@ func NewUIModel() UIModel {
 		PlayerHand:        []Card{},
 		GameInProgress:    false,
 		PlayerTurn:        false,
+		SelectedCard:      NO_CARD_SELECTED,
 	}
 }
 
