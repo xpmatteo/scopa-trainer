@@ -20,23 +20,26 @@ func TestNewGameSuite(t *testing.T) {
 	suite.Run(t, new(NewGameTestSuite))
 }
 
-func (s *NewGameTestSuite) TestInitialUIModelHasNewGameButton() {
+func TestInitialUIModelHasNewGameButton(t *testing.T) {
+	service := NewGameService()
+
 	// When the application starts
-	model := s.service.GetUIModel()
+	model := service.GetUIModel()
 
 	// Then the UI model should have a "New Game" button
-	assert.True(s.T(), model.ShowNewGameButton, "New Game button should be displayed initially")
+	assert.True(t, model.ShowNewGameButton, "New Game button should be displayed initially")
 }
 
-func (s *NewGameTestSuite) TestStartNewGame() {
+func TestStartNewGame(t *testing.T) {
 	// Given the application has started
-	initialModel := s.service.GetUIModel()
-	assert.True(s.T(), initialModel.ShowNewGameButton, "New Game button should be displayed initially")
+	service := NewGameService()
+	initialModel := service.GetUIModel()
+	assert.True(t, initialModel.ShowNewGameButton, "New Game button should be displayed initially")
 
 	// When the player clicks the "New Game" button
-	updatedModel := s.service.StartNewGame()
+	updatedModel := service.StartNewGame()
 
-	assert.Equal(s.T(), 0, len(updatedModel.TableCards), "Table should have no cards")
-	assert.Equal(s.T(), 10, len(updatedModel.PlayerHand), "Player should have 10 cards")
-	assert.False(s.T(), updatedModel.ShowNewGameButton, "New Game button should be hidden after starting a game")
+	assert.Equal(t, 0, len(updatedModel.TableCards), "Table should have no cards")
+	assert.Equal(t, 10, len(updatedModel.PlayerHand), "Player should have 10 cards")
+	assert.False(t, updatedModel.ShowNewGameButton, "New Game button should be hidden after starting a game")
 }
