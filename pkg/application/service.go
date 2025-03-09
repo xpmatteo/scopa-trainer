@@ -29,7 +29,7 @@ func (s *GameService) GetUIModel() domain.UIModel {
 	model := domain.NewUIModel()
 	model.ShowNewGameButton = false
 	model.TableCards = s.gameState.Deck.CardsAt(domain.TableLocation)
-	model.PlayerHand = s.getSortedPlayerHand()
+	model.PlayerHand = sortCards(s.gameState.Deck.CardsAt(domain.AIHandLocation))
 	model.GameInProgress = true
 	model.PlayerTurn = s.gameState.PlayerTurn
 
@@ -52,16 +52,15 @@ func (s *GameService) StartNewGame() domain.UIModel {
 	return s.GetUIModel()
 }
 
-// getSortedPlayerHand returns the player's hand sorted by rank and suit
-func (s *GameService) getSortedPlayerHand() []domain.Card {
-	playerHand := s.gameState.Deck.CardsAt(domain.AIHandLocation)
-	sort.Slice(playerHand, func(i, j int) bool {
+// sortCards sorts the cards by rank and suit
+func sortCards(cards []domain.Card) []domain.Card {
+	sort.Slice(cards, func(i, j int) bool {
 		// First compare by rank
-		if playerHand[i].Rank != playerHand[j].Rank {
-			return playerHand[i].Rank < playerHand[j].Rank
+		if cards[i].Rank != cards[j].Rank {
+			return cards[i].Rank < cards[j].Rank
 		}
 		// If ranks are equal, compare by suit
-		return string(playerHand[i].Suit) < string(playerHand[j].Suit)
+		return string(cards[i].Suit) < string(cards[j].Suit)
 	})
-	return playerHand
+	return cards
 }
