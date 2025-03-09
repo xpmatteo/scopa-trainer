@@ -31,6 +31,8 @@ func main() {
 	// Set up routes
 	http.HandleFunc("GET /", handler.HandleIndex)
 	http.HandleFunc("POST /new-game", handler.HandleNewGame)
+	http.HandleFunc("GET /select-card", handler.HandleSelectCard)
+
 	// Start the server
 	log.Println("Starting server on :8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {

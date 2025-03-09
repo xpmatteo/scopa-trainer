@@ -106,7 +106,7 @@
         <h2>Your Hand ({{len .PlayerHand}})</h2>
         <div style="display: flex; flex-wrap: wrap;">
             {{range .PlayerHand}}
-            <div class="card {{.Suit}} {{if eq . $.SelectedCard}}selected{{end}}" onclick="selectCard('{{.Suit}}', '{{.Rank}}')">
+            <div class="card {{.Suit}} {{if eq . $.SelectedCard}}selected{{end}}" onclick="selectCard('{{.Suit}}', '{{.Value}}')">
                 <div class="card-rank">{{.Rank}}</div>
                 <div class="card-suit">{{.Name}} di {{.Suit}}</div>
             </div>
