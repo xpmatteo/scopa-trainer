@@ -5,6 +5,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/xpmatteo/scopa-trainer/pkg/domain"
 )
 
 type NewGameTestSuite struct {
@@ -41,5 +43,20 @@ func TestStartNewGame(t *testing.T) {
 
 	assert.Equal(t, 0, len(updatedModel.TableCards), "Table should have no cards")
 	assert.Equal(t, 10, len(updatedModel.PlayerHand), "Player should have 10 cards")
+	assert.True(t, isSorted(updatedModel.PlayerHand), "Player hand should be sorted")
 	assert.False(t, updatedModel.ShowNewGameButton, "New Game button should be hidden after starting a game")
+}
+
+func isSorted(cards []domain.Card) bool {
+	for i := 1; i < len(cards); i++ {
+		if cards[i].Rank < cards[i-1].Rank {
+			return false
+		}
+		if cards[i].Rank == cards[i-1].Rank {
+			if cards[i].Suit < cards[i-1].Suit {
+				return false
+			}
+		}
+	}
+	return true
 }
