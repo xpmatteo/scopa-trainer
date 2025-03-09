@@ -8,21 +8,38 @@ import (
 
 // GameService handles the application logic for the game
 type GameService struct {
-	model     domain.UIModel
 	gameState *domain.GameState
 }
 
 // NewGameService creates a new game service with initial state
 func NewGameService() *GameService {
 	return &GameService{
-		model:     domain.NewUIModel(),
 		gameState: nil,
 	}
 }
 
 // GetUIModel returns the current UI model
 func (s *GameService) GetUIModel() domain.UIModel {
-	return s.model
+	if s.gameState == nil {
+		// Return initial UI model when no game is in progress
+		return domain.NewUIModel()
+	}
+
+	// Generate UI model based on current game state
+	model := domain.NewUIModel()
+	model.ShowNewGameButton = false
+	model.TableCards = s.gameState.Deck.CardsAt(domain.TableLocation)
+	model.PlayerHand = s.getSortedPlayerHand()
+	model.GameInProgress = true
+	model.PlayerTurn = s.gameState.PlayerTurn
+
+	if model.PlayerTurn {
+		model.GamePrompt = "Your turn. Select a card to play."
+	} else {
+		model.GamePrompt = "AI is thinking..."
+	}
+
+	return model
 }
 
 // StartNewGame initializes a new game and returns the updated UI model
@@ -31,7 +48,12 @@ func (s *GameService) StartNewGame() domain.UIModel {
 	gameState := domain.NewGameState()
 	s.gameState = &gameState
 
-	// Get player hand and sort it by rank first, then by suit
+	// Return the UI model
+	return s.GetUIModel()
+}
+
+// getSortedPlayerHand returns the player's hand sorted by rank and suit
+func (s *GameService) getSortedPlayerHand() []domain.Card {
 	playerHand := s.gameState.Deck.CardsAt(domain.AIHandLocation)
 	sort.Slice(playerHand, func(i, j int) bool {
 		// First compare by rank
@@ -41,19 +63,5 @@ func (s *GameService) StartNewGame() domain.UIModel {
 		// If ranks are equal, compare by suit
 		return string(playerHand[i].Suit) < string(playerHand[j].Suit)
 	})
-
-	// Update the UI model
-	s.model.ShowNewGameButton = false
-	s.model.TableCards = s.gameState.Deck.CardsAt(domain.TableLocation)
-	s.model.PlayerHand = playerHand
-	s.model.GameInProgress = true
-	s.model.PlayerTurn = s.gameState.PlayerTurn
-
-	if s.model.PlayerTurn {
-		s.model.GamePrompt = "Your turn. Select a card to play."
-	} else {
-		s.model.GamePrompt = "AI is thinking..."
-	}
-
-	return s.model
+	return playerHand
 }
