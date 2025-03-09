@@ -25,7 +25,7 @@ func (h *Handler) HandlePlayerAction(w http.ResponseWriter, r *http.Request) {
     h.service.PerformAction()
     
     // Redirect to a GET endpoint
-    http.Redirect(w, r, "/game", http.StatusSeeOther)
+    http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 // Route registration
