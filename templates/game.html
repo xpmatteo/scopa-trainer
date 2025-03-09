@@ -117,7 +117,28 @@
 
     <script>
         function selectCard(suit, rank) {
-            window.location.href = `/select-card?suit=${suit}&rank=${rank}`;
+            // Create a form and submit it
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/select-card';
+            
+            // Add suit input
+            const suitInput = document.createElement('input');
+            suitInput.type = 'hidden';
+            suitInput.name = 'suit';
+            suitInput.value = suit;
+            form.appendChild(suitInput);
+            
+            // Add rank input
+            const rankInput = document.createElement('input');
+            rankInput.type = 'hidden';
+            rankInput.name = 'rank';
+            rankInput.value = rank;
+            form.appendChild(rankInput);
+            
+            // Submit the form
+            document.body.appendChild(form);
+            form.submit();
         }
     </script>
 </body>

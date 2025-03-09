@@ -40,8 +40,20 @@ func (h *Handler) HandleNewGame(w http.ResponseWriter, r *http.Request) {
 
 // HandleSelectCard handles the selection of a card from the player's hand
 func (h *Handler) HandleSelectCard(w http.ResponseWriter, r *http.Request) {
-	suit := domain.Suit(r.URL.Query().Get("suit"))
-	rankStr := r.URL.Query().Get("rank")
+	// Only accept POST requests
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Parse form values
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	suit := domain.Suit(r.PostForm.Get("suit"))
+	rankStr := r.PostForm.Get("rank")
 	rankInt, err := strconv.Atoi(rankStr)
 	if err != nil {
 		http.Error(w, "Invalid rank parameter", http.StatusBadRequest)
@@ -49,9 +61,9 @@ func (h *Handler) HandleSelectCard(w http.ResponseWriter, r *http.Request) {
 	}
 	rank := domain.Rank(rankInt)
 
-	model := h.service.SelectCard(suit, rank)
+	// Process the action
+	h.service.SelectCard(suit, rank)
 
-	if err := h.template.Execute(w, model); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	// Redirect to the main page
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

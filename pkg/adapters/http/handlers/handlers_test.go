@@ -9,6 +9,9 @@ import (
 
 	"html/template"
 
+	"net/url"
+	"strings"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/xpmatteo/scopa-trainer/pkg/application"
 	"github.com/xpmatteo/scopa-trainer/pkg/domain"
@@ -53,8 +56,12 @@ func TestHandleSelectCard(t *testing.T) {
 	handler, err := NewHandler(service, tmpl)
 	require.NoError(t, err)
 
-	// Create a test request with suit and rank parameters
-	req := httptest.NewRequest("GET", "/select-card?suit=Denari&rank=1", nil)
+	// Create a test request with POST method and form values
+	form := url.Values{}
+	form.Add("suit", "Denari")
+	form.Add("rank", "1")
+	req := httptest.NewRequest(http.MethodPost, "/select-card", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	w := httptest.NewRecorder()
 
 	// Call the handler
@@ -64,8 +71,13 @@ func TestHandleSelectCard(t *testing.T) {
 	resp := w.Result()
 	defer resp.Body.Close()
 
-	// Verify successful response
-	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	// Verify we get a redirect response
+	assert.Equal(t, http.StatusSeeOther, resp.StatusCode)
+
+	// Verify the redirect location
+	location, err := resp.Location()
+	assert.NoError(t, err)
+	assert.Equal(t, "/", location.String())
 
 	// Verify that the card was selected in the service
 	model := service.GetUIModel()

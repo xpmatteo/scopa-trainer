@@ -1,0 +1,49 @@
+---
+description: Use POST-Redirect-GET pattern for all player actions to prevent duplicate submissions
+globs: pkg/adapters/http/**/*.go
+---
+
+# POST-Redirect-GET Pattern for Player Actions
+
+## Context
+- Web applications should prevent duplicate form submissions
+- Browser refreshes should not repeat actions
+- Player actions modify application state
+
+## Requirements
+- Use POST method for all player actions that modify state
+- After processing a POST request, redirect to a GET endpoint
+- Use HTTP status 303 (See Other) for redirects
+- Form submissions should never render templates directly
+- Query parameters should only be used for filtering, not actions
+
+## Examples
+<example>
+// Good: POST + Redirect pattern
+func (h *Handler) HandlePlayerAction(w http.ResponseWriter, r *http.Request) {
+    // Process the action
+    h.service.PerformAction()
+    
+    // Redirect to a GET endpoint
+    http.Redirect(w, r, "/game", http.StatusSeeOther)
+}
+
+// Route registration
+http.HandleFunc("/player-action", handler.HandlePlayerAction)
+</example>
+
+<example type="invalid">
+// Bad: Using GET for state-changing actions
+func (h *Handler) HandlePlayerAction(w http.ResponseWriter, r *http.Request) {
+    // Process the action via GET
+    h.service.PerformAction()
+    
+    // Render template directly
+    model := h.service.GetUIModel()
+    h.template.Execute(w, model)
+}
+
+// Bad: Using query parameters for actions
+http.HandleFunc("/perform-action", handler.HandlePlayerAction)
+// Called via: /perform-action?action=playCard&cardId=5
+</example> 
