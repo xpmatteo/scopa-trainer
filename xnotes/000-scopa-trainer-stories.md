@@ -50,7 +50,7 @@ Acceptance Criteria:
 2. Selected card is visually highlighted
 3. Playing on a different card selects it, and deselects previous one
 
-**US2.3: Capture Single Card**
+✅ **US2.3: Capture Single Card**
 When a player selects a card from their hand, they can capture a matching card from the table.
 Acceptance Criteria:
 1. After selecting a hand card, player can click on a table card of matching value
@@ -70,7 +70,7 @@ Acceptance Criteria:
 2. Player can select which combination to capture
 3. Only one combination can be selected at a time
 
-**US2.6: Play Card to Table**
+✅ **US2.6: Play Card to Table**
 When a player cannot or chooses not to make a capture, they can play a card to the table.
 Acceptance Criteria:
 1. If player selects a hand card and no capture is possible, the selected card is added to the table cards

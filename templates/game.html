@@ -105,6 +105,21 @@
             color: #666;
             font-weight: normal;
         }
+        .game-stats {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .stat-label {
+            font-weight: bold;
+        }
+        .stat-value {
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -119,6 +134,21 @@
     {{end}}
 
     {{if .GameInProgress}}
+    <div class="game-stats">
+        <div class="stat-item">
+            <span class="stat-label">Deck:</span>
+            <span class="stat-value">{{.DeckCount}} cards</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Your Captures:</span>
+            <span class="stat-value">{{.PlayerCaptureCount}} cards</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">AI Captures:</span>
+            <span class="stat-value">{{.AICaptureCount}} cards</span>
+        </div>
+    </div>
+    
     <div class="card-area table-area">
         <h2>Table Cards ({{len .TableCards}})</h2>
         <div style="display: flex; flex-wrap: wrap;">

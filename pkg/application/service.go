@@ -36,6 +36,11 @@ func (s *GameService) GetUIModel() domain.UIModel {
 	model.PlayerTurn = s.gameState.PlayerTurn
 	model.SelectedCard = s.selectedCard
 
+	// Set card counts
+	model.DeckCount = len(s.gameState.Deck.CardsAt(domain.DeckLocation))
+	model.PlayerCaptureCount = len(s.gameState.Deck.CardsAt(domain.PlayerCapturesLocation))
+	model.AICaptureCount = len(s.gameState.Deck.CardsAt(domain.AICapturesLocation))
+
 	// Check if the selected card can be played to the table
 	if s.selectedCard != domain.NO_CARD_SELECTED {
 		// Can only play to table if no capture is possible

@@ -24,6 +24,9 @@ type UIModel struct {
 	PlayerTurn          bool
 	SelectedCard        Card
 	CanPlaySelectedCard bool
+	DeckCount           int
+	PlayerCaptureCount  int
+	AICaptureCount      int
 }
 
 var NO_CARD_SELECTED = Card{}
@@ -39,6 +42,9 @@ func NewUIModel() UIModel {
 		PlayerTurn:          false,
 		SelectedCard:        NO_CARD_SELECTED,
 		CanPlaySelectedCard: false,
+		DeckCount:           0,
+		PlayerCaptureCount:  0,
+		AICaptureCount:      0,
 	}
 }
 
