@@ -48,8 +48,17 @@ func TestCaptureCard(t *testing.T) {
 	// Manually set the selected card
 	service.selectedCard = selectedCard
 
+	// Verify initial state
+	initialModel := service.GetUIModel()
+	assert.Equal(t, 1, len(initialModel.TableCards), "Table should have one card before capture")
+	assert.Equal(t, 10, len(initialModel.PlayerHand), "Player should have 10 cards before capture")
+	assert.Equal(t, 0, len(service.gameState.Deck.CardsAt(domain.PlayerCapturesLocation)), "Player should have no captured cards initially")
+
 	// When the player selects a matching card from the table
-	model := service.SelectCard(tableCard.Suit, tableCard.Rank)
+	service.SelectCard(tableCard.Suit, tableCard.Rank)
+
+	// Get the updated model
+	model := service.GetUIModel()
 
 	// Then the cards should be captured
 	assert.Equal(t, 0, len(model.TableCards), "Table should have no cards after capture")
@@ -106,6 +115,10 @@ func TestCannotCaptureNonMatchingCard(t *testing.T) {
 		}
 	}
 
+	// Get the initial state
+	initialModel := service.GetUIModel()
+	initialTableCardCount := len(initialModel.TableCards)
+
 	// Manually set the selected card
 	service.selectedCard = selectedCard
 
@@ -113,7 +126,7 @@ func TestCannotCaptureNonMatchingCard(t *testing.T) {
 	model := service.SelectCard(tableCard.Suit, tableCard.Rank)
 
 	// Then the cards should not be captured
-	assert.Equal(t, 1, len(model.TableCards), "Table should still have the card")
+	assert.Equal(t, initialTableCardCount, len(model.TableCards), "Table should still have the same number of cards")
 	assert.Equal(t, 10, len(model.PlayerHand), "Player should still have all cards")
 
 	// And the selected card should remain selected
@@ -128,6 +141,8 @@ func TestSelectingTableCardWithoutHandCardDoesNothing(t *testing.T) {
 	// Given a game in progress with no card selected from hand
 	service := NewGameService()
 	service.StartNewGame()
+
+	// Ensure no card is selected
 	service.selectedCard = domain.NO_CARD_SELECTED
 
 	// Put a card on the table
@@ -159,14 +174,20 @@ func TestSelectingTableCardWithoutHandCardDoesNothing(t *testing.T) {
 		}
 	}
 
-	// Verify the table card was moved
-	tableCards := service.gameState.Deck.CardsAt(domain.TableLocation)
-	assert.Equal(t, 1, len(tableCards), "Table should have one card before the test")
+	// Get the initial state
+	initialModel := service.GetUIModel()
+	initialTableCardCount := len(initialModel.TableCards)
+
+	// Verify no card is selected
+	assert.Equal(t, domain.NO_CARD_SELECTED, service.selectedCard, "No card should be selected initially")
 
 	// When the player selects a card from the table without selecting a hand card first
-	model := service.SelectCard(tableCard.Suit, tableCard.Rank)
+	service.SelectCard(tableCard.Suit, tableCard.Rank)
+
+	// Get the updated model
+	model := service.GetUIModel()
 
 	// Then nothing should happen
-	assert.Equal(t, 1, len(model.TableCards), "Table should still have the card")
+	assert.Equal(t, initialTableCardCount, len(model.TableCards), "Table should still have the same number of cards")
 	assert.Equal(t, domain.NO_CARD_SELECTED, model.SelectedCard, "No card should be selected")
 }

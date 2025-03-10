@@ -129,3 +129,19 @@ func (s *GameService) SelectCard(suit domain.Suit, rank domain.Rank) domain.UIMo
 
 	return s.GetUIModel()
 }
+
+// PlaySelectedCard moves the currently selected card from the player's hand to the table
+func (s *GameService) PlaySelectedCard() domain.UIModel {
+	// Check if a card is selected
+	if s.selectedCard == domain.NO_CARD_SELECTED {
+		return s.GetUIModel()
+	}
+
+	// Move the selected card to the table
+	s.gameState.Deck.MoveCard(s.selectedCard, domain.PlayerHandLocation, domain.TableLocation)
+
+	// Clear the selected card
+	s.selectedCard = domain.NO_CARD_SELECTED
+
+	return s.GetUIModel()
+}

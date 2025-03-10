@@ -67,3 +67,18 @@ func (h *Handler) HandleSelectCard(w http.ResponseWriter, r *http.Request) {
 	// Redirect to the main page
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
+
+// HandlePlayCard handles the request to play a card to the table
+func (h *Handler) HandlePlayCard(w http.ResponseWriter, r *http.Request) {
+	// Only accept POST requests
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Play the selected card
+	h.service.PlaySelectedCard()
+
+	// Redirect to the main page
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}

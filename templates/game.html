@@ -79,6 +79,23 @@
         .card.capturable {
             border: 2px dashed yellow;
         }
+        .play-area {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #4CAF50;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .play-area:hover {
+            background-color: #45a049;
+        }
+        .play-area p {
+            margin: 0;
+            color: white;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -103,6 +120,12 @@
             </div>
             {{end}}
         </div>
+        
+        {{if ne .SelectedCard.Rank 0}}
+        <div class="play-area" onclick="playCard()">
+            <p>Click here to play the selected card to the table</p>
+        </div>
+        {{end}}
     </div>
 
     <div class="card-area hand-area">
@@ -138,6 +161,17 @@
             rankInput.name = 'rank';
             rankInput.value = rank;
             form.appendChild(rankInput);
+            
+            // Submit the form
+            document.body.appendChild(form);
+            form.submit();
+        }
+        
+        function playCard() {
+            // Create a form and submit it
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/play-card';
             
             // Submit the form
             document.body.appendChild(form);
