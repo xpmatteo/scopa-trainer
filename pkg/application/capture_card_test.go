@@ -123,7 +123,10 @@ func TestCannotCaptureNonMatchingCard(t *testing.T) {
 	service.selectedCard = selectedCard
 
 	// When the player selects a non-matching card from the table
-	model := service.SelectCard(tableCard.Suit, tableCard.Rank)
+	service.SelectCard(tableCard.Suit, tableCard.Rank)
+
+	// Get the updated model
+	model := service.GetUIModel()
 
 	// Then the cards should not be captured
 	assert.Equal(t, initialTableCardCount, len(model.TableCards), "Table should still have the same number of cards")

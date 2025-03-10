@@ -39,7 +39,10 @@ func TestStartNewGame(t *testing.T) {
 	assert.True(t, initialModel.ShowNewGameButton, "New Game button should be displayed initially")
 
 	// When the player clicks the "New Game" button
-	updatedModel := service.StartNewGame()
+	service.StartNewGame()
+
+	// Get the updated model
+	updatedModel := service.GetUIModel()
 
 	assert.Equal(t, 0, len(updatedModel.TableCards), "Table should have no cards")
 	assert.Equal(t, 10, len(updatedModel.PlayerHand), "Player should have 10 cards")

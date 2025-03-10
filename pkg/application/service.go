@@ -69,14 +69,11 @@ func (s *GameService) canCaptureAnyCard(card domain.Card) bool {
 }
 
 // StartNewGame initializes a new game and returns the updated UI model
-func (s *GameService) StartNewGame() domain.UIModel {
+func (s *GameService) StartNewGame() {
 	// Initialize a new game state
 	gameState := domain.NewGameState()
 	s.gameState = &gameState
 	s.selectedCard = domain.NO_CARD_SELECTED
-
-	// Return the UI model
-	return s.GetUIModel()
 }
 
 // sortCards sorts the cards by rank and suit
@@ -93,7 +90,7 @@ func sortCards(cards []domain.Card) []domain.Card {
 }
 
 // SelectCard handles the selection of a card from the player's hand or capturing a card from the table
-func (s *GameService) SelectCard(suit domain.Suit, rank domain.Rank) domain.UIModel {
+func (s *GameService) SelectCard(suit domain.Suit, rank domain.Rank) {
 	// Find the card that was clicked
 	clickedCard := domain.Card{
 		Suit:  suit,
@@ -134,7 +131,7 @@ func (s *GameService) SelectCard(suit domain.Suit, rank domain.Rank) domain.UIMo
 			s.selectedCard = domain.NO_CARD_SELECTED
 		}
 		// If ranks don't match, keep the hand card selected
-		return s.GetUIModel()
+		return
 	}
 
 	// If a card from the hand was clicked
@@ -149,21 +146,19 @@ func (s *GameService) SelectCard(suit domain.Suit, rank domain.Rank) domain.UIMo
 	}
 	// If a table card was clicked without a hand card selected, do nothing
 	// The selected card remains unchanged
-
-	return s.GetUIModel()
 }
 
 // PlaySelectedCard moves the currently selected card from the player's hand to the table
-func (s *GameService) PlaySelectedCard() domain.UIModel {
+func (s *GameService) PlaySelectedCard() {
 	// Check if a card is selected
 	if s.selectedCard == domain.NO_CARD_SELECTED {
-		return s.GetUIModel()
+		return
 	}
 
 	// Check if a capture is possible
 	if s.canCaptureAnyCard(s.selectedCard) {
 		// Cannot play to table if capture is possible
-		return s.GetUIModel()
+		return
 	}
 
 	// Move the selected card to the table
@@ -171,6 +166,4 @@ func (s *GameService) PlaySelectedCard() domain.UIModel {
 
 	// Clear the selected card
 	s.selectedCard = domain.NO_CARD_SELECTED
-
-	return s.GetUIModel()
 }
