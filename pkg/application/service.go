@@ -36,6 +36,12 @@ func (s *GameService) GetUIModel() domain.UIModel {
 	model.PlayerTurn = s.gameState.PlayerTurn
 	model.SelectedCard = s.selectedCard
 
+	// Check if the selected card can be played to the table
+	if s.selectedCard != domain.NO_CARD_SELECTED {
+		// Can only play to table if no capture is possible
+		model.CanPlaySelectedCard = !s.canCaptureAnyCard(s.selectedCard)
+	}
+
 	if model.PlayerTurn {
 		model.GamePrompt = "Your turn. Select a card to play."
 	} else {
@@ -43,6 +49,23 @@ func (s *GameService) GetUIModel() domain.UIModel {
 	}
 
 	return model
+}
+
+// canCaptureAnyCard checks if the given card can capture any card on the table
+func (s *GameService) canCaptureAnyCard(card domain.Card) bool {
+	// If no card is selected, no capture is possible
+	if card == domain.NO_CARD_SELECTED {
+		return false
+	}
+
+	// Check if any table card has the same rank as the selected card
+	for _, tableCard := range s.gameState.Deck.CardsAt(domain.TableLocation) {
+		if tableCard.Rank == card.Rank {
+			return true
+		}
+	}
+
+	return false
 }
 
 // StartNewGame initializes a new game and returns the updated UI model
@@ -134,6 +157,12 @@ func (s *GameService) SelectCard(suit domain.Suit, rank domain.Rank) domain.UIMo
 func (s *GameService) PlaySelectedCard() domain.UIModel {
 	// Check if a card is selected
 	if s.selectedCard == domain.NO_CARD_SELECTED {
+		return s.GetUIModel()
+	}
+
+	// Check if a capture is possible
+	if s.canCaptureAnyCard(s.selectedCard) {
+		// Cannot play to table if capture is possible
 		return s.GetUIModel()
 	}
 

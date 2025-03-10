@@ -96,6 +96,15 @@
             color: white;
             font-weight: bold;
         }
+        .play-area.disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .play-area.disabled p {
+            margin: 0;
+            color: #666;
+            font-weight: normal;
+        }
     </style>
 </head>
 <body>
@@ -122,9 +131,15 @@
         </div>
         
         {{if ne .SelectedCard.Rank 0}}
-        <div class="play-area" onclick="playCard()">
-            <p>Click here to play the selected card to the table</p>
-        </div>
+            {{if .CanPlaySelectedCard}}
+            <div class="play-area" onclick="playCard()">
+                <p>Click here to play the selected card to the table</p>
+            </div>
+            {{else}}
+            <div class="play-area disabled">
+                <p>You must capture a card with the same rank</p>
+            </div>
+            {{end}}
         {{end}}
     </div>
 
