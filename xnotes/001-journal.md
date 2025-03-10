@@ -3,4 +3,5 @@
 Start at 170 requests.
 I had to remove the bit about scoring, it was premature.
 
+At 178 I start the implementation of the Random AI Player
 

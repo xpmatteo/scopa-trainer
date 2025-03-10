@@ -70,6 +70,9 @@ func TestCaptureCard(t *testing.T) {
 
 	// And no card should be selected
 	assert.Equal(t, domain.NO_CARD_SELECTED, model.SelectedCard, "No card should be selected after capture")
+
+	// And it should be the AI's turn
+	assert.False(t, service.gameState.PlayerTurn, "It should be the AI's turn after capture")
 }
 
 func TestCannotCaptureNonMatchingCard(t *testing.T) {

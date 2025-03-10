@@ -64,6 +64,15 @@ func (h *Handler) HandleSelectCard(w http.ResponseWriter, r *http.Request) {
 	// Process the action
 	h.service.SelectCard(suit, rank)
 
+	// Get the current UI model to check if player's turn is complete
+	model := h.service.GetUIModel()
+
+	// If it's not the player's turn anymore (i.e., they made a capture),
+	// trigger the AI turn
+	if !model.PlayerTurn {
+		h.service.PlayAITurn()
+	}
+
 	// Redirect to the main page
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
@@ -78,6 +87,9 @@ func (h *Handler) HandlePlayCard(w http.ResponseWriter, r *http.Request) {
 
 	// Play the selected card
 	h.service.PlaySelectedCard()
+
+	// After player plays a card, it's AI's turn
+	h.service.PlayAITurn()
 
 	// Redirect to the main page
 	http.Redirect(w, r, "/", http.StatusSeeOther)

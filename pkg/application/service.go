@@ -2,9 +2,13 @@ package application
 
 import (
 	"sort"
+	"time"
 
 	"github.com/xpmatteo/scopa-trainer/pkg/domain"
 )
+
+// AI delay constant in milliseconds
+const AITurnDelay = 1000
 
 // GameService handles the application logic for the game
 type GameService struct {
@@ -134,6 +138,9 @@ func (s *GameService) SelectCard(suit domain.Suit, rank domain.Rank) {
 
 			// Clear the selected card
 			s.selectedCard = domain.NO_CARD_SELECTED
+
+			// Switch turn to AI
+			s.gameState.PlayerTurn = false
 		}
 		// If ranks don't match, keep the hand card selected
 		return
@@ -171,4 +178,50 @@ func (s *GameService) PlaySelectedCard() {
 
 	// Clear the selected card
 	s.selectedCard = domain.NO_CARD_SELECTED
+
+	// Switch turn to AI
+	s.gameState.PlayerTurn = false
+}
+
+// PlayAITurn handles the AI's turn
+func (s *GameService) PlayAITurn() {
+	// Check if it's the AI's turn
+	if s.gameState.PlayerTurn {
+		return
+	}
+
+	// Add delay for AI turn
+	time.Sleep(time.Duration(AITurnDelay) * time.Millisecond)
+
+	// Get the first card from AI's hand
+	aiCards := s.gameState.Deck.CardsAt(domain.AIHandLocation)
+	if len(aiCards) == 0 {
+		// No cards in AI hand, nothing to do
+		return
+	}
+
+	// Select the first card
+	aiCard := aiCards[0]
+
+	// Check if the card can capture any card on the table
+	tableCards := s.gameState.Deck.CardsAt(domain.TableLocation)
+	captured := false
+
+	for _, tableCard := range tableCards {
+		if tableCard.Rank == aiCard.Rank {
+			// Capture the card
+			s.gameState.Deck.MoveCard(aiCard, domain.AIHandLocation, domain.AICapturesLocation)
+			s.gameState.Deck.MoveCard(tableCard, domain.TableLocation, domain.AICapturesLocation)
+			captured = true
+			break // Only capture the first matching card
+		}
+	}
+
+	// If no capture was made, play the card to the table
+	if !captured {
+		s.gameState.Deck.MoveCard(aiCard, domain.AIHandLocation, domain.TableLocation)
+	}
+
+	// Switch turn to player
+	s.gameState.PlayerTurn = true
 }
