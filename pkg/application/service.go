@@ -2,13 +2,9 @@ package application
 
 import (
 	"sort"
-	"time"
 
 	"github.com/xpmatteo/scopa-trainer/pkg/domain"
 )
-
-// AI delay constant in milliseconds
-const AITurnDelay = 1000
 
 // GameService handles the application logic for the game
 type GameService struct {
@@ -189,9 +185,6 @@ func (s *GameService) PlayAITurn() {
 	if s.gameState.PlayerTurn {
 		return
 	}
-
-	// Add delay for AI turn
-	time.Sleep(time.Duration(AITurnDelay) * time.Millisecond)
 
 	// Get the first card from AI's hand
 	aiCards := s.gameState.Deck.CardsAt(domain.AIHandLocation)
