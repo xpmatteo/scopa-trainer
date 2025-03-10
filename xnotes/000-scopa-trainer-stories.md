@@ -55,7 +55,6 @@ When a player selects a card from their hand, they can capture a matching card f
 Acceptance Criteria:
 1. After selecting a hand card, player can click on a table card of matching value
 2. The capture removes both cards from display and adds them to player's capture pile
-3. The score updates if the capture results in a scopa
 
 **US2.4: Capture Card Combinations**
 When a player selects a card from their hand, they can capture multiple cards that sum to its value.

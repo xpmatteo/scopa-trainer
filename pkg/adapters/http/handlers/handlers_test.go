@@ -10,11 +10,11 @@ import (
 	"html/template"
 
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/xpmatteo/scopa-trainer/pkg/application"
-	"github.com/xpmatteo/scopa-trainer/pkg/domain"
 )
 
 func TestHandleNewGameRedirects(t *testing.T) {
@@ -49,17 +49,25 @@ func TestHandleSelectCard(t *testing.T) {
 	service.StartNewGame()
 
 	// Create template for testing
-	tmpl, err := template.ParseFiles("../../../../templates/game.html")
+	funcMap := template.FuncMap{
+		"lower": strings.ToLower,
+	}
+	tmpl, err := template.New("game.html").Funcs(funcMap).ParseFiles("../../../../templates/game.html")
 	require.NoError(t, err)
 
 	// Create handler
 	handler, err := NewHandler(service, tmpl)
 	require.NoError(t, err)
 
+	// Get a card from the player's hand to use in the test
+	playerHand := service.GetUIModel().PlayerHand
+	require.NotEmpty(t, playerHand, "Player hand should not be empty")
+	selectedCard := playerHand[0]
+
 	// Create a test request with POST method and form values
 	form := url.Values{}
-	form.Add("suit", "Denari")
-	form.Add("rank", "1")
+	form.Add("suit", string(selectedCard.Suit))
+	form.Add("rank", strconv.Itoa(int(selectedCard.Rank)))
 	req := httptest.NewRequest(http.MethodPost, "/select-card", strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	w := httptest.NewRecorder()
@@ -81,5 +89,5 @@ func TestHandleSelectCard(t *testing.T) {
 
 	// Verify that the card was selected in the service
 	model := service.GetUIModel()
-	assert.NotEqual(t, domain.NO_CARD_SELECTED, model.SelectedCard)
+	assert.Equal(t, selectedCard, model.SelectedCard, "The selected card should match the one we chose")
 }
