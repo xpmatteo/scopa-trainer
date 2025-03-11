@@ -28,6 +28,28 @@ const (
 	Re      Rank = 10
 )
 
+// rankNames maps ranks to their string representation
+var rankNames = map[Rank]string{
+	Asso:    "Asso",
+	Due:     "Due",
+	Tre:     "Tre",
+	Quattro: "Quattro",
+	Cinque:  "Cinque",
+	Sei:     "Sei",
+	Sette:   "Sette",
+	Fante:   "Fante",
+	Cavallo: "Cavallo",
+	Re:      "Re",
+}
+
+// Card represents a playing card in the Italian deck
+type Card struct {
+	Suit  Suit
+	Rank  Rank
+	Name  string
+	Value int
+}
+
 // String returns the string representation of a Rank
 func (r Rank) String() string {
 	return rankNames[r]
@@ -46,18 +68,4 @@ func AllSuits() []Suit {
 // AllRanks returns all available ranks
 func AllRanks() []Rank {
 	return []Rank{Asso, Due, Tre, Quattro, Cinque, Sei, Sette, Fante, Cavallo, Re}
-}
-
-// rankNames maps ranks to their string representation
-var rankNames = map[Rank]string{
-	Asso:    "Asso",
-	Due:     "Due",
-	Tre:     "Tre",
-	Quattro: "Quattro",
-	Cinque:  "Cinque",
-	Sei:     "Sei",
-	Sette:   "Sette",
-	Fante:   "Fante",
-	Cavallo: "Cavallo",
-	Re:      "Re",
 }
