@@ -1,0 +1,77 @@
+---
+description: Use interface-based handlers for HTTP endpoints to improve testability and maintainability
+globs: pkg/adapters/http/handlers/*.go
+---
+
+# Interface-Based HTTP Handlers
+
+## Context
+- HTTP handlers often need to interact with application services
+- Direct dependencies on concrete implementations make testing difficult
+- Handlers should follow the POST-Redirect-GET pattern for state changes
+
+## Requirements
+- Define small, focused interfaces for each handler's dependencies
+- Create handler factory functions that accept these interfaces
+- Return http.HandlerFunc from factory functions, not methods on structs
+- Use descriptive names for interfaces that end with action verbs (e.g., CardSelector)
+- Redirect after POST requests that modify state
+- Keep handler logic minimal, delegating business logic to the service layer
+- Test handlers with fake implementations of interfaces
+
+## Examples
+<example>
+// Good: Interface-based handler with factory function
+// CardSelector defines the interface for selecting a card
+type CardSelector interface {
+  SelectCard(suit domain.Suit, rank domain.Rank)
+}
+
+// NewHandleSelectCard creates a handler for selecting a card
+func NewHandleSelectCard(selector CardSelector) http.HandlerFunc {
+  return func(w http.ResponseWriter, r *http.Request) {
+    // Parse request parameters
+    suit := domain.Suit(r.PostForm.Get("suit"))
+    rank := domain.Rank(parseRank(r.PostForm.Get("rank")))
+    
+    // Call the interface method
+    selector.SelectCard(suit, rank)
+    
+    // Redirect to GET endpoint
+    http.Redirect(w, r, "/", http.StatusSeeOther)
+  }
+}
+
+// In tests:
+type FakeCardSelector struct {
+  callCount int
+  lastSuit domain.Suit
+  lastRank domain.Rank
+}
+
+func (f *FakeCardSelector) SelectCard(suit domain.Suit, rank domain.Rank) {
+  f.callCount++
+  f.lastSuit = suit
+  f.lastRank = rank
+}
+</example>
+
+<example type="invalid">
+// Bad: Method on struct with direct dependency
+type Handler struct {
+  service *GameService
+}
+
+func (h *Handler) HandleSelectCard(w http.ResponseWriter, r *http.Request) {
+  // Parse request parameters
+  suit := domain.Suit(r.PostForm.Get("suit"))
+  rank := domain.Rank(parseRank(r.PostForm.Get("rank")))
+  
+  // Direct dependency on concrete implementation
+  h.service.SelectCard(suit, rank)
+  
+  // Render template directly instead of redirecting
+  model := h.service.GetUIModel()
+  h.template.Execute(w, model)
+}
+</example> 
