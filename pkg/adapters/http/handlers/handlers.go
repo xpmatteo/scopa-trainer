@@ -77,20 +77,15 @@ func (h *Handler) HandleSelectCard(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-// HandlePlayCard handles the request to play a card to the table
-func (h *Handler) HandlePlayCard(w http.ResponseWriter, r *http.Request) {
-	// Only accept POST requests
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
+type SelectedCardPlayer interface {
+	PlaySelectedCard()
+}
+
+func NewHandlePlayCard(p SelectedCardPlayer) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		p.PlaySelectedCard()
+
+		// Redirect to the main page
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
-
-	// Play the selected card
-	h.service.PlaySelectedCard()
-
-	// After player plays a card, it's AI's turn
-	h.service.PlayAITurn()
-
-	// Redirect to the main page
-	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

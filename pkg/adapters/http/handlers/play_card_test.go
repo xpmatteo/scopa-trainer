@@ -1,47 +1,35 @@
 package handlers
 
 import (
-	"html/template"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/xpmatteo/scopa-trainer/pkg/application"
 )
 
+type FakeService struct {
+	callCount int
+}
+
+func (f *FakeService) PlaySelectedCard() {
+	f.callCount++
+}
+
 func TestHandlePlayCard(t *testing.T) {
-	// Create service and start a game
-	service := application.NewGameService()
-	service.StartNewGame()
-
-	// Create template for testing
-	funcMap := template.FuncMap{
-		"lower": strings.ToLower,
-	}
-	tmpl, err := template.New("game.html").Funcs(funcMap).ParseFiles("../../../../templates/game.html")
-	require.NoError(t, err)
-
-	// Create handler
-	handler, err := NewHandler(service, tmpl)
-	require.NoError(t, err)
-
-	// Select a card from the player's hand first
-	playerHand := service.GetUIModel().PlayerHand
-	require.NotEmpty(t, playerHand, "Player hand should not be empty")
-	selectedCard := playerHand[0]
-	service.SelectCard(selectedCard.Suit, selectedCard.Rank)
+	// Arrange
+	// Create a new handler
+	fakeService := &FakeService{}
+	handler := NewHandlePlayCard(fakeService)
 
 	// Create a test request for playing the card
 	req := httptest.NewRequest(http.MethodPost, "/play-card", nil)
 	w := httptest.NewRecorder()
 
-	// Call the handler
-	handler.HandlePlayCard(w, req)
+	// Act
+	handler.ServeHTTP(w, req)
 
-	// Check the response
+	// Assert
 	resp := w.Result()
 	defer resp.Body.Close()
 
@@ -53,8 +41,6 @@ func TestHandlePlayCard(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "/", location.String())
 
-	// Verify that the card was played to the table
-	model := service.GetUIModel()
-	assert.Equal(t, 1, len(model.TableCards), "Table should have one card after playing")
-	assert.Equal(t, 9, len(model.PlayerHand), "Player should have 9 cards after playing one")
+	// Verify that the service method was called
+	assert.Equal(t, 1, fakeService.callCount)
 }

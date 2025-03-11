@@ -22,7 +22,16 @@ Let me clarify: this is a thin slice of functionality, it's not meant to be comp
 Please tell me if now all is clear, Master Yoda.  If no further questions you have, please start with implementing updated tests for all the parts of the code that are involved, and then let's stop and run the tests and see them fail, TDD style.
 
 
+At 178 I start the implementation of the Random AI Player.  We end at 184.
 
+2025-03-11 Reveiw
 
-At 178 I start the implementation of the Random AI Player
+TODO
+
+- I find that one of the tests is not working
+- No need to test for GET in handlers
+- Name and Value fields of Card should be methods
+- Handler tests are too long and involved
+- handlers should not all share the same struct?
+- AI turn should be invoked by a separate action
 

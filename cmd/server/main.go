@@ -32,7 +32,7 @@ func main() {
 	http.HandleFunc("GET /", handler.HandleIndex)
 	http.HandleFunc("POST /new-game", handler.HandleNewGame)
 	http.HandleFunc("POST /select-card", handler.HandleSelectCard)
-	http.HandleFunc("POST /play-card", handler.HandlePlayCard)
+	http.HandleFunc("POST /play-card", handlers.NewHandlePlayCard(gameService))
 
 	// Start the server
 	log.Println("Starting server on :8080")
