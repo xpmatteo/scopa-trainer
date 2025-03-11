@@ -1,35 +1,41 @@
 package handlers
 
 import (
+	"html/template"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
-	"html/template"
-
-	"net/url"
-	"strconv"
-	"strings"
-
 	"github.com/stretchr/testify/assert"
-	"github.com/xpmatteo/scopa-trainer/pkg/application"
+	"github.com/stretchr/testify/require"
+	"github.com/xpmatteo/scopa-trainer/pkg/domain"
 )
 
-func TestHandleNewGameRedirects(t *testing.T) {
-	service := application.NewGameService()
-	handler, err := NewHandler(service, nil)
-	require.NoError(t, err)
+// FakeGameStarter is a fake implementation of the GameStarter interface
+type FakeGameStarter struct {
+	callCount int
+}
+
+func (f *FakeGameStarter) StartNewGame() {
+	f.callCount++
+}
+
+// TestHandleNewGame tests the new game handler
+func TestHandleNewGame(t *testing.T) {
+	// Arrange
+	fakeStarter := &FakeGameStarter{}
+	handler := NewHandleNewGame(fakeStarter)
 
 	// Create a test request
 	req := httptest.NewRequest("POST", "/new-game", nil)
 	w := httptest.NewRecorder()
 
-	// Call the handler
-	handler.HandleNewGame(w, req)
+	// Act
+	handler.ServeHTTP(w, req)
 
-	// Check the response
+	// Assert
 	resp := w.Result()
 	defer resp.Body.Close()
 
@@ -40,42 +46,87 @@ func TestHandleNewGameRedirects(t *testing.T) {
 	location, err := resp.Location()
 	assert.NoError(t, err)
 	assert.Equal(t, "/", location.String())
+
+	// Verify that the service method was called
+	assert.Equal(t, 1, fakeStarter.callCount)
+}
+
+// FakeUIModelProvider is a fake implementation of the UIModelProvider interface
+type FakeUIModelProvider struct {
+	model domain.UIModel
+}
+
+func (f *FakeUIModelProvider) GetUIModel() domain.UIModel {
+	return f.model
+}
+
+// TestHandleIndex tests the index handler
+func TestHandleIndex(t *testing.T) {
+	// Arrange
+	// Create a simple template for testing
+	tmpl, err := template.New("test").Parse("Game in progress: {{.GameInProgress}}")
+	require.NoError(t, err)
+
+	handler, err := NewHandler(tmpl)
+	require.NoError(t, err)
+
+	// Create a fake model provider
+	model := domain.NewUIModel()
+	model.GameInProgress = true
+	provider := &FakeUIModelProvider{model: model}
+
+	// Create a test request
+	req := httptest.NewRequest("GET", "/", nil)
+	w := httptest.NewRecorder()
+
+	// Act
+	indexHandler := handler.HandleIndex(provider)
+	indexHandler.ServeHTTP(w, req)
+
+	// Assert
+	resp := w.Result()
+	defer resp.Body.Close()
+
+	// Verify that we get a successful response
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+
+	// Verify the response body contains the expected content
+	body, err := io.ReadAll(resp.Body)
+	assert.NoError(t, err)
+	assert.True(t, strings.Contains(string(body), "Game in progress: true"))
+}
+
+// FakeCardSelector is a fake implementation of the CardSelector interface
+type FakeCardSelector struct {
+	callCount int
+	lastSuit  domain.Suit
+	lastRank  domain.Rank
+}
+
+func (f *FakeCardSelector) SelectCard(suit domain.Suit, rank domain.Rank) {
+	f.callCount++
+	f.lastSuit = suit
+	f.lastRank = rank
 }
 
 // TestHandleSelectCard tests the card selection handler
 func TestHandleSelectCard(t *testing.T) {
-	// Create service and start a game
-	service := application.NewGameService()
-	service.StartNewGame()
-
-	// Create template for testing
-	funcMap := template.FuncMap{
-		"lower": strings.ToLower,
-	}
-	tmpl, err := template.New("game.html").Funcs(funcMap).ParseFiles("../../../../templates/game.html")
-	require.NoError(t, err)
-
-	// Create handler
-	handler, err := NewHandler(service, tmpl)
-	require.NoError(t, err)
-
-	// Get a card from the player's hand to use in the test
-	playerHand := service.GetUIModel().PlayerHand
-	require.NotEmpty(t, playerHand, "Player hand should not be empty")
-	selectedCard := playerHand[0]
+	// Arrange
+	fakeSelector := &FakeCardSelector{}
+	handler := NewHandleSelectCard(fakeSelector)
 
 	// Create a test request with POST method and form values
-	form := url.Values{}
-	form.Add("suit", string(selectedCard.Suit))
-	form.Add("rank", strconv.Itoa(int(selectedCard.Rank)))
-	req := httptest.NewRequest(http.MethodPost, "/select-card", strings.NewReader(form.Encode()))
+	req := httptest.NewRequest(http.MethodPost, "/select-card?suit=Coppe&rank=7", nil)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.ParseForm()
+	req.PostForm.Set("suit", "Coppe")
+	req.PostForm.Set("rank", "7")
 	w := httptest.NewRecorder()
 
-	// Call the handler
-	handler.HandleSelectCard(w, req)
+	// Act
+	handler.ServeHTTP(w, req)
 
-	// Check the response
+	// Assert
 	resp := w.Result()
 	defer resp.Body.Close()
 
@@ -87,7 +138,8 @@ func TestHandleSelectCard(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "/", location.String())
 
-	// Verify that the card was selected in the service
-	model := service.GetUIModel()
-	assert.Equal(t, selectedCard, model.SelectedCard, "The selected card should match the one we chose")
+	// Verify that the service method was called with the correct parameters
+	assert.Equal(t, 1, fakeSelector.callCount)
+	assert.Equal(t, domain.Suit("Coppe"), fakeSelector.lastSuit)
+	assert.Equal(t, domain.Rank(7), fakeSelector.lastRank)
 }
