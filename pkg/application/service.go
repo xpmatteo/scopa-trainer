@@ -98,10 +98,8 @@ func sortCards(cards []domain.Card) []domain.Card {
 func (s *GameService) SelectCard(suit domain.Suit, rank domain.Rank) {
 	// Find the card that was clicked
 	clickedCard := domain.Card{
-		Suit:  suit,
-		Rank:  rank,
-		Name:  rank.String(),
-		Value: rank.Value(),
+		Suit: suit,
+		Rank: rank,
 	}
 
 	// Check if the clicked card is on the table

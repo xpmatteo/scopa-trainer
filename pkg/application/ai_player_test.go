@@ -30,7 +30,7 @@ func TestRandomAIPlayer(t *testing.T) {
 
 	for _, suit := range possibleSuits {
 		for _, rank := range possibleRanks {
-			candidateCard := domain.Card{Suit: suit, Rank: rank, Name: rank.String(), Value: rank.Value()}
+			candidateCard := domain.Card{Suit: suit, Rank: rank}
 
 			// Check if this card exists in the deck
 			deckCards := service.gameState.Deck.CardsAt(domain.DeckLocation)
@@ -75,7 +75,7 @@ func TestRandomAIPlayer(t *testing.T) {
 			continue
 		}
 
-		candidateCard := domain.Card{Suit: suit, Rank: aiCard.Rank, Name: aiCard.Rank.String(), Value: aiCard.Rank.Value()}
+		candidateCard := domain.Card{Suit: suit, Rank: aiCard.Rank}
 
 		// Check if this card exists in the deck
 		deckCards := service.gameState.Deck.CardsAt(domain.DeckLocation)
@@ -146,66 +146,42 @@ func TestRandomAIPlayerNoCapture(t *testing.T) {
 		service.gameState.Deck.MoveCard(card, domain.AIHandLocation, domain.DeckLocation)
 	}
 
-	// Create a specific card for AI hand (7 of Coppe)
-	aiCard := domain.Card{Suit: domain.Coppe, Rank: domain.Sette, Name: "Sette", Value: 7}
-
-	// Make sure the card exists in the deck
+	// Get all cards from the deck
 	deckCards := service.gameState.Deck.CardsAt(domain.DeckLocation)
-	aiCardFound := false
-	for _, card := range deckCards {
-		if card.Suit == aiCard.Suit && card.Rank == aiCard.Rank {
-			aiCardFound = true
-			aiCard = card // Use the actual card from the deck
-			break
-		}
+	if len(deckCards) == 0 {
+		t.Fatalf("No cards in the deck")
 	}
 
-	if !aiCardFound {
-		t.Fatalf("Could not find the AI card in the deck")
-	}
-
-	// Move the card to AI hand
+	// Use the first card from the deck for the AI hand
+	aiCard := deckCards[0]
 	service.gameState.Deck.MoveCard(aiCard, domain.DeckLocation, domain.AIHandLocation)
 
-	// Clear table and add a different card to the table (6 of Denari)
+	// Clear table and add a different card to the table
 	tableCards := service.gameState.Deck.CardsAt(domain.TableLocation)
 	for _, card := range tableCards {
 		service.gameState.Deck.MoveCard(card, domain.TableLocation, domain.DeckLocation)
 	}
 
-	// Try different suits and ranks until we find a card that exists in the deck
-	possibleSuits := []domain.Suit{domain.Denari, domain.Coppe, domain.Bastoni, domain.Spade}
-	possibleRanks := []domain.Rank{domain.Sei, domain.Cinque, domain.Quattro, domain.Tre, domain.Due, domain.Asso}
+	// Get updated deck cards after moving the AI card
+	deckCards = service.gameState.Deck.CardsAt(domain.DeckLocation)
+	if len(deckCards) == 0 {
+		t.Fatalf("No cards in the deck after moving AI card")
+	}
 
+	// Find a card with a different rank for the table
 	var tableCard domain.Card
 	tableCardFound := false
 
-	for _, suit := range possibleSuits {
-		for _, rank := range possibleRanks {
-			candidateCard := domain.Card{Suit: suit, Rank: rank, Name: rank.String(), Value: rank.Value()}
-
-			// Check if this card exists in the deck
-			deckCards = service.gameState.Deck.CardsAt(domain.DeckLocation)
-			for _, card := range deckCards {
-				if card.Suit == candidateCard.Suit && card.Rank == candidateCard.Rank {
-					tableCardFound = true
-					tableCard = card // Use the actual card from the deck
-					break
-				}
-			}
-
-			if tableCardFound {
-				break
-			}
-		}
-
-		if tableCardFound {
+	for _, card := range deckCards {
+		if card.Rank != aiCard.Rank {
+			tableCard = card
+			tableCardFound = true
 			break
 		}
 	}
 
 	if !tableCardFound {
-		t.Fatalf("Could not find any suitable table card in the deck")
+		t.Fatalf("Could not find a card with a different rank in the deck")
 	}
 
 	// Move the card to the table
@@ -234,7 +210,7 @@ func TestRandomAIPlayerNoCapture(t *testing.T) {
 		t.Errorf("Expected AI to have 0 captured cards, got %d", len(aiCaptures))
 	}
 
-	// Verify that the table now has 2 cards (the original card and the played 7)
+	// Verify that the table now has 2 cards (the original card and the played card)
 	tableCards = service.gameState.Deck.CardsAt(domain.TableLocation)
 	if len(tableCards) != 2 {
 		t.Errorf("Expected table to have 2 cards, got %d cards", len(tableCards))

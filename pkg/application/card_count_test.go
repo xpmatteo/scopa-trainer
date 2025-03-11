@@ -33,10 +33,8 @@ func TestCardCountsAfterCapture(t *testing.T) {
 
 	// Create a card with the same rank to put on the table
 	tableCard := domain.Card{
-		Suit:  domain.Coppe,
-		Rank:  selectedCard.Rank,
-		Name:  selectedCard.Rank.String(),
-		Value: selectedCard.Rank.Value(),
+		Suit: domain.Coppe,
+		Rank: selectedCard.Rank,
 	}
 
 	// Find this card in the deck and move it to the table

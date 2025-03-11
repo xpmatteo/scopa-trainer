@@ -125,10 +125,10 @@ func TestGameInProgressScreen(t *testing.T) {
 
 	// With one card on the table and one in hand
 	model.TableCards = []domain.Card{
-		{Suit: domain.Coppe, Rank: domain.Asso, Name: "Asso", Value: 1},
+		{Suit: domain.Coppe, Rank: domain.Asso},
 	}
 	model.PlayerHand = []domain.Card{
-		{Suit: domain.Denari, Rank: domain.Tre, Name: "Tre", Value: 3},
+		{Suit: domain.Denari, Rank: domain.Tre},
 	}
 
 	// When rendering the template - this should not panic
@@ -151,10 +151,10 @@ func TestCardSuitStyling(t *testing.T) {
 
 	// Add one card of each suit to the table
 	model.TableCards = []domain.Card{
-		{Suit: domain.Coppe, Rank: domain.Asso, Name: "Asso", Value: 1},
-		{Suit: domain.Denari, Rank: domain.Due, Name: "Due", Value: 2},
-		{Suit: domain.Bastoni, Rank: domain.Tre, Name: "Tre", Value: 3},
-		{Suit: domain.Spade, Rank: domain.Quattro, Name: "Quattro", Value: 4},
+		{Suit: domain.Coppe, Rank: domain.Asso},
+		{Suit: domain.Denari, Rank: domain.Due},
+		{Suit: domain.Bastoni, Rank: domain.Tre},
+		{Suit: domain.Spade, Rank: domain.Quattro},
 	}
 
 	// When rendering the template

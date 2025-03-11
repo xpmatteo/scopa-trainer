@@ -44,10 +44,8 @@ var rankNames = map[Rank]string{
 
 // Card represents a playing card in the Italian deck
 type Card struct {
-	Suit  Suit
-	Rank  Rank
-	Name  string
-	Value int
+	Suit Suit
+	Rank Rank
 }
 
 // String returns the string representation of a Rank
@@ -58,6 +56,16 @@ func (r Rank) String() string {
 // Value returns the numeric value of a Rank in the game
 func (r Rank) Value() int {
 	return int(r)
+}
+
+// Name returns the string representation of a Card's rank
+func (c Card) Name() string {
+	return c.Rank.String()
+}
+
+// Value returns the numeric value of a Card in the game
+func (c Card) Value() int {
+	return c.Rank.Value()
 }
 
 // AllSuits returns all available suits

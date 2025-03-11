@@ -18,10 +18,8 @@ func TestCannotPlayCardWhenCaptureIsPossible(t *testing.T) {
 
 	// Create a card with the same rank to put on the table (making capture possible)
 	tableCard := domain.Card{
-		Suit:  domain.Coppe,
-		Rank:  selectedCard.Rank,
-		Name:  selectedCard.Rank.String(),
-		Value: selectedCard.Rank.Value(),
+		Suit: domain.Coppe,
+		Rank: selectedCard.Rank,
 	}
 
 	// Find this card in the deck and move it to the table
@@ -88,10 +86,8 @@ func TestCanPlayCardWhenNoCaptureIsPossible(t *testing.T) {
 	}
 
 	tableCard := domain.Card{
-		Suit:  domain.Coppe,
-		Rank:  differentRank,
-		Name:  differentRank.String(),
-		Value: differentRank.Value(),
+		Suit: domain.Coppe,
+		Rank: differentRank,
 	}
 
 	// Find this card in the deck and move it to the table

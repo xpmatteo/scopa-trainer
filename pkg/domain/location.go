@@ -35,10 +35,8 @@ func NewDeck() *Deck {
 	for _, suit := range AllSuits() {
 		for _, rank := range AllRanks() {
 			card := Card{
-				Suit:  suit,
-				Rank:  rank,
-				Name:  rank.String(),
-				Value: rank.Value(),
+				Suit: suit,
+				Rank: rank,
 			}
 			deck.cardLocations[card] = DeckLocation
 			deck.orderedCards = append(deck.orderedCards, card)

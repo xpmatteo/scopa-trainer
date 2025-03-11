@@ -18,10 +18,8 @@ func TestCaptureCard(t *testing.T) {
 
 	// Create a card with the same rank to put on the table
 	tableCard := domain.Card{
-		Suit:  domain.Coppe,
-		Rank:  selectedCard.Rank,
-		Name:  selectedCard.Rank.String(),
-		Value: selectedCard.Rank.Value(),
+		Suit: domain.Coppe,
+		Rank: selectedCard.Rank,
 	}
 
 	// Find this card in the deck and move it to the table
@@ -91,10 +89,8 @@ func TestCannotCaptureNonMatchingCard(t *testing.T) {
 	}
 
 	tableCard := domain.Card{
-		Suit:  domain.Coppe,
-		Rank:  differentRank,
-		Name:  differentRank.String(),
-		Value: differentRank.Value(),
+		Suit: domain.Coppe,
+		Rank: differentRank,
 	}
 
 	// Find this card in the deck and move it to the table
@@ -153,10 +149,8 @@ func TestSelectingTableCardWithoutHandCardDoesNothing(t *testing.T) {
 
 	// Put a card on the table
 	tableCard := domain.Card{
-		Suit:  domain.Coppe,
-		Rank:  domain.Asso,
-		Name:  domain.Asso.String(),
-		Value: domain.Asso.Value(),
+		Suit: domain.Coppe,
+		Rank: domain.Asso,
 	}
 
 	// Find this card in the deck and move it to the table
