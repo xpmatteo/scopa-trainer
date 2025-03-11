@@ -1,0 +1,50 @@
+---
+description: Use methods instead of redundant fields in structs to improve maintainability and reduce memory usage
+globs: **/*.go
+---
+
+# Go Struct Design: Avoid Redundant Fields
+
+## Context
+- Go structs should be designed to be efficient and maintainable
+- Redundant fields increase memory usage and create maintenance challenges
+- Derived values should be computed when needed, not stored
+
+## Requirements
+- Do not include fields that can be derived from other fields
+- Use methods to compute derived values instead of storing them
+- Ensure struct fields contain only essential, non-redundant data
+- When a value can be computed from another field, prefer a method
+- Document methods that provide derived values with clear comments
+
+## Examples
+<example>
+// Good: Using methods instead of redundant fields
+type Card struct {
+  Suit Suit
+  Rank Rank
+}
+
+// Name returns the string representation of a Card's rank
+func (c Card) Name() string {
+  return c.Rank.String()
+}
+
+// Value returns the numeric value of a Card in the game
+func (c Card) Value() int {
+  return c.Rank.Value()
+}
+</example>
+
+<example type="invalid">
+// Bad: Redundant fields that duplicate information
+type Card struct {
+  Suit  Suit
+  Rank  Rank
+  Name  string  // Redundant: can be derived from Rank.String()
+  Value int     // Redundant: can be derived from Rank.Value()
+}
+
+// This approach requires keeping Name and Value in sync with Rank
+// and increases memory usage unnecessarily
+</example> 
