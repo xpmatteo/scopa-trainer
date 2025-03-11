@@ -8,28 +8,16 @@ import (
 	"github.com/xpmatteo/scopa-trainer/pkg/domain"
 )
 
-// Handler handles HTTP requests for the game
-type Handler struct {
-	template *template.Template
-}
-
-// NewHandler creates a new HTTP handler
-func NewHandler(templ *template.Template) (*Handler, error) {
-	return &Handler{
-		template: templ,
-	}, nil
-}
-
 // UIModelProvider defines the interface for getting the UI model
 type UIModelProvider interface {
 	GetUIModel() domain.UIModel
 }
 
-// HandleIndex serves the main game page
-func (h *Handler) HandleIndex(provider UIModelProvider) http.HandlerFunc {
+// NewHandleIndex creates a handler for the index page
+func NewHandleIndex(provider UIModelProvider, templ *template.Template) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		model := provider.GetUIModel()
-		if err := h.template.Execute(w, model); err != nil {
+		if err := templ.Execute(w, model); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	}
@@ -56,12 +44,6 @@ type CardSelector interface {
 // NewHandleSelectCard creates a handler for selecting a card
 func NewHandleSelectCard(selector CardSelector) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Only accept POST requests
-		if r.Method != http.MethodPost {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
 		// Parse form values
 		if err := r.ParseForm(); err != nil {
 			http.Error(w, "Failed to parse form", http.StatusBadRequest)

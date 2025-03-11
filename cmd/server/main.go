@@ -22,14 +22,8 @@ func main() {
 		panic(err)
 	}
 
-	// Initialize the HTTP handler
-	handler, err := handlers.NewHandler(templ)
-	if err != nil {
-		log.Fatalf("Failed to initialize handler: %v", err)
-	}
-
 	// Set up routes
-	http.HandleFunc("GET /", handler.HandleIndex(gameService))
+	http.HandleFunc("GET /", handlers.NewHandleIndex(gameService, templ))
 	http.HandleFunc("POST /new-game", handlers.NewHandleNewGame(gameService))
 	http.HandleFunc("POST /select-card", handlers.NewHandleSelectCard(gameService))
 	http.HandleFunc("POST /play-card", handlers.NewHandlePlayCard(gameService))

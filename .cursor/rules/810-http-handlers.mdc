@@ -8,14 +8,12 @@ globs: pkg/adapters/http/handlers/*.go
 ## Context
 - HTTP handlers often need to interact with application services
 - Direct dependencies on concrete implementations make testing difficult
-- Handlers should follow the POST-Redirect-GET pattern for state changes
 
 ## Requirements
 - Define small, focused interfaces for each handler's dependencies
 - Create handler factory functions that accept these interfaces
 - Return http.HandlerFunc from factory functions, not methods on structs
 - Use descriptive names for interfaces that end with action verbs (e.g., CardSelector)
-- Redirect after POST requests that modify state
 - Keep handler logic minimal, delegating business logic to the service layer
 - Test handlers with fake implementations of interfaces
 

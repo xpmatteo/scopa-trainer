@@ -24,12 +24,12 @@ Please tell me if now all is clear, Master Yoda.  If no further questions you ha
 
 At 178 I start the implementation of the Random AI Player.  We end at 184.
 
-2025-03-11 Reveiw
+2025-03-11 Review the code and refactor.
 
 TODO
 
-- I find that one of the tests is not working
-- No need to test for GET in handlers
+- ✅ I find that one of the tests is not working
+- ✅ No need to test for GET in handlers
 - Name and Value fields of Card should be methods
 - Handler tests are too long and involved
 - handlers should not all share the same struct?
