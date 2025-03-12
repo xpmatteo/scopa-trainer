@@ -29,12 +29,12 @@ func TestWelcomeScreen(t *testing.T) {
 	assert.Equal(t, normalizeWhitespace(expected), actual)
 }
 
-func TestGameInProgressScreen(t *testing.T) {
+func TestGameInProgress_PlayerTurn(t *testing.T) {
 	// Given a simplified game in progress model
 	model := domain.NewUIModel()
 	model.GameInProgress = true
 	model.ShowNewGameButton = false
-	model.GamePrompt = "Your turn. Select a card to play."
+	model.GamePrompt = "Your turn."
 
 	// With one card on the table and one in hand
 	model.TableCards = []domain.Card{
@@ -49,12 +49,12 @@ func TestGameInProgressScreen(t *testing.T) {
 
 	// Assert
 	expected := `
-		Your turn. Select a card to play. 
+		Your turn. 
 		Deck: 0 cards 
 		Your Captures: 0 cards 
 		AI Captures: 0 cards 
-		Table Cards (1) [👆 Asso di Coppe] Asso Asso di Coppe 
-		Your Hand (1) [👆 Tre di Denari] Tre Tre di Denari		
+		Table Cards (1) [👆 Asso-di-Coppe] 
+		Your Hand (1) [👆 Tre-di-Denari]		
 		`
 	actual := visualizeTemplate(doc)
 	assert.Equal(t, normalizeWhitespace(expected), actual)
@@ -80,6 +80,13 @@ func normalizeWhitespace(s string) string {
 	return strings.TrimSpace(replaceAll(s, `\s+`, " "))
 }
 
+// visualizeTemplate returns a string representation of the HTML content
+// that is easier to read and test.
+// see https://martinfowler.com/articles/tdd-html-templates.html
+// We add a `data-test-icon` attribute to some elements to simplify their rendering.
+// This is a workaround to avoid having to deal with the complexity of the actual HTML structure,
+// but still lets us test the logic in the template.
+// This trick I learned from Esko Luontola.
 func visualizeTemplate(htmlContent string) string {
 	doc, err := html.Parse(strings.NewReader(htmlContent))
 	if err != nil {
@@ -87,7 +94,7 @@ func visualizeTemplate(htmlContent string) string {
 	}
 
 	var output strings.Builder
-	skipElements := []string{"style", "script", "title"}
+	skipElements := []string{"style", "script", "head"}
 	visualizeNode(doc, &output, 0, skipElements)
 
 	return normalizeWhitespace(output.String())
@@ -122,12 +129,15 @@ func visualizeNode(n *html.Node, output *strings.Builder, depth int, skipElement
 
 		if testIcon != "" && hasOnClick {
 			output.WriteString(fmt.Sprintf("[👆 %s] ", testIcon))
+			return
 		} else if testIcon != "" {
 			output.WriteString(testIcon)
 			output.WriteString(" ")
+			return
 		} else if hasOnClick {
 			textContent := extractTextContent(n)
 			output.WriteString(fmt.Sprintf("[👆 %s] ", textContent))
+			return
 		}
 	} else if n.Type == html.TextNode {
 		text := strings.TrimSpace(n.Data)

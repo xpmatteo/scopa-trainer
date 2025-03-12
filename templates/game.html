@@ -153,7 +153,7 @@
         <h2>Table Cards ({{len .TableCards}})</h2>
         <div style="display: flex; flex-wrap: wrap;">
             {{range .TableCards}}
-            <div data-test-icon="{{.Name}} di {{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)}}capturable{{end}}" onclick="selectCard('{{.Suit}}', '{{.Value}}')">
+            <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)}}capturable{{end}}" onclick="selectCard('{{.Suit}}', '{{.Value}}')">
                 <div class="card-rank">{{.Rank}}</div>
                 <div class="card-suit">{{.Name}} di {{.Suit}}</div>
             </div>
@@ -177,7 +177,7 @@
         <h2>Your Hand ({{len .PlayerHand}})</h2>
         <div style="display: flex; flex-wrap: wrap;">
             {{range .PlayerHand}}
-            <div data-test-icon="{{.Name}} di {{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if eq . $.SelectedCard}}selected{{end}}" onclick="selectCard('{{.Suit}}', '{{.Value}}')">
+            <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if eq . $.SelectedCard}}selected{{end}}" onclick="selectCard('{{.Suit}}', '{{.Value}}')">
                 <div class="card-rank">{{.Rank}}</div>
                 <div class="card-suit">{{.Name}} di {{.Suit}}</div>
             </div>
