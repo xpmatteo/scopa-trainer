@@ -1,3 +1,22 @@
+# Learning to code with AI
+
+I'm learning how to use Cursor and Claude with a small side project.
+
+I'm trying to separate commits: those prefixed with "Yoda:" are primarily the work of Cursor (who impersonates Yoda 😄). 
+The others are primarily my work.
+
+I started with planning the work using the planning method of 
+[Harper Reed](https://harper.blog/2025/02/16/my-llm-codegen-workflow-atm/).  The output is in the `/spec.md` and 
+`xnotes/000-scopa-trainer-stories.md`.
+
+Then I created a meta-AI-rule to create AI rules following [BMad](https://github.com/bmadcode/cursor-auto-rules-agile-workflow). 
+It is in `.cursor/rules/000-cursor-rules.mdc`.
+
+Then I created a bunch of Go style rules following the advice of [Geoffrey Huntley](https://ghuntley.com/stdlib/).
+
+I have a prompt for starting every user story that asks Yoda to reason step by step, then revise the plan, then ask for
+clarification.  Then I ask him to write tests, see them fail, then make them pass.
+
 # Scopa Trainer
 
 A browser-based implementation of the Scopa card game (two-player variant) that allows a human player to play against an AI opponent.
