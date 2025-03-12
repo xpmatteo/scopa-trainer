@@ -2,118 +2,29 @@ package handlers
 
 import (
 	"bytes"
+	"github.com/stretchr/testify/require"
 	"html/template"
+	"regexp"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/xpmatteo/scopa-trainer/pkg/domain"
-	"golang.org/x/net/html"
 )
 
-// Helper function to render template and parse HTML
-func renderTemplate(t *testing.T, model domain.UIModel) *html.Node {
-	funcMap := template.FuncMap{
-		"lower": strings.ToLower,
-	}
-	tmpl, err := template.New("game.html").Funcs(funcMap).ParseFiles("../../../../templates/game.html")
-	assert.NoError(t, err)
-
-	var buf bytes.Buffer
-	err = tmpl.Execute(&buf, model)
-	assert.NoError(t, err)
-
-	doc, err := html.Parse(strings.NewReader(buf.String()))
-	assert.NoError(t, err)
-
-	return doc
-}
-
-// Helper to find elements by CSS selector-like query
-func findElement(node *html.Node, elementType, class string) *html.Node {
-	if node == nil {
-		return nil
-	}
-
-	if node.Type == html.ElementNode && node.Data == elementType {
-		for _, attr := range node.Attr {
-			if attr.Key == "class" && strings.Contains(attr.Val, class) {
-				return node
-			}
-		}
-	}
-
-	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		if result := findElement(c, elementType, class); result != nil {
-			return result
-		}
-	}
-
-	return nil
-}
-
-// Helper to find all elements matching criteria
-func findAllElements(node *html.Node, elementType, class string) []*html.Node {
-	var results []*html.Node
-
-	if node == nil {
-		return results
-	}
-
-	if node.Type == html.ElementNode && node.Data == elementType {
-		for _, attr := range node.Attr {
-			if attr.Key == "class" && strings.Contains(attr.Val, class) {
-				results = append(results, node)
-				break
-			}
-		}
-	}
-
-	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		results = append(results, findAllElements(c, elementType, class)...)
-	}
-
-	return results
-}
-
-// Helper to get text content of node
-func getTextContent(node *html.Node) string {
-	if node == nil {
-		return ""
-	}
-
-	if node.Type == html.TextNode {
-		return node.Data
-	}
-
-	var result string
-	for c := node.FirstChild; c != nil; c = c.NextSibling {
-		result += getTextContent(c)
-	}
-
-	return strings.TrimSpace(result)
-}
-
 func TestWelcomeScreen(t *testing.T) {
-	// Given a new game model
+	// Arrange
 	model := domain.NewUIModel()
 
-	// When rendering the template
+	// Act
 	doc := renderTemplate(t, model)
 
-	// Then we should see the welcome message
-	promptDiv := findElement(doc, "div", "game-prompt")
-	assert.NotNil(t, promptDiv, "Game prompt div should exist")
-	assert.Contains(t, getTextContent(promptDiv), "Welcome to Scopa Trainer")
-
-	// And we should see the new game button
-	button := findElement(doc, "button", "new-game-button")
-	assert.NotNil(t, button, "New game button should exist")
-	assert.Equal(t, "New Game", getTextContent(button))
-
-	// And we should not see the game areas
-	assert.Nil(t, findElement(doc, "div", "table-area"), "Table area should not exist yet")
-	assert.Nil(t, findElement(doc, "div", "hand-area"), "Hand area should not exist yet")
+	// Assert
+	expected := `
+		Welcome to Scopa Trainer! Click &#39;New Game&#39; to start playing. 
+		New Game`
+	actual := visualizeWithTestIcons(doc)
+	assert.Equal(t, normalizeWhitespace(expected), actual)
 }
 
 func TestGameInProgressScreen(t *testing.T) {
@@ -131,60 +42,74 @@ func TestGameInProgressScreen(t *testing.T) {
 		{Suit: domain.Denari, Rank: domain.Tre},
 	}
 
-	// When rendering the template - this should not panic
+	// Act
 	doc := renderTemplate(t, model)
 
-	// Then we should see the game areas
-	assert.NotNil(t, findElement(doc, "div", "game-prompt"), "Game prompt should be visible")
-	assert.NotNil(t, findElement(doc, "div", "table-area"), "Table area should be visible")
-	assert.NotNil(t, findElement(doc, "div", "hand-area"), "Hand area should be visible")
-
-	// And we should see at least one card
-	tableCards := findAllElements(doc, "div", "card")
-	assert.Greater(t, len(tableCards), 0, "At least one card should be visible")
+	// Assert
+	expected := `
+		Your turn. Select a card to play. 
+		Deck: 0 cards 
+		Your Captures: 0 cards 
+		AI Captures: 0 cards 
+		Table Cards (1) Asso Asso di Coppe 
+		Your Hand (1) Tre Tre di Denari`
+	actual := visualizeWithTestIcons(doc)
+	assert.Equal(t, normalizeWhitespace(expected), actual)
 }
 
-func TestCardSuitStyling(t *testing.T) {
-	// Given a model with cards of each suit
-	model := domain.NewUIModel()
-	model.GameInProgress = true
-
-	// Add one card of each suit to the table
-	model.TableCards = []domain.Card{
-		{Suit: domain.Coppe, Rank: domain.Asso},
-		{Suit: domain.Denari, Rank: domain.Due},
-		{Suit: domain.Bastoni, Rank: domain.Tre},
-		{Suit: domain.Spade, Rank: domain.Quattro},
+func renderTemplate(t *testing.T, model domain.UIModel) string {
+	funcMap := template.FuncMap{
+		"lower": strings.ToLower,
 	}
+	templ, err := template.New("game.html").Funcs(funcMap).ParseFiles("../../../../templates/game.html")
+	require.NoError(t, err)
 
-	// When rendering the template
-	doc := renderTemplate(t, model)
+	var buf bytes.Buffer
 
-	// Then we should see cards on the table
-	tableArea := findElement(doc, "div", "table-area")
-	assert.NotNil(t, tableArea, "Table area should be visible")
-
-	// And we should see cards
-	cards := findAllElements(tableArea, "div", "card")
-	assert.NotEmpty(t, cards, "Cards should be visible")
-
-	// Check that we have at least one card with a suit class
-	// Note: The template might be using lowercase suit names for classes
-	foundSuitClass := false
-	for _, card := range cards {
-		for _, attr := range card.Attr {
-			if attr.Key == "class" {
-				classVal := strings.ToLower(attr.Val)
-				if strings.Contains(classVal, "card") {
-					foundSuitClass = true
-					break
-				}
-			}
-		}
-		if foundSuitClass {
-			break
-		}
+	if err := templ.Execute(&buf, model); err != nil {
+		require.NoError(t, err)
 	}
+	return buf.String()
+}
 
-	assert.True(t, foundSuitClass, "At least one card should have a card class")
+func visualizeWithTestIcons(html string) string {
+	// Remove style element entirely
+	html = replaceAll(html, `(?s)<style>.*?</style>`, "")
+
+	// Remove script element entirely
+	html = replaceAll(html, `(?s)<script>.*?</script>`, "")
+
+	// Remove title element entirely
+	html = replaceAll(html, `(?s)<title>.*?</title>`, "")
+
+	// Replace elements with data-test-icon with their icon
+	html = replaceAll(html, `<[^<>]+\bdata-test-icon="(.*?)".*?>`, " $1 ")
+
+	// Process elements with onclick but no test-icon
+	html = replaceAll(html, `onclick`, " orpo ")
+	html = replaceAll(html, `\bonclick="([^"]*)"[^>]*>(.*?)`, " [👆 $1: $2] ")
+	html = replaceAll(html, `<button[^>]*\bonclick="([^"]*)"[^>]*>(.*?)</button>`, " [👆 $1: $2] ")
+
+	// Strip remaining HTML tags
+	html = replaceAll(html, `</?(a|abbr|b|big|cite|code|em|i|small|span|strong|tt)\b.*?>`, "")
+	html = replaceAll(html, `<[^>]*>`, " ")
+
+	// Replace HTML entities
+	html = replaceAll(html, `&nbsp;`, " ")
+	html = replaceAll(html, `&lt;`, "<")
+	html = replaceAll(html, `&gt;`, ">")
+	html = replaceAll(html, `&quot;`, "\"")
+	html = replaceAll(html, `&apos;`, "'")
+	html = replaceAll(html, `&amp;`, "&")
+
+	return normalizeWhitespace(html)
+}
+
+func replaceAll(src, regex, repl string) string {
+	re := regexp.MustCompile(regex)
+	return re.ReplaceAllString(src, repl)
+}
+
+func normalizeWhitespace(s string) string {
+	return strings.TrimSpace(replaceAll(s, `\s+`, " "))
 }
