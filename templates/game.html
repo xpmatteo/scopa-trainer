@@ -148,18 +148,18 @@
             <span class="stat-value">{{.AICaptureCount}} cards</span>
         </div>
     </div>
-    
+
     <div class="card-area table-area">
         <h2>Table Cards ({{len .TableCards}})</h2>
         <div style="display: flex; flex-wrap: wrap;">
             {{range .TableCards}}
-            <div class="card {{.Suit | printf "%s" | lower}} {{if and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)}}capturable{{end}}" onclick="selectCard('{{.Suit}}', '{{.Value}}')">
+            <div data-test-icon="{{.Name}} di {{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)}}capturable{{end}}" onclick="selectCard('{{.Suit}}', '{{.Value}}')">
                 <div class="card-rank">{{.Rank}}</div>
                 <div class="card-suit">{{.Name}} di {{.Suit}}</div>
             </div>
             {{end}}
         </div>
-        
+
         {{if ne .SelectedCard.Rank 0}}
             {{if .CanPlaySelectedCard}}
             <div class="play-area" onclick="playCard()">
@@ -177,7 +177,7 @@
         <h2>Your Hand ({{len .PlayerHand}})</h2>
         <div style="display: flex; flex-wrap: wrap;">
             {{range .PlayerHand}}
-            <div class="card {{.Suit | printf "%s" | lower}} {{if eq . $.SelectedCard}}selected{{end}}" onclick="selectCard('{{.Suit}}', '{{.Value}}')">
+            <div data-test-icon="{{.Name}} di {{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if eq . $.SelectedCard}}selected{{end}}" onclick="selectCard('{{.Suit}}', '{{.Value}}')">
                 <div class="card-rank">{{.Rank}}</div>
                 <div class="card-suit">{{.Name}} di {{.Suit}}</div>
             </div>
@@ -192,32 +192,32 @@
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '/select-card';
-            
+
             // Add suit input
             const suitInput = document.createElement('input');
             suitInput.type = 'hidden';
             suitInput.name = 'suit';
             suitInput.value = suit;
             form.appendChild(suitInput);
-            
+
             // Add rank input
             const rankInput = document.createElement('input');
             rankInput.type = 'hidden';
             rankInput.name = 'rank';
             rankInput.value = rank;
             form.appendChild(rankInput);
-            
+
             // Submit the form
             document.body.appendChild(form);
             form.submit();
         }
-        
+
         function playCard() {
             // Create a form and submit it
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '/play-card';
-            
+
             // Submit the form
             document.body.appendChild(form);
             form.submit();
