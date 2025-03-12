@@ -1,26 +1,18 @@
 package main
 
 import (
-	"html/template"
+	"github.com/xpmatteo/scopa-trainer/pkg/adapters/http/handlers"
+	"github.com/xpmatteo/scopa-trainer/pkg/adapters/http/views"
+	"github.com/xpmatteo/scopa-trainer/pkg/application"
 	"log"
 	"net/http"
-	"strings"
-
-	"github.com/xpmatteo/scopa-trainer/pkg/adapters/http/handlers"
-	"github.com/xpmatteo/scopa-trainer/pkg/application"
 )
 
 func main() {
 	// Initialize the application service
 	gameService := application.NewGameService()
 
-	funcMap := template.FuncMap{
-		"lower": strings.ToLower,
-	}
-	templ, err := template.New("game.html").Funcs(funcMap).ParseFiles("templates/game.html")
-	if err != nil {
-		panic(err)
-	}
+	templ := views.ParseTemplates("templates/game.html")
 
 	// Set up routes
 	http.HandleFunc("GET /", handlers.NewHandleIndex(gameService, templ))

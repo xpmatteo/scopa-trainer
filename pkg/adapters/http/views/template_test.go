@@ -1,11 +1,10 @@
-package handlers
+package views
 
 import (
 	"bytes"
 	"fmt"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/html"
-	"html/template"
 	"regexp"
 	"slices"
 	"strings"
@@ -62,11 +61,7 @@ func TestGameInProgressScreen(t *testing.T) {
 }
 
 func renderTemplate(t *testing.T, model domain.UIModel) string {
-	funcMap := template.FuncMap{
-		"lower": strings.ToLower,
-	}
-	templ, err := template.New("game.html").Funcs(funcMap).ParseFiles("../../../../templates/game.html")
-	require.NoError(t, err)
+	templ := ParseTemplates("../../../../templates/game.html")
 
 	var buf bytes.Buffer
 
