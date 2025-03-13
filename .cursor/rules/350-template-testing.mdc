@@ -14,6 +14,7 @@ globs: **/*_test.go
 - Convert HTML output to simplified text representation for testing
 - Add data-test-icon attributes to elements for easier identification
 - Use a visualizeTemplate function to transform HTML into readable text
+- Visualize element states (selected, disabled, etc.) with symbols (✓, ⭐, etc.)
 - Test all conditional logic paths in templates
 - Use table-driven tests for multiple template states
 - Assert against normalized text output instead of raw HTML
@@ -21,7 +22,7 @@ globs: **/*_test.go
 
 ## Examples
 <example>
-// Good: Testing template with visualization
+// Good: Testing template with visualization and state indicators
 func TestCardSelection(t *testing.T) {
 	// Arrange
 	model := domain.NewUIModel()
@@ -30,28 +31,57 @@ func TestCardSelection(t *testing.T) {
 	// Act
 	doc := renderTemplate(t, model)
 	
-	// Assert - Using visualization with multi-line format
+	// Assert - Using visualization with multi-line format and state indicators
 	expected := `
 		Your turn. 
-		Table Cards (1) [👆 Card-Name] 
-		Your Hand (1) [👆 Selected-Card]
+		Table Cards (1) [👆 Card-Name ⭐] 
+		Your Hand (1) [👆 Selected-Card ✓]
 	`
 	actual := visualizeTemplate(doc)
 	assert.Equal(t, normalizeWhitespace(expected), actual)
 }
 
-// Visualization helper
-func visualizeTemplate(htmlContent string) string {
-	doc, err := html.Parse(strings.NewReader(htmlContent))
-	if err != nil {
-		return fmt.Sprintf("Error parsing HTML: %v", err)
+// Visualization helper that includes state indicators
+func visualizeNode(n *html.Node, output *strings.Builder, depth int, skipElements []string) {
+	// Skip elements in the skip list
+	if n.Type == html.ElementNode && slices.Contains(skipElements, n.Data) {
+		return
 	}
 
-	var output strings.Builder
-	skipElements := []string{"style", "script", "head"}
-	visualizeNode(doc, &output, 0, skipElements)
+	if n.Type == html.ElementNode {
+		var testIcon string
+		var isSelected bool
+		var isCapturable bool
 
-	return normalizeWhitespace(output.String())
+		for _, attr := range n.Attr {
+			if attr.Key == "data-test-icon" {
+				testIcon = attr.Val
+			}
+			if attr.Key == "class" {
+				if strings.Contains(attr.Val, "selected") {
+					isSelected = true
+				}
+				if strings.Contains(attr.Val, "capturable") {
+					isCapturable = true
+				}
+			}
+		}
+
+		// Add visual indicators for element states
+		var indicators string
+		if isSelected {
+			indicators += "✓"  // Checkmark for selected
+		}
+		if isCapturable {
+			indicators += "⭐"  // Star for capturable
+		}
+		
+		if indicators != "" {
+			output.WriteString(fmt.Sprintf("[👆 %s %s] ", testIcon, indicators))
+		} else {
+			output.WriteString(fmt.Sprintf("[👆 %s] ", testIcon))
+		}
+	}
 }
 </example>
 

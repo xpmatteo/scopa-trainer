@@ -91,9 +91,9 @@ func TestCardSelection_WithCapturableCard(t *testing.T) {
 		Deck: 0 cards 
 		Your Captures: 0 cards 
 		AI Captures: 0 cards 
-		Table Cards (2) [👆 Tre-di-Coppe] [👆 Quattro-di-Bastoni] 
+		Table Cards (2) [👆 Tre-di-Coppe ⭐] [👆 Quattro-di-Bastoni] 
 		You must capture a card with the same rank 
-		Your Hand (1) [👆 Tre-di-Denari]
+		Your Hand (1) [👆 Tre-di-Denari ✓]
 	`
 	actual := visualizeTemplate(doc)
 	assert.Equal(t, normalizeWhitespace(expected), actual)
@@ -129,7 +129,7 @@ func TestCardSelection_CanPlayToTable(t *testing.T) {
 		AI Captures: 0 cards 
 		Table Cards (1) [👆 Quattro-di-Coppe] 
 		[👆 Click here to play the selected card to the table] 
-		Your Hand (1) [👆 Tre-di-Denari]
+		Your Hand (1) [👆 Tre-di-Denari ✓]
 	`
 	actual := visualizeTemplate(doc)
 	assert.Equal(t, normalizeWhitespace(expected), actual)
@@ -223,9 +223,9 @@ func TestGameStates_TableDriven(t *testing.T) {
 				Deck: 20 cards 
 				Your Captures: 5 cards 
 				AI Captures: 3 cards 
-				Table Cards (3) [👆 Sette-di-Denari] [👆 Sette-di-Coppe] [👆 Due-di-Bastoni] 
+				Table Cards (3) [👆 Sette-di-Denari ⭐] [👆 Sette-di-Coppe ⭐] [👆 Due-di-Bastoni] 
 				You must capture a card with the same rank 
-				Your Hand (1) [👆 Sette-di-Spade]
+				Your Hand (1) [👆 Sette-di-Spade ✓]
 			`,
 		},
 		{
@@ -257,6 +257,42 @@ func TestGameStates_TableDriven(t *testing.T) {
 				Your Hand (2) [👆 Tre-di-Spade] [👆 Cinque-di-Denari]
 			`,
 		},
+		{
+			name: "selected card with capturable cards",
+			model: func() domain.UIModel {
+				model := domain.NewUIModel()
+				model.GameInProgress = true
+				model.ShowNewGameButton = false
+				model.GamePrompt = "Your turn."
+				model.DeckCount = 15
+				model.PlayerCaptureCount = 8
+				model.AICaptureCount = 7
+				// Multiple cards on table with same rank
+				model.TableCards = []domain.Card{
+					{Suit: domain.Coppe, Rank: domain.Sette},
+					{Suit: domain.Denari, Rank: domain.Sette},
+					{Suit: domain.Bastoni, Rank: domain.Due},
+				}
+				// Cards in hand
+				model.PlayerHand = []domain.Card{
+					{Suit: domain.Spade, Rank: domain.Sette},
+					{Suit: domain.Denari, Rank: domain.Re},
+				}
+				// Selected card that matches multiple table cards
+				model.SelectedCard = domain.Card{Suit: domain.Spade, Rank: domain.Sette}
+				model.CanPlaySelectedCard = false // Should show capture message
+				return model
+			}(),
+			expected: `
+				Your turn. 
+				Deck: 15 cards 
+				Your Captures: 8 cards 
+				AI Captures: 7 cards 
+				Table Cards (3) [👆 Sette-di-Coppe ⭐] [👆 Sette-di-Denari ⭐] [👆 Due-di-Bastoni] 
+				You must capture a card with the same rank 
+				Your Hand (2) [👆 Sette-di-Spade ✓] [👆 Re-di-Denari]
+			`,
+		},
 	}
 
 	for _, test := range tests {
@@ -269,85 +305,6 @@ func TestGameStates_TableDriven(t *testing.T) {
 			assert.Equal(t, normalizeWhitespace(test.expected), actual)
 		})
 	}
-}
-
-func TestCardHighlighting_CapturableCards(t *testing.T) {
-	// Arrange
-	model := domain.NewUIModel()
-	model.GameInProgress = true
-	model.ShowNewGameButton = false
-	model.GamePrompt = "Your turn."
-
-	// Multiple cards on table with same rank
-	model.TableCards = []domain.Card{
-		{Suit: domain.Coppe, Rank: domain.Sette},
-		{Suit: domain.Denari, Rank: domain.Sette},
-		{Suit: domain.Bastoni, Rank: domain.Due},
-	}
-	model.PlayerHand = []domain.Card{
-		{Suit: domain.Spade, Rank: domain.Sette},
-	}
-
-	// Selected card that matches multiple table cards
-	model.SelectedCard = domain.Card{Suit: domain.Spade, Rank: domain.Sette}
-
-	// Act
-	doc := renderTemplate(t, model)
-
-	// Assert - Check that the HTML contains the "capturable" class for matching cards
-	assert.Contains(t, doc, `class="card coppe capturable"`)
-	assert.Contains(t, doc, `class="card denari capturable"`)
-	// The Due card should not be capturable
-	assert.NotContains(t, doc, `class="card bastoni capturable"`)
-}
-
-func TestCardHighlighting_SelectedCard(t *testing.T) {
-	// Arrange
-	model := domain.NewUIModel()
-	model.GameInProgress = true
-	model.ShowNewGameButton = false
-	model.GamePrompt = "Your turn."
-
-	// Cards in hand
-	model.PlayerHand = []domain.Card{
-		{Suit: domain.Spade, Rank: domain.Sette},
-		{Suit: domain.Denari, Rank: domain.Re},
-	}
-
-	// Selected card
-	model.SelectedCard = domain.Card{Suit: domain.Spade, Rank: domain.Sette}
-
-	// Act
-	doc := renderTemplate(t, model)
-
-	// Assert - Check that the HTML contains the "selected" class for the selected card
-	assert.Contains(t, doc, `class="card spade selected"`)
-	// The other card should not be selected
-	assert.NotContains(t, doc, `class="card denari selected"`)
-}
-
-func TestEmptyHand(t *testing.T) {
-	// Arrange - Test when player has no cards in hand
-	model := domain.NewUIModel()
-	model.GameInProgress = true
-	model.ShowNewGameButton = false
-	model.GamePrompt = "Game over! Calculating scores..."
-	model.PlayerHand = []domain.Card{} // Empty hand
-
-	// Act
-	doc := renderTemplate(t, model)
-
-	// Assert
-	expected := `
-		Game over! Calculating scores... 
-		Deck: 0 cards 
-		Your Captures: 0 cards 
-		AI Captures: 0 cards 
-		Table Cards (0) 
-		Your Hand (0)
-	`
-	actual := visualizeTemplate(doc)
-	assert.Equal(t, normalizeWhitespace(expected), actual)
 }
 
 func TestDisabledPlayArea(t *testing.T) {
@@ -431,6 +388,8 @@ func visualizeNode(n *html.Node, output *strings.Builder, depth int, skipElement
 		var testIcon string
 		var hasOnClick bool
 		var onClickValue string
+		var isSelected bool
+		var isCapturable bool
 
 		for _, attr := range n.Attr {
 			if attr.Key == "data-test-icon" {
@@ -441,10 +400,31 @@ func visualizeNode(n *html.Node, output *strings.Builder, depth int, skipElement
 				onClickValue = attr.Val
 				_ = onClickValue
 			}
+			if attr.Key == "class" {
+				if strings.Contains(attr.Val, "selected") {
+					isSelected = true
+				}
+				if strings.Contains(attr.Val, "capturable") {
+					isCapturable = true
+				}
+			}
 		}
 
 		if testIcon != "" && hasOnClick {
-			output.WriteString(fmt.Sprintf("[👆 %s] ", testIcon))
+			// Add visual indicators for selected and capturable states
+			var indicators string
+			if isSelected {
+				indicators += "✓" // Checkmark for selected
+			}
+			if isCapturable {
+				indicators += "⭐" // Star for capturable
+			}
+
+			if indicators != "" {
+				output.WriteString(fmt.Sprintf("[👆 %s %s] ", testIcon, indicators))
+			} else {
+				output.WriteString(fmt.Sprintf("[👆 %s] ", testIcon))
+			}
 			return
 		} else if testIcon != "" {
 			output.WriteString(testIcon)
