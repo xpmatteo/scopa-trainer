@@ -39,3 +39,13 @@ TODO
 - 
 
 We end at 189 - it took 5 requests
+
+## 2025-03-13
+
+Refactored the tests to follow Esko Luontola's way explained in https://martinfowler.com/articles/tdd-html-templates.html
+
+Asked Yoda to add missing tests, and an AI rule to apply the method.
+
+The rule is good, the tests also but I think he added too many tests.  Also I'm not sure that all the new rules have the correct numeric prefix, but I'm too much in a hurry now to check.
+
+Started at 189, now at 193 -- 4 requests.
