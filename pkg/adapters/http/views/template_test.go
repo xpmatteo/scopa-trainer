@@ -3,12 +3,14 @@ package views
 import (
 	"bytes"
 	"fmt"
-	"github.com/stretchr/testify/require"
-	"golang.org/x/net/html"
+	"html/template"
 	"regexp"
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+	"golang.org/x/net/html"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/xpmatteo/scopa-trainer/pkg/domain"
@@ -58,6 +60,320 @@ func TestGameInProgress_PlayerTurn(t *testing.T) {
 		`
 	actual := visualizeTemplate(doc)
 	assert.Equal(t, normalizeWhitespace(expected), actual)
+}
+
+func TestCardSelection_WithCapturableCard(t *testing.T) {
+	// Arrange
+	model := domain.NewUIModel()
+	model.GameInProgress = true
+	model.ShowNewGameButton = false
+	model.GamePrompt = "Your turn."
+
+	// With matching cards on table and in hand (same rank)
+	model.TableCards = []domain.Card{
+		{Suit: domain.Coppe, Rank: domain.Tre},
+		{Suit: domain.Bastoni, Rank: domain.Quattro},
+	}
+	model.PlayerHand = []domain.Card{
+		{Suit: domain.Denari, Rank: domain.Tre}, // This matches the Tre on the table
+	}
+
+	// Selected card that matches a table card
+	model.SelectedCard = domain.Card{Suit: domain.Denari, Rank: domain.Tre}
+	model.CanPlaySelectedCard = false // Should show capture message
+
+	// Act
+	doc := renderTemplate(t, model)
+
+	// Assert
+	expected := `
+		Your turn. 
+		Deck: 0 cards 
+		Your Captures: 0 cards 
+		AI Captures: 0 cards 
+		Table Cards (2) [👆 Tre-di-Coppe] [👆 Quattro-di-Bastoni] 
+		You must capture a card with the same rank 
+		Your Hand (1) [👆 Tre-di-Denari]
+	`
+	actual := visualizeTemplate(doc)
+	assert.Equal(t, normalizeWhitespace(expected), actual)
+}
+
+func TestCardSelection_CanPlayToTable(t *testing.T) {
+	// Arrange
+	model := domain.NewUIModel()
+	model.GameInProgress = true
+	model.ShowNewGameButton = false
+	model.GamePrompt = "Your turn."
+
+	// With non-matching cards on table
+	model.TableCards = []domain.Card{
+		{Suit: domain.Coppe, Rank: domain.Quattro},
+	}
+	model.PlayerHand = []domain.Card{
+		{Suit: domain.Denari, Rank: domain.Tre},
+	}
+
+	// Selected card that doesn't match any table card
+	model.SelectedCard = domain.Card{Suit: domain.Denari, Rank: domain.Tre}
+	model.CanPlaySelectedCard = true // Should show play to table message
+
+	// Act
+	doc := renderTemplate(t, model)
+
+	// Assert
+	expected := `
+		Your turn. 
+		Deck: 0 cards 
+		Your Captures: 0 cards 
+		AI Captures: 0 cards 
+		Table Cards (1) [👆 Quattro-di-Coppe] 
+		[👆 Click here to play the selected card to the table] 
+		Your Hand (1) [👆 Tre-di-Denari]
+	`
+	actual := visualizeTemplate(doc)
+	assert.Equal(t, normalizeWhitespace(expected), actual)
+}
+
+func TestParseTemplates(t *testing.T) {
+	// Test that the template parser works correctly
+	templ := ParseTemplates("../../../../templates/game.html")
+	require.NotNil(t, templ)
+
+	// Verify the template has the expected name
+	require.NotNil(t, templ.Lookup("game.html"), "Template should have the expected name")
+
+	// Create a simple test template to verify the custom function
+	testTemplate := `<div class="card {{.Suit | lower}}">Test</div>`
+	tmpl, err := template.New("test").Funcs(template.FuncMap{
+		"lower": strings.ToLower,
+	}).Parse(testTemplate)
+	require.NoError(t, err)
+
+	// Test with a simple data structure
+	data := struct {
+		Suit string
+	}{
+		Suit: "COPPE",
+	}
+
+	var buf bytes.Buffer
+	err = tmpl.Execute(&buf, data)
+	require.NoError(t, err)
+
+	// Check that the output contains the lowercase suit class
+	assert.Contains(t, buf.String(), `class="card coppe"`)
+}
+
+func TestGameStates_TableDriven(t *testing.T) {
+	tests := []struct {
+		name     string
+		model    domain.UIModel
+		expected string
+	}{
+		{
+			name: "empty table with multiple cards in hand",
+			model: func() domain.UIModel {
+				model := domain.NewUIModel()
+				model.GameInProgress = true
+				model.ShowNewGameButton = false
+				model.GamePrompt = "Your turn."
+				model.DeckCount = 30
+				model.TableCards = []domain.Card{} // Empty table
+				model.PlayerHand = []domain.Card{
+					{Suit: domain.Denari, Rank: domain.Re},
+					{Suit: domain.Coppe, Rank: domain.Cavallo},
+					{Suit: domain.Bastoni, Rank: domain.Fante},
+				}
+				return model
+			}(),
+			expected: `
+				Your turn. 
+				Deck: 30 cards 
+				Your Captures: 0 cards 
+				AI Captures: 0 cards 
+				Table Cards (0) 
+				Your Hand (3) [👆 Re-di-Denari] [👆 Cavallo-di-Coppe] [👆 Fante-di-Bastoni]
+			`,
+		},
+		{
+			name: "multiple cards on table with same rank as hand card",
+			model: func() domain.UIModel {
+				model := domain.NewUIModel()
+				model.GameInProgress = true
+				model.ShowNewGameButton = false
+				model.GamePrompt = "Your turn."
+				model.DeckCount = 20
+				model.PlayerCaptureCount = 5
+				model.AICaptureCount = 3
+				model.TableCards = []domain.Card{
+					{Suit: domain.Denari, Rank: domain.Sette},
+					{Suit: domain.Coppe, Rank: domain.Sette},
+					{Suit: domain.Bastoni, Rank: domain.Due},
+				}
+				model.PlayerHand = []domain.Card{
+					{Suit: domain.Spade, Rank: domain.Sette},
+				}
+				model.SelectedCard = domain.Card{Suit: domain.Spade, Rank: domain.Sette}
+				model.CanPlaySelectedCard = false
+				return model
+			}(),
+			expected: `
+				Your turn. 
+				Deck: 20 cards 
+				Your Captures: 5 cards 
+				AI Captures: 3 cards 
+				Table Cards (3) [👆 Sette-di-Denari] [👆 Sette-di-Coppe] [👆 Due-di-Bastoni] 
+				You must capture a card with the same rank 
+				Your Hand (1) [👆 Sette-di-Spade]
+			`,
+		},
+		{
+			name: "game with captures and scores",
+			model: func() domain.UIModel {
+				model := domain.NewUIModel()
+				model.GameInProgress = true
+				model.ShowNewGameButton = false
+				model.GamePrompt = "AI played Fante di Spade and captured Fante di Denari."
+				model.DeckCount = 10
+				model.PlayerCaptureCount = 12
+				model.AICaptureCount = 14
+				model.TableCards = []domain.Card{
+					{Suit: domain.Coppe, Rank: domain.Cinque},
+					{Suit: domain.Bastoni, Rank: domain.Asso},
+				}
+				model.PlayerHand = []domain.Card{
+					{Suit: domain.Spade, Rank: domain.Tre},
+					{Suit: domain.Denari, Rank: domain.Cinque},
+				}
+				return model
+			}(),
+			expected: `
+				AI played Fante di Spade and captured Fante di Denari. 
+				Deck: 10 cards 
+				Your Captures: 12 cards 
+				AI Captures: 14 cards 
+				Table Cards (2) [👆 Cinque-di-Coppe] [👆 Asso-di-Bastoni] 
+				Your Hand (2) [👆 Tre-di-Spade] [👆 Cinque-di-Denari]
+			`,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			// Act
+			doc := renderTemplate(t, test.model)
+
+			// Assert
+			actual := visualizeTemplate(doc)
+			assert.Equal(t, normalizeWhitespace(test.expected), actual)
+		})
+	}
+}
+
+func TestCardHighlighting_CapturableCards(t *testing.T) {
+	// Arrange
+	model := domain.NewUIModel()
+	model.GameInProgress = true
+	model.ShowNewGameButton = false
+	model.GamePrompt = "Your turn."
+
+	// Multiple cards on table with same rank
+	model.TableCards = []domain.Card{
+		{Suit: domain.Coppe, Rank: domain.Sette},
+		{Suit: domain.Denari, Rank: domain.Sette},
+		{Suit: domain.Bastoni, Rank: domain.Due},
+	}
+	model.PlayerHand = []domain.Card{
+		{Suit: domain.Spade, Rank: domain.Sette},
+	}
+
+	// Selected card that matches multiple table cards
+	model.SelectedCard = domain.Card{Suit: domain.Spade, Rank: domain.Sette}
+
+	// Act
+	doc := renderTemplate(t, model)
+
+	// Assert - Check that the HTML contains the "capturable" class for matching cards
+	assert.Contains(t, doc, `class="card coppe capturable"`)
+	assert.Contains(t, doc, `class="card denari capturable"`)
+	// The Due card should not be capturable
+	assert.NotContains(t, doc, `class="card bastoni capturable"`)
+}
+
+func TestCardHighlighting_SelectedCard(t *testing.T) {
+	// Arrange
+	model := domain.NewUIModel()
+	model.GameInProgress = true
+	model.ShowNewGameButton = false
+	model.GamePrompt = "Your turn."
+
+	// Cards in hand
+	model.PlayerHand = []domain.Card{
+		{Suit: domain.Spade, Rank: domain.Sette},
+		{Suit: domain.Denari, Rank: domain.Re},
+	}
+
+	// Selected card
+	model.SelectedCard = domain.Card{Suit: domain.Spade, Rank: domain.Sette}
+
+	// Act
+	doc := renderTemplate(t, model)
+
+	// Assert - Check that the HTML contains the "selected" class for the selected card
+	assert.Contains(t, doc, `class="card spade selected"`)
+	// The other card should not be selected
+	assert.NotContains(t, doc, `class="card denari selected"`)
+}
+
+func TestEmptyHand(t *testing.T) {
+	// Arrange - Test when player has no cards in hand
+	model := domain.NewUIModel()
+	model.GameInProgress = true
+	model.ShowNewGameButton = false
+	model.GamePrompt = "Game over! Calculating scores..."
+	model.PlayerHand = []domain.Card{} // Empty hand
+
+	// Act
+	doc := renderTemplate(t, model)
+
+	// Assert
+	expected := `
+		Game over! Calculating scores... 
+		Deck: 0 cards 
+		Your Captures: 0 cards 
+		AI Captures: 0 cards 
+		Table Cards (0) 
+		Your Hand (0)
+	`
+	actual := visualizeTemplate(doc)
+	assert.Equal(t, normalizeWhitespace(expected), actual)
+}
+
+func TestDisabledPlayArea(t *testing.T) {
+	// Arrange - Test when play area is disabled
+	model := domain.NewUIModel()
+	model.GameInProgress = true
+	model.ShowNewGameButton = false
+	model.GamePrompt = "Your turn."
+
+	model.TableCards = []domain.Card{
+		{Suit: domain.Coppe, Rank: domain.Sette},
+	}
+	model.PlayerHand = []domain.Card{
+		{Suit: domain.Spade, Rank: domain.Tre},
+	}
+
+	// Selected card that doesn't match any table card
+	model.SelectedCard = domain.Card{Suit: domain.Spade, Rank: domain.Tre}
+	model.CanPlaySelectedCard = false // Should show disabled play area
+
+	// Act
+	doc := renderTemplate(t, model)
+
+	// Assert
+	assert.Contains(t, doc, `class="play-area disabled"`)
+	assert.Contains(t, doc, `You must capture a card with the same rank`)
 }
 
 func renderTemplate(t *testing.T, model domain.UIModel) string {

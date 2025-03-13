@@ -1,0 +1,73 @@
+---
+description: Use visualization testing for HTML templates to simplify assertions and focus on template logic
+globs: **/*_test.go
+---
+
+# HTML Template Visualization Testing
+
+## Context
+- HTML templates contain complex markup that's difficult to test directly
+- Template logic (conditionals, loops) needs thorough testing
+- Direct HTML assertions are brittle and hard to maintain
+
+## Requirements
+- Convert HTML output to simplified text representation for testing
+- Add data-test-icon attributes to elements for easier identification
+- Use a visualizeTemplate function to transform HTML into readable text
+- Test all conditional logic paths in templates
+- Use table-driven tests for multiple template states
+- Assert against normalized text output instead of raw HTML
+- Format expected output over multiple lines for readability
+
+## Examples
+<example>
+// Good: Testing template with visualization
+func TestCardSelection(t *testing.T) {
+	// Arrange
+	model := domain.NewUIModel()
+	model.SelectedCard = Card{Suit: "Spade", Rank: 7}
+	
+	// Act
+	doc := renderTemplate(t, model)
+	
+	// Assert - Using visualization with multi-line format
+	expected := `
+		Your turn. 
+		Table Cards (1) [👆 Card-Name] 
+		Your Hand (1) [👆 Selected-Card]
+	`
+	actual := visualizeTemplate(doc)
+	assert.Equal(t, normalizeWhitespace(expected), actual)
+}
+
+// Visualization helper
+func visualizeTemplate(htmlContent string) string {
+	doc, err := html.Parse(strings.NewReader(htmlContent))
+	if err != nil {
+		return fmt.Sprintf("Error parsing HTML: %v", err)
+	}
+
+	var output strings.Builder
+	skipElements := []string{"style", "script", "head"}
+	visualizeNode(doc, &output, 0, skipElements)
+
+	return normalizeWhitespace(output.String())
+}
+</example>
+
+<example type="invalid">
+// Bad: Testing template with direct HTML assertions
+func TestCardSelection(t *testing.T) {
+	// Arrange
+	model := domain.NewUIModel()
+	model.SelectedCard = Card{Suit: "Spade", Rank: 7}
+	
+	// Act
+	doc := renderTemplate(t, model)
+	
+	// Assert - Brittle direct HTML assertions
+	assert.Contains(t, doc, `<div class="card spade selected">`)
+	assert.Contains(t, doc, `<div class="card-rank">7</div>`)
+	assert.Contains(t, doc, `<div class="card-suit">Sette di Spade</div>`)
+}
+</example> 
