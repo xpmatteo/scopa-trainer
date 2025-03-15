@@ -16,148 +16,7 @@ import (
 	"github.com/xpmatteo/scopa-trainer/pkg/domain"
 )
 
-func TestWelcomeScreen(t *testing.T) {
-	// Arrange
-	model := domain.NewUIModel()
-
-	// Act
-	doc := renderTemplate(t, model)
-
-	// Assert
-	expected := `
---- Game Prompt ---
-Welcome to Scopa Trainer! Click 'New Game' to start playing. [👆 New Game]
-`
-	actual := visualizeTemplate(doc)
-	assert.Equal(t, normalizeWhitespace(expected), actual)
-}
-
-func TestGameInProgress_PlayerTurn(t *testing.T) {
-	// Given a simplified game in progress model
-	model := domain.NewUIModel()
-	model.GameInProgress = true
-	model.ShowNewGameButton = false
-	model.GamePrompt = "Your turn."
-	model.PlayerTurn = true
-
-	// With one card on the table and one in hand
-	model.TableCards = []domain.Card{
-		{Suit: domain.Coppe, Rank: domain.Asso},
-	}
-	model.PlayerHand = []domain.Card{
-		{Suit: domain.Denari, Rank: domain.Tre},
-	}
-
-	// Act
-	doc := renderTemplate(t, model)
-
-	// Assert
-	expected := `
---- Game Prompt ---
-Your turn.
-
---- Game Stats ---
-Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
-
---- Table Cards ---
-Table Cards (1)
-[👆 Asso-di-Coppe]
-
---- Player Hand ---
-Your Hand (1)
-[👆 Tre-di-Denari]
-`
-	actual := visualizeTemplate(doc)
-	assert.Equal(t, normalizeWhitespace(expected), actual)
-}
-
-func TestCardSelection_WithCapturableCard(t *testing.T) {
-	// Arrange
-	model := domain.NewUIModel()
-	model.GameInProgress = true
-	model.ShowNewGameButton = false
-	model.GamePrompt = "Your turn."
-	model.PlayerTurn = true
-
-	// With matching cards on table and in hand (same rank)
-	model.TableCards = []domain.Card{
-		{Suit: domain.Coppe, Rank: domain.Tre},
-		{Suit: domain.Bastoni, Rank: domain.Quattro},
-	}
-	model.PlayerHand = []domain.Card{
-		{Suit: domain.Denari, Rank: domain.Tre}, // This matches the Tre on the table
-	}
-
-	// Selected card that matches a table card
-	model.SelectedCard = domain.Card{Suit: domain.Denari, Rank: domain.Tre}
-	model.CanPlaySelectedCard = false // Should show capture message
-
-	// Act
-	doc := renderTemplate(t, model)
-
-	// Assert
-	expected := `
---- Game Prompt ---
-Your turn.
-
---- Game Stats ---
-Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
-
---- Table Cards ---
-Table Cards (2)
-[👆 Tre-di-Coppe ⭐] [👆 Quattro-di-Bastoni] [👆 You must capture a card with the same rank]
-
---- Player Hand ---
-Your Hand (1)
-[👆 Tre-di-Denari ✓]
-`
-	actual := visualizeTemplate(doc)
-	assert.Equal(t, normalizeWhitespace(expected), actual)
-}
-
-func TestCardSelection_CanPlayToTable(t *testing.T) {
-	// Arrange
-	model := domain.NewUIModel()
-	model.GameInProgress = true
-	model.ShowNewGameButton = false
-	model.GamePrompt = "Your turn."
-	model.PlayerTurn = true
-
-	// With non-matching cards on table
-	model.TableCards = []domain.Card{
-		{Suit: domain.Coppe, Rank: domain.Quattro},
-	}
-	model.PlayerHand = []domain.Card{
-		{Suit: domain.Denari, Rank: domain.Tre},
-	}
-
-	// Selected card that doesn't match any table card
-	model.SelectedCard = domain.Card{Suit: domain.Denari, Rank: domain.Tre}
-	model.CanPlaySelectedCard = true // Should show play to table message
-
-	// Act
-	doc := renderTemplate(t, model)
-
-	// Assert
-	expected := `
---- Game Prompt ---
-Your turn.
-
---- Game Stats ---
-Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
-
---- Table Cards ---
-Table Cards (1)
-[👆 Quattro-di-Coppe] [👆 Click here to play the selected card to the table]
-
---- Player Hand ---
-Your Hand (1)
-[👆 Tre-di-Denari ✓]
-`
-	actual := visualizeTemplate(doc)
-	assert.Equal(t, normalizeWhitespace(expected), actual)
-}
-
+// TestParseTemplates tests the template parsing functionality
 func TestParseTemplates(t *testing.T) {
 	// Test that the template parser works correctly
 	templ := ParseTemplates("../../../../templates/game.html")
@@ -188,12 +47,155 @@ func TestParseTemplates(t *testing.T) {
 	assert.Contains(t, buf.String(), `class="card coppe"`)
 }
 
+// TestGameStates_TableDriven tests various UI states using a table-driven approach
 func TestGameStates_TableDriven(t *testing.T) {
 	tests := []struct {
 		name     string
 		model    domain.UIModel
 		expected string
 	}{
+		{
+			name: "welcome screen",
+			model: domain.UIModel{
+				GamePrompt:        "Welcome to Scopa Trainer! Click 'New Game' to start playing.",
+				ShowNewGameButton: true,
+				GameInProgress:    false,
+				PlayerTurn:        false,
+				SelectedCard:      domain.NO_CARD_SELECTED,
+			},
+			expected: `
+--- Game Prompt ---
+Welcome to Scopa Trainer! Click 'New Game' to start playing. [👆 New Game]
+`,
+		},
+		{
+			name: "game in progress - player turn",
+			model: domain.UIModel{
+				GamePrompt: "Your turn.",
+				TableCards: []domain.Card{
+					{Suit: domain.Coppe, Rank: domain.Asso},
+				},
+				PlayerHand: []domain.Card{
+					{Suit: domain.Denari, Rank: domain.Tre},
+				},
+				GameInProgress:    true,
+				PlayerTurn:        true,
+				SelectedCard:      domain.NO_CARD_SELECTED,
+				ShowNewGameButton: false,
+			},
+			expected: `
+--- Game Prompt ---
+Your turn.
+
+--- Game Stats ---
+Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
+
+--- Table Cards ---
+Table Cards (1)
+[👆 Asso-di-Coppe]
+
+--- Player Hand ---
+Your Hand (1)
+[👆 Tre-di-Denari]
+`,
+		},
+		{
+			name: "card selection with capturable card",
+			model: domain.UIModel{
+				GamePrompt: "Your turn.",
+				TableCards: []domain.Card{
+					{Suit: domain.Coppe, Rank: domain.Tre},
+					{Suit: domain.Bastoni, Rank: domain.Quattro},
+				},
+				PlayerHand: []domain.Card{
+					{Suit: domain.Denari, Rank: domain.Tre}, // This matches the Tre on the table
+				},
+				GameInProgress:      true,
+				PlayerTurn:          true,
+				SelectedCard:        domain.Card{Suit: domain.Denari, Rank: domain.Tre},
+				CanPlaySelectedCard: false, // Should show capture message
+				ShowNewGameButton:   false,
+			},
+			expected: `
+--- Game Prompt ---
+Your turn.
+
+--- Game Stats ---
+Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
+
+--- Table Cards ---
+Table Cards (2)
+[👆 Tre-di-Coppe ⭐] [👆 Quattro-di-Bastoni] [👆 You must capture a card with the same rank]
+
+--- Player Hand ---
+Your Hand (1)
+[👆 Tre-di-Denari ✓]
+`,
+		},
+		{
+			name: "card selection can play to table",
+			model: domain.UIModel{
+				GamePrompt: "Your turn.",
+				TableCards: []domain.Card{
+					{Suit: domain.Coppe, Rank: domain.Quattro},
+				},
+				PlayerHand: []domain.Card{
+					{Suit: domain.Denari, Rank: domain.Tre},
+				},
+				GameInProgress:      true,
+				PlayerTurn:          true,
+				SelectedCard:        domain.Card{Suit: domain.Denari, Rank: domain.Tre},
+				CanPlaySelectedCard: true, // Should show play to table message
+				ShowNewGameButton:   false,
+			},
+			expected: `
+--- Game Prompt ---
+Your turn.
+
+--- Game Stats ---
+Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
+
+--- Table Cards ---
+Table Cards (1)
+[👆 Quattro-di-Coppe] [👆 Click here to play the selected card to the table]
+
+--- Player Hand ---
+Your Hand (1)
+[👆 Tre-di-Denari ✓]
+`,
+		},
+		{
+			name: "disabled play area",
+			model: domain.UIModel{
+				GamePrompt: "Your turn.",
+				TableCards: []domain.Card{
+					{Suit: domain.Coppe, Rank: domain.Sette},
+				},
+				PlayerHand: []domain.Card{
+					{Suit: domain.Spade, Rank: domain.Tre},
+				},
+				GameInProgress:      true,
+				PlayerTurn:          true,
+				SelectedCard:        domain.Card{Suit: domain.Spade, Rank: domain.Tre},
+				CanPlaySelectedCard: false,
+				ShowNewGameButton:   false,
+			},
+			expected: `
+--- Game Prompt ---
+Your turn.
+
+--- Game Stats ---
+Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
+
+--- Table Cards ---
+Table Cards (1)
+[👆 Sette-di-Coppe] [👆 You must capture a card with the same rank]
+
+--- Player Hand ---
+Your Hand (1)
+[👆 Tre-di-Spade ✓]
+`,
+		},
 		{
 			name: "empty table with multiple cards in hand",
 			model: domain.UIModel{
@@ -384,31 +386,6 @@ Quattro-di-Spade disabled Cinque-di-Bastoni disabled
 			assert.Equal(t, normalizeWhitespace(test.expected), actual)
 		})
 	}
-}
-
-func TestDisabledPlayArea(t *testing.T) {
-	// Arrange - Test when play area is disabled
-	model := domain.UIModel{
-		GamePrompt: "Your turn.",
-		TableCards: []domain.Card{
-			{Suit: domain.Coppe, Rank: domain.Sette},
-		},
-		PlayerHand: []domain.Card{
-			{Suit: domain.Spade, Rank: domain.Tre},
-		},
-		GameInProgress:      true,
-		PlayerTurn:          true,
-		SelectedCard:        domain.Card{Suit: domain.Spade, Rank: domain.Tre},
-		CanPlaySelectedCard: false,
-		ShowNewGameButton:   false,
-	}
-
-	// Act
-	doc := renderTemplate(t, model)
-
-	// Assert
-	assert.Contains(t, doc, `class="play-area disabled"`)
-	assert.Contains(t, doc, `You must capture a card with the same rank`)
 }
 
 func renderTemplate(t *testing.T, model domain.UIModel) string {

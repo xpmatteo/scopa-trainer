@@ -56,6 +56,6 @@ Started at 189, now at 194 -- 5 requests.
 Started at 213
 Improved the template tests to make them more readable and make failures easier to fix
 
-At 214: implement the button to make the AI play its turn.
+At 214: implement the button to make the AI play its turn.  Had to insist on simplifying the template tests, we arrived at 221.
 
 
