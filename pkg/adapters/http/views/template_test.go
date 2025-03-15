@@ -386,6 +386,50 @@ func TestDisabledPlayArea(t *testing.T) {
 	assert.Contains(t, doc, `You must capture a card with the same rank`)
 }
 
+func TestAITurn_DisabledPlayerButtons(t *testing.T) {
+	// Arrange - Test when it's AI's turn
+	model := domain.NewUIModel()
+	model.GameInProgress = true
+	model.ShowNewGameButton = false
+	model.GamePrompt = "AI is thinking..."
+	model.PlayerTurn = false // AI's turn
+
+	// Add cards to the table and player's hand
+	model.TableCards = []domain.Card{
+		{Suit: domain.Coppe, Rank: domain.Sette},
+		{Suit: domain.Denari, Rank: domain.Tre},
+	}
+	model.PlayerHand = []domain.Card{
+		{Suit: domain.Spade, Rank: domain.Quattro},
+		{Suit: domain.Bastoni, Rank: domain.Cinque},
+	}
+
+	// Act
+	doc := renderTemplate(t, model)
+
+	// Assert
+	expected := `
+--- Game Prompt ---
+AI is thinking...
+
+--- Game Stats ---
+Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
+
+--- AI Turn ---
+[👆 Let AI Play Its Turn]
+
+--- Table Cards ---
+Table Cards (2)
+Sette-di-Coppe disabled Tre-di-Denari disabled
+
+--- Player Hand ---
+Your Hand (2)
+Quattro-di-Spade disabled Cinque-di-Bastoni disabled
+`
+	actual := visualizeTemplate(doc)
+	assert.Equal(t, normalizeWhitespace(expected), actual)
+}
+
 func renderTemplate(t *testing.T, model domain.UIModel) string {
 	templ := ParseTemplates("../../../../templates/game.html")
 
@@ -500,6 +544,7 @@ func visualizeNode(n *html.Node, output *strings.Builder, depth int, skipElement
 		var onClickValue string
 		var isSelected bool
 		var isCapturable bool
+		var isDisabled bool
 
 		for _, attr := range n.Attr {
 			if attr.Key == "data-test-icon" {
@@ -517,6 +562,9 @@ func visualizeNode(n *html.Node, output *strings.Builder, depth int, skipElement
 				if strings.Contains(attr.Val, "capturable") {
 					isCapturable = true
 				}
+				if strings.Contains(attr.Val, "disabled") {
+					isDisabled = true
+				}
 			}
 		}
 
@@ -529,6 +577,9 @@ func visualizeNode(n *html.Node, output *strings.Builder, depth int, skipElement
 			if isCapturable {
 				indicators += "⭐" // Star for capturable
 			}
+			if isDisabled {
+				indicators += " disabled" // Text indicator for disabled
+			}
 
 			if indicators != "" {
 				output.WriteString(fmt.Sprintf("[👆 %s %s] ", testIcon, indicators))
@@ -537,12 +588,20 @@ func visualizeNode(n *html.Node, output *strings.Builder, depth int, skipElement
 			}
 			return
 		} else if testIcon != "" {
-			output.WriteString(testIcon)
-			output.WriteString(" ")
+			if isDisabled {
+				output.WriteString(fmt.Sprintf("%s disabled ", testIcon))
+			} else {
+				output.WriteString(testIcon)
+				output.WriteString(" ")
+			}
 			return
 		} else if hasOnClick {
 			textContent := extractTextContent(n)
-			output.WriteString(fmt.Sprintf("[👆 %s] ", textContent))
+			if isDisabled {
+				output.WriteString(fmt.Sprintf("[👆 %s disabled] ", textContent))
+			} else {
+				output.WriteString(fmt.Sprintf("[👆 %s] ", textContent))
+			}
 			return
 		}
 	} else if n.Type == html.TextNode {

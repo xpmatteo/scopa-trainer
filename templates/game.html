@@ -65,6 +65,10 @@
             box-shadow: 0 8px 16px rgba(0,0,0,0.3);
             border: 2px solid yellow;
         }
+        .card.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
         .card.coppe { color: blue; }
         .card.denari { color: gold; }
         .card.bastoni { color: green; }
@@ -189,7 +193,7 @@
             <h2>Table Cards ({{len .TableCards}})</h2>
             <div style="display: flex; flex-wrap: wrap;">
                 {{range .TableCards}}
-                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)}}capturable{{end}}" onclick="selectCard('{{.Suit}}', '{{.Value}}')">
+                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)}}capturable{{end}} {{if not $.PlayerTurn}}disabled{{end}}" {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
                     <div class="card-rank">{{.Rank}}</div>
                     <div class="card-suit">{{.Name}} di {{.Suit}}</div>
                 </div>
@@ -198,7 +202,7 @@
 
             {{if ne .SelectedCard.Rank 0}}
                 {{if .CanPlaySelectedCard}}
-                <div class="play-area" onclick="playCard()">
+                <div class="play-area {{if not $.PlayerTurn}}disabled{{end}}" {{if $.PlayerTurn}}onclick="playCard()"{{end}}>
                     <p>Click here to play the selected card to the table</p>
                 </div>
                 {{else}}
@@ -215,7 +219,7 @@
             <h2>Your Hand ({{len .PlayerHand}})</h2>
             <div style="display: flex; flex-wrap: wrap;">
                 {{range .PlayerHand}}
-                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if eq . $.SelectedCard}}selected{{end}}" onclick="selectCard('{{.Suit}}', '{{.Value}}')">
+                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if eq . $.SelectedCard}}selected{{end}} {{if not $.PlayerTurn}}disabled{{end}}" {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
                     <div class="card-rank">{{.Rank}}</div>
                     <div class="card-suit">{{.Name}} di {{.Suit}}</div>
                 </div>
