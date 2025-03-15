@@ -196,21 +196,20 @@ func TestGameStates_TableDriven(t *testing.T) {
 	}{
 		{
 			name: "empty table with multiple cards in hand",
-			model: func() domain.UIModel {
-				model := domain.NewUIModel()
-				model.GameInProgress = true
-				model.ShowNewGameButton = false
-				model.GamePrompt = "Your turn."
-				model.PlayerTurn = true
-				model.DeckCount = 30
-				model.TableCards = []domain.Card{} // Empty table
-				model.PlayerHand = []domain.Card{
+			model: domain.UIModel{
+				GamePrompt: "Your turn.",
+				TableCards: []domain.Card{},
+				PlayerHand: []domain.Card{
 					{Suit: domain.Denari, Rank: domain.Re},
 					{Suit: domain.Coppe, Rank: domain.Cavallo},
 					{Suit: domain.Bastoni, Rank: domain.Fante},
-				}
-				return model
-			}(),
+				},
+				GameInProgress:    true,
+				PlayerTurn:        true,
+				SelectedCard:      domain.NO_CARD_SELECTED,
+				DeckCount:         30,
+				ShowNewGameButton: false,
+			},
 			expected: `
 --- Game Prompt ---
 Your turn.
@@ -228,27 +227,25 @@ Your Hand (3)
 		},
 		{
 			name: "multiple cards on table with same rank as hand card",
-			model: func() domain.UIModel {
-				model := domain.NewUIModel()
-				model.GameInProgress = true
-				model.ShowNewGameButton = false
-				model.GamePrompt = "Your turn."
-				model.PlayerTurn = true
-				model.DeckCount = 20
-				model.PlayerCaptureCount = 5
-				model.AICaptureCount = 3
-				model.TableCards = []domain.Card{
+			model: domain.UIModel{
+				GamePrompt: "Your turn.",
+				TableCards: []domain.Card{
 					{Suit: domain.Denari, Rank: domain.Sette},
 					{Suit: domain.Coppe, Rank: domain.Sette},
 					{Suit: domain.Bastoni, Rank: domain.Due},
-				}
-				model.PlayerHand = []domain.Card{
+				},
+				PlayerHand: []domain.Card{
 					{Suit: domain.Spade, Rank: domain.Sette},
-				}
-				model.SelectedCard = domain.Card{Suit: domain.Spade, Rank: domain.Sette}
-				model.CanPlaySelectedCard = false
-				return model
-			}(),
+				},
+				GameInProgress:      true,
+				PlayerTurn:          true,
+				SelectedCard:        domain.Card{Suit: domain.Spade, Rank: domain.Sette},
+				CanPlaySelectedCard: false,
+				DeckCount:           20,
+				PlayerCaptureCount:  5,
+				AICaptureCount:      3,
+				ShowNewGameButton:   false,
+			},
 			expected: `
 --- Game Prompt ---
 Your turn.
@@ -267,25 +264,24 @@ Your Hand (1)
 		},
 		{
 			name: "game with captures and scores",
-			model: func() domain.UIModel {
-				model := domain.NewUIModel()
-				model.GameInProgress = true
-				model.ShowNewGameButton = false
-				model.GamePrompt = "AI played Fante di Spade and captured Fante di Denari."
-				model.PlayerTurn = true
-				model.DeckCount = 10
-				model.PlayerCaptureCount = 12
-				model.AICaptureCount = 14
-				model.TableCards = []domain.Card{
+			model: domain.UIModel{
+				GamePrompt: "AI played Fante di Spade and captured Fante di Denari.",
+				TableCards: []domain.Card{
 					{Suit: domain.Coppe, Rank: domain.Cinque},
 					{Suit: domain.Bastoni, Rank: domain.Asso},
-				}
-				model.PlayerHand = []domain.Card{
+				},
+				PlayerHand: []domain.Card{
 					{Suit: domain.Spade, Rank: domain.Tre},
 					{Suit: domain.Denari, Rank: domain.Cinque},
-				}
-				return model
-			}(),
+				},
+				GameInProgress:     true,
+				PlayerTurn:         true,
+				SelectedCard:       domain.NO_CARD_SELECTED,
+				DeckCount:          10,
+				PlayerCaptureCount: 12,
+				AICaptureCount:     14,
+				ShowNewGameButton:  false,
+			},
 			expected: `
 --- Game Prompt ---
 AI played Fante di Spade and captured Fante di Denari.
@@ -304,31 +300,26 @@ Your Hand (2)
 		},
 		{
 			name: "selected card with capturable cards",
-			model: func() domain.UIModel {
-				model := domain.NewUIModel()
-				model.GameInProgress = true
-				model.ShowNewGameButton = false
-				model.GamePrompt = "Your turn."
-				model.PlayerTurn = true
-				model.DeckCount = 15
-				model.PlayerCaptureCount = 8
-				model.AICaptureCount = 7
-				// Multiple cards on table with same rank
-				model.TableCards = []domain.Card{
+			model: domain.UIModel{
+				GamePrompt: "Your turn.",
+				TableCards: []domain.Card{
 					{Suit: domain.Coppe, Rank: domain.Sette},
 					{Suit: domain.Denari, Rank: domain.Sette},
 					{Suit: domain.Bastoni, Rank: domain.Due},
-				}
-				// Cards in hand
-				model.PlayerHand = []domain.Card{
+				},
+				PlayerHand: []domain.Card{
 					{Suit: domain.Spade, Rank: domain.Sette},
 					{Suit: domain.Denari, Rank: domain.Re},
-				}
-				// Selected card that matches multiple table cards
-				model.SelectedCard = domain.Card{Suit: domain.Spade, Rank: domain.Sette}
-				model.CanPlaySelectedCard = false // Should show capture message
-				return model
-			}(),
+				},
+				GameInProgress:      true,
+				PlayerTurn:          true,
+				SelectedCard:        domain.Card{Suit: domain.Spade, Rank: domain.Sette},
+				CanPlaySelectedCard: false,
+				DeckCount:           15,
+				PlayerCaptureCount:  8,
+				AICaptureCount:      7,
+				ShowNewGameButton:   false,
+			},
 			expected: `
 --- Game Prompt ---
 Your turn.
@@ -343,6 +334,42 @@ Table Cards (3)
 --- Player Hand ---
 Your Hand (2)
 [👆 Sette-di-Spade ✓] [👆 Re-di-Denari]
+`,
+		},
+		{
+			name: "AI turn with disabled player buttons",
+			model: domain.UIModel{
+				GamePrompt: "AI is thinking...",
+				TableCards: []domain.Card{
+					{Suit: domain.Coppe, Rank: domain.Sette},
+					{Suit: domain.Denari, Rank: domain.Tre},
+				},
+				PlayerHand: []domain.Card{
+					{Suit: domain.Spade, Rank: domain.Quattro},
+					{Suit: domain.Bastoni, Rank: domain.Cinque},
+				},
+				GameInProgress:    true,
+				PlayerTurn:        false,
+				SelectedCard:      domain.NO_CARD_SELECTED,
+				ShowNewGameButton: false,
+			},
+			expected: `
+--- Game Prompt ---
+AI is thinking...
+
+--- Game Stats ---
+Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
+
+--- AI Turn ---
+[👆 Let AI Play Its Turn]
+
+--- Table Cards ---
+Table Cards (2)
+Sette-di-Coppe disabled Tre-di-Denari disabled
+
+--- Player Hand ---
+Your Hand (2)
+Quattro-di-Spade disabled Cinque-di-Bastoni disabled
 `,
 		},
 	}
@@ -361,22 +388,20 @@ Your Hand (2)
 
 func TestDisabledPlayArea(t *testing.T) {
 	// Arrange - Test when play area is disabled
-	model := domain.NewUIModel()
-	model.GameInProgress = true
-	model.ShowNewGameButton = false
-	model.GamePrompt = "Your turn."
-	model.PlayerTurn = true
-
-	model.TableCards = []domain.Card{
-		{Suit: domain.Coppe, Rank: domain.Sette},
+	model := domain.UIModel{
+		GamePrompt: "Your turn.",
+		TableCards: []domain.Card{
+			{Suit: domain.Coppe, Rank: domain.Sette},
+		},
+		PlayerHand: []domain.Card{
+			{Suit: domain.Spade, Rank: domain.Tre},
+		},
+		GameInProgress:      true,
+		PlayerTurn:          true,
+		SelectedCard:        domain.Card{Suit: domain.Spade, Rank: domain.Tre},
+		CanPlaySelectedCard: false,
+		ShowNewGameButton:   false,
 	}
-	model.PlayerHand = []domain.Card{
-		{Suit: domain.Spade, Rank: domain.Tre},
-	}
-
-	// Selected card that doesn't match any table card
-	model.SelectedCard = domain.Card{Suit: domain.Spade, Rank: domain.Tre}
-	model.CanPlaySelectedCard = false // Should show disabled play area
 
 	// Act
 	doc := renderTemplate(t, model)
@@ -384,50 +409,6 @@ func TestDisabledPlayArea(t *testing.T) {
 	// Assert
 	assert.Contains(t, doc, `class="play-area disabled"`)
 	assert.Contains(t, doc, `You must capture a card with the same rank`)
-}
-
-func TestAITurn_DisabledPlayerButtons(t *testing.T) {
-	// Arrange - Test when it's AI's turn
-	model := domain.NewUIModel()
-	model.GameInProgress = true
-	model.ShowNewGameButton = false
-	model.GamePrompt = "AI is thinking..."
-	model.PlayerTurn = false // AI's turn
-
-	// Add cards to the table and player's hand
-	model.TableCards = []domain.Card{
-		{Suit: domain.Coppe, Rank: domain.Sette},
-		{Suit: domain.Denari, Rank: domain.Tre},
-	}
-	model.PlayerHand = []domain.Card{
-		{Suit: domain.Spade, Rank: domain.Quattro},
-		{Suit: domain.Bastoni, Rank: domain.Cinque},
-	}
-
-	// Act
-	doc := renderTemplate(t, model)
-
-	// Assert
-	expected := `
---- Game Prompt ---
-AI is thinking...
-
---- Game Stats ---
-Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
-
---- AI Turn ---
-[👆 Let AI Play Its Turn]
-
---- Table Cards ---
-Table Cards (2)
-Sette-di-Coppe disabled Tre-di-Denari disabled
-
---- Player Hand ---
-Your Hand (2)
-Quattro-di-Spade disabled Cinque-di-Bastoni disabled
-`
-	actual := visualizeTemplate(doc)
-	assert.Equal(t, normalizeWhitespace(expected), actual)
 }
 
 func renderTemplate(t *testing.T, model domain.UIModel) string {
