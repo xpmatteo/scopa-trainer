@@ -135,6 +135,9 @@ func (s *GameService) SelectCard(suit domain.Suit, rank domain.Rank) {
 
 			// Switch turn to AI
 			s.gameState.PlayerTurn = false
+
+			// Check if new cards need to be dealt
+			s.DealNewCardsIfNeeded()
 		}
 		// If ranks don't match, keep the hand card selected
 		return
@@ -175,6 +178,40 @@ func (s *GameService) PlaySelectedCard() {
 
 	// Switch turn to AI
 	s.gameState.PlayerTurn = false
+
+	// Check if new cards need to be dealt
+	s.DealNewCardsIfNeeded()
+}
+
+// DealNewCardsIfNeeded checks if hands are empty and deals new cards if needed
+// Returns true if new cards were dealt
+func (s *GameService) DealNewCardsIfNeeded() bool {
+	// If no game in progress, do nothing
+	if s.gameState == nil {
+		return false
+	}
+
+	playerHand := s.gameState.Deck.CardsAt(domain.PlayerHandLocation)
+	aiHand := s.gameState.Deck.CardsAt(domain.AIHandLocation)
+	deckCards := s.gameState.Deck.CardsAt(domain.DeckLocation)
+
+	// Check if both hands are empty and there are cards in the deck
+	if len(playerHand) == 0 && len(aiHand) == 0 && len(deckCards) > 0 {
+		// Calculate how many cards to deal to each player
+		cardsPerPlayer := 10
+		if len(deckCards) < 20 {
+			// If fewer than 20 cards, distribute evenly
+			cardsPerPlayer = len(deckCards) / 2
+		}
+
+		// Deal cards to each player
+		s.gameState.Deck.DealCards(domain.DeckLocation, domain.PlayerHandLocation, cardsPerPlayer)
+		s.gameState.Deck.DealCards(domain.DeckLocation, domain.AIHandLocation, cardsPerPlayer)
+
+		return true
+	}
+
+	return false
 }
 
 // PlayAITurn handles the AI's turn
@@ -215,4 +252,7 @@ func (s *GameService) PlayAITurn() {
 
 	// Switch turn to player
 	s.gameState.PlayerTurn = true
+
+	// Check if new cards need to be dealt
+	s.DealNewCardsIfNeeded()
 }

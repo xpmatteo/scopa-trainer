@@ -53,9 +53,15 @@ func TestCardCountsAfterCapture(t *testing.T) {
 			if card.Rank == tableCard.Rank {
 				service.gameState.Deck.MoveCard(card, domain.DeckLocation, domain.TableLocation)
 				tableCard = card // Use the actual card from the deck
+				found = true
 				break
 			}
 		}
+	}
+
+	// Ensure we found a matching card
+	if !found {
+		t.Fatalf("Could not find a card with rank %v to put on the table", selectedCard.Rank)
 	}
 
 	// Get the initial state
