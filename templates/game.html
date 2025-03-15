@@ -123,67 +123,75 @@
     </style>
 </head>
 <body>
-    <div class="game-prompt">
-        {{.GamePrompt}}
-    </div>
+    <section data-section="Game Prompt">
+        <div class="game-prompt">
+            {{.GamePrompt}}
+        </div>
 
-    {{if .ShowNewGameButton}}
-    <form action="/new-game" method="post">
-        <button type="submit" class="new-game-button">New Game</button>
-    </form>
-    {{end}}
+        {{if .ShowNewGameButton}}
+        <form action="/new-game" method="post">
+            <button type="submit" class="new-game-button">New Game</button>
+        </form>
+        {{end}}
+    </section>
 
     {{if .GameInProgress}}
-    <div class="game-stats">
-        <div class="stat-item">
-            <span class="stat-label">Deck:</span>
-            <span class="stat-value">{{.DeckCount}} cards</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-label">Your Captures:</span>
-            <span class="stat-value">{{.PlayerCaptureCount}} cards</span>
-        </div>
-        <div class="stat-item">
-            <span class="stat-label">AI Captures:</span>
-            <span class="stat-value">{{.AICaptureCount}} cards</span>
-        </div>
-    </div>
-
-    <div class="card-area table-area">
-        <h2>Table Cards ({{len .TableCards}})</h2>
-        <div style="display: flex; flex-wrap: wrap;">
-            {{range .TableCards}}
-            <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)}}capturable{{end}}" onclick="selectCard('{{.Suit}}', '{{.Value}}')">
-                <div class="card-rank">{{.Rank}}</div>
-                <div class="card-suit">{{.Name}} di {{.Suit}}</div>
+    <section data-section="Game Stats">
+        <div class="game-stats">
+            <div class="stat-item">
+                <span class="stat-label">Deck:</span>
+                <span class="stat-value">{{.DeckCount}} cards</span>
             </div>
+            <div class="stat-item">
+                <span class="stat-label">Your Captures:</span>
+                <span class="stat-value">{{.PlayerCaptureCount}} cards</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">AI Captures:</span>
+                <span class="stat-value">{{.AICaptureCount}} cards</span>
+            </div>
+        </div>
+    </section>
+
+    <section data-section="Table Cards">
+        <div class="card-area table-area">
+            <h2>Table Cards ({{len .TableCards}})</h2>
+            <div style="display: flex; flex-wrap: wrap;">
+                {{range .TableCards}}
+                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)}}capturable{{end}}" onclick="selectCard('{{.Suit}}', '{{.Value}}')">
+                    <div class="card-rank">{{.Rank}}</div>
+                    <div class="card-suit">{{.Name}} di {{.Suit}}</div>
+                </div>
+                {{end}}
+            </div>
+
+            {{if ne .SelectedCard.Rank 0}}
+                {{if .CanPlaySelectedCard}}
+                <div class="play-area" onclick="playCard()">
+                    <p>Click here to play the selected card to the table</p>
+                </div>
+                {{else}}
+                <div class="play-area disabled">
+                    <p>You must capture a card with the same rank</p>
+                </div>
+                {{end}}
             {{end}}
         </div>
+    </section>
 
-        {{if ne .SelectedCard.Rank 0}}
-            {{if .CanPlaySelectedCard}}
-            <div class="play-area" onclick="playCard()">
-                <p>Click here to play the selected card to the table</p>
+    <section data-section="Player Hand">
+        <div class="card-area hand-area">
+            <h2>Your Hand ({{len .PlayerHand}})</h2>
+            <div style="display: flex; flex-wrap: wrap;">
+                {{range .PlayerHand}}
+                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if eq . $.SelectedCard}}selected{{end}}" onclick="selectCard('{{.Suit}}', '{{.Value}}')">
+                    <div class="card-rank">{{.Rank}}</div>
+                    <div class="card-suit">{{.Name}} di {{.Suit}}</div>
+                </div>
+                {{end}}
             </div>
-            {{else}}
-            <div class="play-area disabled">
-                <p>You must capture a card with the same rank</p>
-            </div>
-            {{end}}
-        {{end}}
-    </div>
-
-    <div class="card-area hand-area">
-        <h2>Your Hand ({{len .PlayerHand}})</h2>
-        <div style="display: flex; flex-wrap: wrap;">
-            {{range .PlayerHand}}
-            <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if eq . $.SelectedCard}}selected{{end}}" onclick="selectCard('{{.Suit}}', '{{.Value}}')">
-                <div class="card-rank">{{.Rank}}</div>
-                <div class="card-suit">{{.Name}} di {{.Suit}}</div>
-            </div>
-            {{end}}
         </div>
-    </div>
+    </section>
     {{end}}
 
     <script>

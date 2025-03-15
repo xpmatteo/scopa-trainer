@@ -25,8 +25,9 @@ func TestWelcomeScreen(t *testing.T) {
 
 	// Assert
 	expected := `
-		Welcome to Scopa Trainer! Click 'New Game' to start playing. 
-		[👆 New Game]`
+--- Game Prompt ---
+Welcome to Scopa Trainer! Click 'New Game' to start playing. [👆 New Game]
+`
 	actual := visualizeTemplate(doc)
 	assert.Equal(t, normalizeWhitespace(expected), actual)
 }
@@ -51,13 +52,20 @@ func TestGameInProgress_PlayerTurn(t *testing.T) {
 
 	// Assert
 	expected := `
-		Your turn. 
-		Deck: 0 cards 
-		Your Captures: 0 cards 
-		AI Captures: 0 cards 
-		Table Cards (1) [👆 Asso-di-Coppe] 
-		Your Hand (1) [👆 Tre-di-Denari]		
-		`
+--- Game Prompt ---
+Your turn.
+
+--- Game Stats ---
+Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
+
+--- Table Cards ---
+Table Cards (1)
+[👆 Asso-di-Coppe]
+
+--- Player Hand ---
+Your Hand (1)
+[👆 Tre-di-Denari]
+`
 	actual := visualizeTemplate(doc)
 	assert.Equal(t, normalizeWhitespace(expected), actual)
 }
@@ -87,14 +95,20 @@ func TestCardSelection_WithCapturableCard(t *testing.T) {
 
 	// Assert
 	expected := `
-		Your turn. 
-		Deck: 0 cards 
-		Your Captures: 0 cards 
-		AI Captures: 0 cards 
-		Table Cards (2) [👆 Tre-di-Coppe ⭐] [👆 Quattro-di-Bastoni] 
-		You must capture a card with the same rank 
-		Your Hand (1) [👆 Tre-di-Denari ✓]
-	`
+--- Game Prompt ---
+Your turn.
+
+--- Game Stats ---
+Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
+
+--- Table Cards ---
+Table Cards (2)
+[👆 Tre-di-Coppe ⭐] [👆 Quattro-di-Bastoni] [👆 You must capture a card with the same rank]
+
+--- Player Hand ---
+Your Hand (1)
+[👆 Tre-di-Denari ✓]
+`
 	actual := visualizeTemplate(doc)
 	assert.Equal(t, normalizeWhitespace(expected), actual)
 }
@@ -123,14 +137,20 @@ func TestCardSelection_CanPlayToTable(t *testing.T) {
 
 	// Assert
 	expected := `
-		Your turn. 
-		Deck: 0 cards 
-		Your Captures: 0 cards 
-		AI Captures: 0 cards 
-		Table Cards (1) [👆 Quattro-di-Coppe] 
-		[👆 Click here to play the selected card to the table] 
-		Your Hand (1) [👆 Tre-di-Denari ✓]
-	`
+--- Game Prompt ---
+Your turn.
+
+--- Game Stats ---
+Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
+
+--- Table Cards ---
+Table Cards (1)
+[👆 Quattro-di-Coppe] [👆 Click here to play the selected card to the table]
+
+--- Player Hand ---
+Your Hand (1)
+[👆 Tre-di-Denari ✓]
+`
 	actual := visualizeTemplate(doc)
 	assert.Equal(t, normalizeWhitespace(expected), actual)
 }
@@ -188,13 +208,19 @@ func TestGameStates_TableDriven(t *testing.T) {
 				return model
 			}(),
 			expected: `
-				Your turn. 
-				Deck: 30 cards 
-				Your Captures: 0 cards 
-				AI Captures: 0 cards 
-				Table Cards (0) 
-				Your Hand (3) [👆 Re-di-Denari] [👆 Cavallo-di-Coppe] [👆 Fante-di-Bastoni]
-			`,
+--- Game Prompt ---
+Your turn.
+
+--- Game Stats ---
+Deck: 30 cards Your Captures: 0 cards AI Captures: 0 cards
+
+--- Table Cards ---
+Table Cards (0)
+
+--- Player Hand ---
+Your Hand (3)
+[👆 Re-di-Denari] [👆 Cavallo-di-Coppe] [👆 Fante-di-Bastoni]
+`,
 		},
 		{
 			name: "multiple cards on table with same rank as hand card",
@@ -219,14 +245,20 @@ func TestGameStates_TableDriven(t *testing.T) {
 				return model
 			}(),
 			expected: `
-				Your turn. 
-				Deck: 20 cards 
-				Your Captures: 5 cards 
-				AI Captures: 3 cards 
-				Table Cards (3) [👆 Sette-di-Denari ⭐] [👆 Sette-di-Coppe ⭐] [👆 Due-di-Bastoni] 
-				You must capture a card with the same rank 
-				Your Hand (1) [👆 Sette-di-Spade ✓]
-			`,
+--- Game Prompt ---
+Your turn.
+
+--- Game Stats ---
+Deck: 20 cards Your Captures: 5 cards AI Captures: 3 cards
+
+--- Table Cards ---
+Table Cards (3)
+[👆 Sette-di-Denari ⭐] [👆 Sette-di-Coppe ⭐] [👆 Due-di-Bastoni] [👆 You must capture a card with the same rank]
+
+--- Player Hand ---
+Your Hand (1)
+[👆 Sette-di-Spade ✓]
+`,
 		},
 		{
 			name: "game with captures and scores",
@@ -249,13 +281,20 @@ func TestGameStates_TableDriven(t *testing.T) {
 				return model
 			}(),
 			expected: `
-				AI played Fante di Spade and captured Fante di Denari. 
-				Deck: 10 cards 
-				Your Captures: 12 cards 
-				AI Captures: 14 cards 
-				Table Cards (2) [👆 Cinque-di-Coppe] [👆 Asso-di-Bastoni] 
-				Your Hand (2) [👆 Tre-di-Spade] [👆 Cinque-di-Denari]
-			`,
+--- Game Prompt ---
+AI played Fante di Spade and captured Fante di Denari.
+
+--- Game Stats ---
+Deck: 10 cards Your Captures: 12 cards AI Captures: 14 cards
+
+--- Table Cards ---
+Table Cards (2)
+[👆 Cinque-di-Coppe] [👆 Asso-di-Bastoni]
+
+--- Player Hand ---
+Your Hand (2)
+[👆 Tre-di-Spade] [👆 Cinque-di-Denari]
+`,
 		},
 		{
 			name: "selected card with capturable cards",
@@ -284,14 +323,20 @@ func TestGameStates_TableDriven(t *testing.T) {
 				return model
 			}(),
 			expected: `
-				Your turn. 
-				Deck: 15 cards 
-				Your Captures: 8 cards 
-				AI Captures: 7 cards 
-				Table Cards (3) [👆 Sette-di-Coppe ⭐] [👆 Sette-di-Denari ⭐] [👆 Due-di-Bastoni] 
-				You must capture a card with the same rank 
-				Your Hand (2) [👆 Sette-di-Spade ✓] [👆 Re-di-Denari]
-			`,
+--- Game Prompt ---
+Your turn.
+
+--- Game Stats ---
+Deck: 15 cards Your Captures: 8 cards AI Captures: 7 cards
+
+--- Table Cards ---
+Table Cards (3)
+[👆 Sette-di-Coppe ⭐] [👆 Sette-di-Denari ⭐] [👆 Due-di-Bastoni] [👆 You must capture a card with the same rank]
+
+--- Player Hand ---
+Your Hand (2)
+[👆 Sette-di-Spade ✓] [👆 Re-di-Denari]
+`,
 		},
 	}
 
@@ -350,7 +395,19 @@ func replaceAll(src, regex, repl string) string {
 }
 
 func normalizeWhitespace(s string) string {
-	return strings.TrimSpace(replaceAll(s, `\s+`, " "))
+	// First, replace all whitespace sequences within lines with a single space
+	inlineNormalized := replaceAll(s, `[^\S\n]+`, " ")
+
+	// Then, replace multiple newlines with a single newline
+	multiNewlineNormalized := replaceAll(inlineNormalized, `\n+`, "\n")
+
+	// Finally, trim leading/trailing whitespace from each line
+	lines := strings.Split(multiNewlineNormalized, "\n")
+	for i, line := range lines {
+		lines[i] = strings.TrimSpace(line)
+	}
+
+	return strings.TrimSpace(strings.Join(lines, "\n"))
 }
 
 // visualizeTemplate returns a string representation of the HTML content
@@ -379,9 +436,54 @@ func visualizeNode(n *html.Node, output *strings.Builder, depth int, skipElement
 		return
 	}
 
-	if n.Type == html.ElementNode && n.Data == "button" {
-		output.WriteString(fmt.Sprintf("[👆 %s] ", extractTextContent(n)))
+	// Add newlines for major UI sections
+	if n.Type == html.ElementNode && n.Data == "section" {
+		// Get section name from data-section attribute
+		var sectionName string
+		for _, attr := range n.Attr {
+			if attr.Key == "data-section" {
+				sectionName = attr.Val
+				break
+			}
+		}
+
+		// Add a newline before the section
+		output.WriteString("\n")
+
+		// If section has a name, add it as a header
+		if sectionName != "" {
+			output.WriteString(fmt.Sprintf("--- %s ---\n", sectionName))
+		}
+
+		// Process children
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			visualizeNode(c, output, depth+1, skipElements)
+		}
+
 		return
+	}
+
+	if n.Type == html.ElementNode && n.Data == "button" {
+		output.WriteString(fmt.Sprintf("[👆 %s]\n", extractTextContent(n)))
+		return
+	}
+
+	// Special handling for play area
+	if n.Type == html.ElementNode && n.Data == "div" {
+		var isPlayArea bool
+		for _, attr := range n.Attr {
+			if attr.Key == "class" && strings.Contains(attr.Val, "play-area") {
+				isPlayArea = true
+				break
+			}
+		}
+
+		if isPlayArea {
+			// Extract the text content
+			text := extractTextContent(n)
+			output.WriteString(fmt.Sprintf("[👆 %s]\n", text))
+			return
+		}
 	}
 
 	if n.Type == html.ElementNode {
@@ -438,7 +540,13 @@ func visualizeNode(n *html.Node, output *strings.Builder, depth int, skipElement
 	} else if n.Type == html.TextNode {
 		text := strings.TrimSpace(n.Data)
 		if text != "" {
-			output.WriteString(text + " ")
+			// Check if this is a heading (h1, h2, etc.)
+			if n.Parent != nil && n.Parent.Type == html.ElementNode &&
+				(n.Parent.Data == "h1" || n.Parent.Data == "h2" || n.Parent.Data == "h3") {
+				output.WriteString(text + "\n")
+			} else {
+				output.WriteString(text + " ")
+			}
 		}
 	}
 

@@ -15,14 +15,17 @@ globs: **/*_test.go
 - Add data-test-icon attributes to elements for easier identification
 - Use a visualizeTemplate function to transform HTML into readable text
 - Visualize element states (selected, disabled, etc.) with symbols (✓, ⭐, etc.)
+- Use <section> elements with data-section attributes to organize UI areas
+- Render sections with clear visual separation and newlines
 - Test all conditional logic paths in templates
 - Use table-driven tests for multiple template states
 - Assert against normalized text output instead of raw HTML
 - Format expected output over multiple lines for readability
+- Preserve newlines in normalized output for better test readability
 
 ## Examples
 <example>
-// Good: Testing template with visualization and state indicators
+// Good: Testing template with visualization, sections, and state indicators
 func TestCardSelection(t *testing.T) {
 	// Arrange
 	model := domain.NewUIModel()
@@ -33,55 +36,54 @@ func TestCardSelection(t *testing.T) {
 	
 	// Assert - Using visualization with multi-line format and state indicators
 	expected := `
-		Your turn. 
-		Table Cards (1) [👆 Card-Name ⭐] 
-		Your Hand (1) [👆 Selected-Card ✓]
+--- Game Prompt ---
+Your turn.
+
+--- Table Cards ---
+Table Cards (1)
+[👆 Card-Name ⭐]
+
+--- Player Hand ---
+Your Hand (1)
+[👆 Selected-Card ✓]
 	`
 	actual := visualizeTemplate(doc)
 	assert.Equal(t, normalizeWhitespace(expected), actual)
 }
 
-// Visualization helper that includes state indicators
-func visualizeNode(n *html.Node, output *strings.Builder, depth int, skipElements []string) {
-	// Skip elements in the skip list
-	if n.Type == html.ElementNode && slices.Contains(skipElements, n.Data) {
-		return
+// HTML template with sections for better organization
+<section data-section="Game Prompt">
+    <div class="game-prompt">{{.GamePrompt}}</div>
+</section>
+
+<section data-section="Table Cards">
+    <div class="card-area">
+        <h2>Table Cards ({{len .TableCards}})</h2>
+        <div>
+            {{range .TableCards}}
+            <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | lower}}">
+                {{.Name}} di {{.Suit}}
+            </div>
+            {{end}}
+        </div>
+    </div>
+</section>
+
+// Visualization helper that preserves newlines and handles sections
+func normalizeWhitespace(s string) string {
+	// First, replace all whitespace sequences within lines with a single space
+	inlineNormalized := replaceAll(s, `[^\S\n]+`, " ")
+	
+	// Then, replace multiple newlines with a single newline
+	multiNewlineNormalized := replaceAll(inlineNormalized, `\n+`, "\n")
+	
+	// Finally, trim leading/trailing whitespace from each line
+	lines := strings.Split(multiNewlineNormalized, "\n")
+	for i, line := range lines {
+		lines[i] = strings.TrimSpace(line)
 	}
-
-	if n.Type == html.ElementNode {
-		var testIcon string
-		var isSelected bool
-		var isCapturable bool
-
-		for _, attr := range n.Attr {
-			if attr.Key == "data-test-icon" {
-				testIcon = attr.Val
-			}
-			if attr.Key == "class" {
-				if strings.Contains(attr.Val, "selected") {
-					isSelected = true
-				}
-				if strings.Contains(attr.Val, "capturable") {
-					isCapturable = true
-				}
-			}
-		}
-
-		// Add visual indicators for element states
-		var indicators string
-		if isSelected {
-			indicators += "✓"  // Checkmark for selected
-		}
-		if isCapturable {
-			indicators += "⭐"  // Star for capturable
-		}
-		
-		if indicators != "" {
-			output.WriteString(fmt.Sprintf("[👆 %s %s] ", testIcon, indicators))
-		} else {
-			output.WriteString(fmt.Sprintf("[👆 %s] ", testIcon))
-		}
-	}
+	
+	return strings.TrimSpace(strings.Join(lines, "\n"))
 }
 </example>
 
