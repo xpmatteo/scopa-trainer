@@ -38,6 +38,7 @@ func TestGameInProgress_PlayerTurn(t *testing.T) {
 	model.GameInProgress = true
 	model.ShowNewGameButton = false
 	model.GamePrompt = "Your turn."
+	model.PlayerTurn = true
 
 	// With one card on the table and one in hand
 	model.TableCards = []domain.Card{
@@ -76,6 +77,7 @@ func TestCardSelection_WithCapturableCard(t *testing.T) {
 	model.GameInProgress = true
 	model.ShowNewGameButton = false
 	model.GamePrompt = "Your turn."
+	model.PlayerTurn = true
 
 	// With matching cards on table and in hand (same rank)
 	model.TableCards = []domain.Card{
@@ -119,6 +121,7 @@ func TestCardSelection_CanPlayToTable(t *testing.T) {
 	model.GameInProgress = true
 	model.ShowNewGameButton = false
 	model.GamePrompt = "Your turn."
+	model.PlayerTurn = true
 
 	// With non-matching cards on table
 	model.TableCards = []domain.Card{
@@ -198,6 +201,7 @@ func TestGameStates_TableDriven(t *testing.T) {
 				model.GameInProgress = true
 				model.ShowNewGameButton = false
 				model.GamePrompt = "Your turn."
+				model.PlayerTurn = true
 				model.DeckCount = 30
 				model.TableCards = []domain.Card{} // Empty table
 				model.PlayerHand = []domain.Card{
@@ -229,6 +233,7 @@ Your Hand (3)
 				model.GameInProgress = true
 				model.ShowNewGameButton = false
 				model.GamePrompt = "Your turn."
+				model.PlayerTurn = true
 				model.DeckCount = 20
 				model.PlayerCaptureCount = 5
 				model.AICaptureCount = 3
@@ -267,6 +272,7 @@ Your Hand (1)
 				model.GameInProgress = true
 				model.ShowNewGameButton = false
 				model.GamePrompt = "AI played Fante di Spade and captured Fante di Denari."
+				model.PlayerTurn = true
 				model.DeckCount = 10
 				model.PlayerCaptureCount = 12
 				model.AICaptureCount = 14
@@ -303,6 +309,7 @@ Your Hand (2)
 				model.GameInProgress = true
 				model.ShowNewGameButton = false
 				model.GamePrompt = "Your turn."
+				model.PlayerTurn = true
 				model.DeckCount = 15
 				model.PlayerCaptureCount = 8
 				model.AICaptureCount = 7
@@ -358,6 +365,7 @@ func TestDisabledPlayArea(t *testing.T) {
 	model.GameInProgress = true
 	model.ShowNewGameButton = false
 	model.GamePrompt = "Your turn."
+	model.PlayerTurn = true
 
 	model.TableCards = []domain.Card{
 		{Suit: domain.Coppe, Rank: domain.Sette},

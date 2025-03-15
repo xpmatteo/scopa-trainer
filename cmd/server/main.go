@@ -1,11 +1,12 @@
 package main
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/xpmatteo/scopa-trainer/pkg/adapters/http/handlers"
 	"github.com/xpmatteo/scopa-trainer/pkg/adapters/http/views"
 	"github.com/xpmatteo/scopa-trainer/pkg/application"
-	"log"
-	"net/http"
 )
 
 func main() {
@@ -19,6 +20,7 @@ func main() {
 	http.HandleFunc("POST /new-game", handlers.NewHandleNewGame(gameService))
 	http.HandleFunc("POST /select-card", handlers.NewHandleSelectCard(gameService))
 	http.HandleFunc("POST /play-card", handlers.NewHandlePlayCard(gameService))
+	http.HandleFunc("POST /ai-turn", handlers.NewHandleAITurn(gameService))
 
 	// Start the server
 	log.Println("Starting server on :8080")

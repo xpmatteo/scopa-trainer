@@ -49,3 +49,13 @@ Asked Yoda to add missing tests, and an AI rule to apply the method.
 The rule is good, the tests also but I think he added too many tests.  Also I'm not sure that all the new rules have the correct numeric prefix, but I'm too much in a hurry now to check.
 
 Started at 189, now at 194 -- 5 requests.
+
+
+## 2025-03-15
+
+Started at 213
+Improved the template tests to make them more readable and make failures easier to fix
+
+At 214: implement the button to make the AI play its turn.
+
+
