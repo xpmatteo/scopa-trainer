@@ -1,9 +1,9 @@
 package application
 
 import (
-	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/xpmatteo/scopa-trainer/pkg/domain"
 )
 
@@ -52,9 +52,7 @@ func TestRandomAIPlayer(t *testing.T) {
 		}
 	}
 
-	if !aiCardFound {
-		t.Fatalf("Could not find any suitable AI card in the deck")
-	}
+	assert.True(t, aiCardFound, "Should be able to find a suitable AI card in the deck")
 
 	// Move the card to AI hand
 	service.gameState.Deck.MoveCard(aiCard, domain.DeckLocation, domain.AIHandLocation)
@@ -92,17 +90,17 @@ func TestRandomAIPlayer(t *testing.T) {
 		}
 	}
 
-	if !tableCardFound {
-		t.Fatalf("Could not find a matching table card in the deck")
-	}
+	assert.True(t, tableCardFound, "Should be able to find a matching table card in the deck")
 
 	// Move the card to the table
 	service.gameState.Deck.MoveCard(tableCard, domain.DeckLocation, domain.TableLocation)
 
-	// Debug: Print the state before AI turn
-	fmt.Println("Before AI turn:")
-	fmt.Printf("AI hand: %v\n", service.gameState.Deck.CardsAt(domain.AIHandLocation))
-	fmt.Printf("Table: %v\n", service.gameState.Deck.CardsAt(domain.TableLocation))
+	// Verify initial state
+	aiHandBefore := service.gameState.Deck.CardsAt(domain.AIHandLocation)
+	tableBefore := service.gameState.Deck.CardsAt(domain.TableLocation)
+	assert.Equal(t, 1, len(aiHandBefore), "AI should have 1 card before its turn")
+	assert.Equal(t, 1, len(tableBefore), "Table should have 1 card before AI turn")
+	assert.Equal(t, aiCard.Rank, tableBefore[0].Rank, "Table card should have same rank as AI card")
 
 	// Set it to AI's turn
 	service.gameState.Status = domain.AITurn
@@ -110,28 +108,18 @@ func TestRandomAIPlayer(t *testing.T) {
 	// Execute AI turn
 	service.PlayAITurn()
 
-	// Debug: Print the state after AI turn
-	fmt.Println("After AI turn:")
-	fmt.Printf("AI hand: %v\n", service.gameState.Deck.CardsAt(domain.AIHandLocation))
-	fmt.Printf("Table: %v\n", service.gameState.Deck.CardsAt(domain.TableLocation))
-	fmt.Printf("AI captures: %v\n", service.gameState.Deck.CardsAt(domain.AICapturesLocation))
+	// Verify final state
+	aiHandAfter := service.gameState.Deck.CardsAt(domain.AIHandLocation)
+	tableAfter := service.gameState.Deck.CardsAt(domain.TableLocation)
+	aiCaptures := service.gameState.Deck.CardsAt(domain.AICapturesLocation)
 
 	// Verify that AI captured the matching card
-	aiCaptures := service.gameState.Deck.CardsAt(domain.AICapturesLocation)
-	if len(aiCaptures) != 2 {
-		t.Errorf("Expected AI to have 2 captured cards, got %d", len(aiCaptures))
-	}
-
-	// Verify that the table is now empty
-	tableCards = service.gameState.Deck.CardsAt(domain.TableLocation)
-	if len(tableCards) != 0 {
-		t.Errorf("Expected table to be empty, got %d cards", len(tableCards))
-	}
+	assert.Equal(t, 2, len(aiCaptures), "AI should have captured 2 cards")
+	assert.Equal(t, 0, len(tableAfter), "Table should be empty after AI turn")
+	assert.Equal(t, 0, len(aiHandAfter), "AI hand should be empty after playing its only card")
 
 	// Verify that it's now the player's turn
-	if service.gameState.Status != domain.PlayerTurn {
-		t.Errorf("Expected it to be player's turn after AI move")
-	}
+	assert.Equal(t, domain.PlayerTurn, service.gameState.Status, "It should be player's turn after AI move")
 }
 
 func TestRandomAIPlayerNoCapture(t *testing.T) {
@@ -148,9 +136,7 @@ func TestRandomAIPlayerNoCapture(t *testing.T) {
 
 	// Get all cards from the deck
 	deckCards := service.gameState.Deck.CardsAt(domain.DeckLocation)
-	if len(deckCards) == 0 {
-		t.Fatalf("No cards in the deck")
-	}
+	assert.NotEmpty(t, deckCards, "Deck should have cards")
 
 	// Use the first card from the deck for the AI hand
 	aiCard := deckCards[0]
@@ -164,9 +150,7 @@ func TestRandomAIPlayerNoCapture(t *testing.T) {
 
 	// Get updated deck cards after moving the AI card
 	deckCards = service.gameState.Deck.CardsAt(domain.DeckLocation)
-	if len(deckCards) == 0 {
-		t.Fatalf("No cards in the deck after moving AI card")
-	}
+	assert.NotEmpty(t, deckCards, "Deck should have cards after moving AI card")
 
 	// Find a card with a different rank for the table
 	var tableCard domain.Card
@@ -180,17 +164,17 @@ func TestRandomAIPlayerNoCapture(t *testing.T) {
 		}
 	}
 
-	if !tableCardFound {
-		t.Fatalf("Could not find a card with a different rank in the deck")
-	}
+	assert.True(t, tableCardFound, "Should be able to find a card with a different rank in the deck")
 
 	// Move the card to the table
 	service.gameState.Deck.MoveCard(tableCard, domain.DeckLocation, domain.TableLocation)
 
-	// Debug: Print the state before AI turn
-	fmt.Println("Before AI turn (no capture):")
-	fmt.Printf("AI hand: %v\n", service.gameState.Deck.CardsAt(domain.AIHandLocation))
-	fmt.Printf("Table: %v\n", service.gameState.Deck.CardsAt(domain.TableLocation))
+	// Verify initial state
+	aiHandBefore := service.gameState.Deck.CardsAt(domain.AIHandLocation)
+	tableBefore := service.gameState.Deck.CardsAt(domain.TableLocation)
+	assert.Equal(t, 1, len(aiHandBefore), "AI should have 1 card before its turn")
+	assert.Equal(t, 1, len(tableBefore), "Table should have 1 card before AI turn")
+	assert.NotEqual(t, aiCard.Rank, tableBefore[0].Rank, "Table card should have different rank than AI card")
 
 	// Set it to AI's turn
 	service.gameState.Status = domain.AITurn
@@ -198,27 +182,16 @@ func TestRandomAIPlayerNoCapture(t *testing.T) {
 	// Execute AI turn
 	service.PlayAITurn()
 
-	// Debug: Print the state after AI turn
-	fmt.Println("After AI turn (no capture):")
-	fmt.Printf("AI hand: %v\n", service.gameState.Deck.CardsAt(domain.AIHandLocation))
-	fmt.Printf("Table: %v\n", service.gameState.Deck.CardsAt(domain.TableLocation))
-	fmt.Printf("AI captures: %v\n", service.gameState.Deck.CardsAt(domain.AICapturesLocation))
+	// Verify final state
+	aiHandAfter := service.gameState.Deck.CardsAt(domain.AIHandLocation)
+	tableAfter := service.gameState.Deck.CardsAt(domain.TableLocation)
+	aiCaptures := service.gameState.Deck.CardsAt(domain.AICapturesLocation)
 
 	// Verify that AI did not capture any card
-	aiCaptures := service.gameState.Deck.CardsAt(domain.AICapturesLocation)
-	if len(aiCaptures) != 0 {
-		t.Errorf("Expected AI to have 0 captured cards, got %d", len(aiCaptures))
-	}
-
-	// Verify that the table now has 2 cards (the original card and the played card)
-	tableCards = service.gameState.Deck.CardsAt(domain.TableLocation)
-	if len(tableCards) != 2 {
-		t.Errorf("Expected table to have 2 cards, got %d cards", len(tableCards))
-		fmt.Printf("Table cards: %v\n", tableCards)
-	}
+	assert.Equal(t, 0, len(aiCaptures), "AI should have 0 captured cards")
+	assert.Equal(t, 2, len(tableAfter), "Table should have 2 cards after AI turn")
+	assert.Equal(t, 0, len(aiHandAfter), "AI hand should be empty after playing its only card")
 
 	// Verify that it's now the player's turn
-	if service.gameState.Status != domain.PlayerTurn {
-		t.Errorf("Expected it to be player's turn after AI move")
-	}
+	assert.Equal(t, domain.PlayerTurn, service.gameState.Status, "It should be player's turn after AI move")
 }
