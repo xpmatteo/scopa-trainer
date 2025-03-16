@@ -103,7 +103,7 @@ func TestRandomAIPlayer(t *testing.T) {
 	assert.Equal(t, aiCard.Rank, tableBefore[0].Rank, "Table card should have same rank as AI card")
 
 	// Set it to AI's turn
-	service.gameState.Status = domain.AITurn
+	service.gameState.Status = domain.StatusAITurn
 
 	// Execute AI turn
 	service.PlayAITurn()
@@ -119,7 +119,7 @@ func TestRandomAIPlayer(t *testing.T) {
 	assert.Equal(t, 0, len(aiHandAfter), "AI hand should be empty after playing its only card")
 
 	// Verify that it's now the player's turn
-	assert.Equal(t, domain.PlayerTurn, service.gameState.Status, "It should be player's turn after AI move")
+	assert.Equal(t, domain.StatusPlayerTurn, service.gameState.Status, "It should be player's turn after AI move")
 }
 
 func TestRandomAIPlayerNoCapture(t *testing.T) {
@@ -177,7 +177,7 @@ func TestRandomAIPlayerNoCapture(t *testing.T) {
 	assert.NotEqual(t, aiCard.Rank, tableBefore[0].Rank, "Table card should have different rank than AI card")
 
 	// Set it to AI's turn
-	service.gameState.Status = domain.AITurn
+	service.gameState.Status = domain.StatusAITurn
 
 	// Execute AI turn
 	service.PlayAITurn()
@@ -193,5 +193,5 @@ func TestRandomAIPlayerNoCapture(t *testing.T) {
 	assert.Equal(t, 0, len(aiHandAfter), "AI hand should be empty after playing its only card")
 
 	// Verify that it's now the player's turn
-	assert.Equal(t, domain.PlayerTurn, service.gameState.Status, "It should be player's turn after AI move")
+	assert.Equal(t, domain.StatusPlayerTurn, service.gameState.Status, "It should be player's turn after AI move")
 }

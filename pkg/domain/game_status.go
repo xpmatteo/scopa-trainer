@@ -4,21 +4,21 @@ package domain
 type GameStatus int
 
 const (
-	GameNotStarted GameStatus = iota
-	PlayerTurn
-	AITurn
+	StatusGameNotStarted GameStatus = iota
+	StatusPlayerTurn
+	StatusAITurn
 )
 
 // String returns a string representation of the GameStatus
 func (s GameStatus) String() string {
 	switch s {
-	case GameNotStarted:
+	case StatusGameNotStarted:
 		return "Game Not Started"
-	case PlayerTurn:
+	case StatusPlayerTurn:
 		return "Player's Turn"
-	case AITurn:
+	case StatusAITurn:
 		return "AI's Turn"
 	default:
-		return "Unknown Status"
+		panic("Unknown Status")
 	}
 }

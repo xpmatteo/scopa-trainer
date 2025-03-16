@@ -134,7 +134,7 @@ func TestCanPlayCardWhenNoCaptureIsPossible(t *testing.T) {
 	assert.Equal(t, beforeTableCount+1, len(playModel.TableCards), "Table should have one more card")
 	assert.Equal(t, beforeHandCount-1, len(playModel.PlayerHand), "Hand should have one less card")
 	assert.Equal(t, domain.NO_CARD_SELECTED, playModel.SelectedCard, "No card should be selected after playing")
-	assert.Equal(t, domain.AITurn, service.gameState.Status, "It should be AI's turn after playing a card")
+	assert.Equal(t, domain.StatusAITurn, service.gameState.Status, "It should be AI's turn after playing a card")
 }
 
 func TestCanPlayCardWhenTableIsEmpty(t *testing.T) {
@@ -169,5 +169,5 @@ func TestCanPlayCardWhenTableIsEmpty(t *testing.T) {
 	assert.Equal(t, beforeTableCount+1, len(playModel.TableCards), "Table should have one more card")
 	assert.Equal(t, beforeHandCount-1, len(playModel.PlayerHand), "Hand should have one less card")
 	assert.Equal(t, domain.NO_CARD_SELECTED, playModel.SelectedCard, "No card should be selected after playing")
-	assert.Equal(t, domain.AITurn, service.gameState.Status, "It should be AI's turn after playing a card")
+	assert.Equal(t, domain.StatusAITurn, service.gameState.Status, "It should be AI's turn after playing a card")
 }

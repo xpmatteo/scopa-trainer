@@ -17,6 +17,6 @@ func NewGameState() GameState {
 
 	return GameState{
 		Deck:   deck,
-		Status: PlayerTurn, // Player goes first by default
+		Status: StatusPlayerTurn, // Player goes first by default
 	}
 }

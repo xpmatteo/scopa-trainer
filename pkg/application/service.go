@@ -32,8 +32,8 @@ func (s *GameService) GetUIModel() domain.UIModel {
 	model.ShowNewGameButton = false
 	model.TableCards = s.gameState.Deck.CardsAt(domain.TableLocation)
 	model.PlayerHand = sortCards(s.gameState.Deck.CardsAt(domain.PlayerHandLocation))
-	model.GameInProgress = s.gameState.Status != domain.GameNotStarted
-	model.PlayerTurn = s.gameState.Status == domain.PlayerTurn
+	model.GameInProgress = s.gameState.Status != domain.StatusGameNotStarted
+	model.PlayerTurn = s.gameState.Status == domain.StatusPlayerTurn
 	model.SelectedCard = s.selectedCard
 
 	// Set card counts
@@ -134,7 +134,7 @@ func (s *GameService) SelectCard(suit domain.Suit, rank domain.Rank) {
 			s.selectedCard = domain.NO_CARD_SELECTED
 
 			// Switch turn to AI
-			s.gameState.Status = domain.AITurn
+			s.gameState.Status = domain.StatusAITurn
 
 			// Check if new cards need to be dealt
 			s.DealNewCardsIfNeeded()
@@ -177,7 +177,7 @@ func (s *GameService) PlaySelectedCard() {
 	s.selectedCard = domain.NO_CARD_SELECTED
 
 	// Switch turn to AI
-	s.gameState.Status = domain.AITurn
+	s.gameState.Status = domain.StatusAITurn
 
 	// Check if new cards need to be dealt
 	s.DealNewCardsIfNeeded()
@@ -217,7 +217,7 @@ func (s *GameService) DealNewCardsIfNeeded() bool {
 // PlayAITurn handles the AI's turn
 func (s *GameService) PlayAITurn() {
 	// Check if it's the AI's turn
-	if s.gameState.Status != domain.AITurn {
+	if s.gameState.Status != domain.StatusAITurn {
 		return
 	}
 
@@ -251,7 +251,7 @@ func (s *GameService) PlayAITurn() {
 	}
 
 	// Switch turn to player
-	s.gameState.Status = domain.PlayerTurn
+	s.gameState.Status = domain.StatusPlayerTurn
 
 	// Check if new cards need to be dealt
 	s.DealNewCardsIfNeeded()
