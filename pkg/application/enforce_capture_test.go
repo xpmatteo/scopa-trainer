@@ -55,7 +55,7 @@ func TestCannotPlayCardWhenCaptureIsPossible(t *testing.T) {
 	// Get the state before trying to play
 	beforeTableCount := len(model.TableCards)
 	beforeHandCount := len(model.PlayerHand)
-	beforePlayerTurn := service.gameState.PlayerTurn
+	beforeStatus := service.gameState.Status
 
 	// And when we try to play the card to the table
 	service.PlaySelectedCard()
@@ -67,7 +67,7 @@ func TestCannotPlayCardWhenCaptureIsPossible(t *testing.T) {
 	assert.Equal(t, beforeTableCount, len(playModel.TableCards), "Table card count should not change")
 	assert.Equal(t, beforeHandCount, len(playModel.PlayerHand), "Hand card count should not change")
 	assert.Equal(t, selectedCard, playModel.SelectedCard, "Selected card should remain selected")
-	assert.Equal(t, beforePlayerTurn, service.gameState.PlayerTurn, "Player turn should not change")
+	assert.Equal(t, beforeStatus, service.gameState.Status, "Game status should not change")
 }
 
 func TestCanPlayCardWhenNoCaptureIsPossible(t *testing.T) {
@@ -134,7 +134,7 @@ func TestCanPlayCardWhenNoCaptureIsPossible(t *testing.T) {
 	assert.Equal(t, beforeTableCount+1, len(playModel.TableCards), "Table should have one more card")
 	assert.Equal(t, beforeHandCount-1, len(playModel.PlayerHand), "Hand should have one less card")
 	assert.Equal(t, domain.NO_CARD_SELECTED, playModel.SelectedCard, "No card should be selected after playing")
-	assert.False(t, service.gameState.PlayerTurn, "It should be AI's turn after playing a card")
+	assert.Equal(t, domain.AITurn, service.gameState.Status, "It should be AI's turn after playing a card")
 }
 
 func TestCanPlayCardWhenTableIsEmpty(t *testing.T) {
@@ -169,5 +169,5 @@ func TestCanPlayCardWhenTableIsEmpty(t *testing.T) {
 	assert.Equal(t, beforeTableCount+1, len(playModel.TableCards), "Table should have one more card")
 	assert.Equal(t, beforeHandCount-1, len(playModel.PlayerHand), "Hand should have one less card")
 	assert.Equal(t, domain.NO_CARD_SELECTED, playModel.SelectedCard, "No card should be selected after playing")
-	assert.False(t, service.gameState.PlayerTurn, "It should be AI's turn after playing a card")
+	assert.Equal(t, domain.AITurn, service.gameState.Status, "It should be AI's turn after playing a card")
 }

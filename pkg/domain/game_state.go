@@ -2,8 +2,8 @@ package domain
 
 // GameState represents the current state of the game
 type GameState struct {
-	Deck       *Deck
-	PlayerTurn bool
+	Deck   *Deck
+	Status GameStatus
 }
 
 // NewGameState initializes a new game state
@@ -16,7 +16,7 @@ func NewGameState() GameState {
 	deck.DealCards(DeckLocation, AIHandLocation, 10)
 
 	return GameState{
-		Deck:       deck,
-		PlayerTurn: true, // Player goes first by default
+		Deck:   deck,
+		Status: PlayerTurn, // Player goes first by default
 	}
 }

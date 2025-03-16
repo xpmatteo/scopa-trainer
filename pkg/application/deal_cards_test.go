@@ -128,7 +128,7 @@ func TestDealNewCardsAfterPlayingLastCard(t *testing.T) {
 
 	// Verify player's hand is empty and it's AI's turn
 	assert.Equal(t, 0, len(service.gameState.Deck.CardsAt(domain.PlayerHandLocation)))
-	assert.False(t, service.gameState.PlayerTurn, "It should be AI's turn")
+	assert.Equal(t, domain.AITurn, service.gameState.Status, "It should be AI's turn")
 
 	// Then manually trigger the AI turn
 	service.PlayAITurn()

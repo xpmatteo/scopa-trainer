@@ -105,7 +105,7 @@ func TestRandomAIPlayer(t *testing.T) {
 	fmt.Printf("Table: %v\n", service.gameState.Deck.CardsAt(domain.TableLocation))
 
 	// Set it to AI's turn
-	service.gameState.PlayerTurn = false
+	service.gameState.Status = domain.AITurn
 
 	// Execute AI turn
 	service.PlayAITurn()
@@ -129,7 +129,7 @@ func TestRandomAIPlayer(t *testing.T) {
 	}
 
 	// Verify that it's now the player's turn
-	if !service.gameState.PlayerTurn {
+	if service.gameState.Status != domain.PlayerTurn {
 		t.Errorf("Expected it to be player's turn after AI move")
 	}
 }
@@ -193,7 +193,7 @@ func TestRandomAIPlayerNoCapture(t *testing.T) {
 	fmt.Printf("Table: %v\n", service.gameState.Deck.CardsAt(domain.TableLocation))
 
 	// Set it to AI's turn
-	service.gameState.PlayerTurn = false
+	service.gameState.Status = domain.AITurn
 
 	// Execute AI turn
 	service.PlayAITurn()
@@ -218,7 +218,7 @@ func TestRandomAIPlayerNoCapture(t *testing.T) {
 	}
 
 	// Verify that it's now the player's turn
-	if !service.gameState.PlayerTurn {
+	if service.gameState.Status != domain.PlayerTurn {
 		t.Errorf("Expected it to be player's turn after AI move")
 	}
 }
