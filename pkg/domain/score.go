@@ -2,10 +2,12 @@ package domain
 
 // ScoreComponent represents a single scoring component in Scopa
 type ScoreComponent struct {
-	Name        string
-	Description string
-	PlayerScore int
-	AIScore     int
+	Name            string
+	Description     string
+	PlayerScore     int
+	AIScore         int
+	PlayerCardCount int
+	AICardCount     int
 }
 
 // Score represents the complete score for a game of Scopa
@@ -20,28 +22,36 @@ func NewScore() Score {
 	return Score{
 		Components: []ScoreComponent{
 			{
-				Name:        "Carte",
-				Description: "Most cards captured",
-				PlayerScore: 0,
-				AIScore:     0,
+				Name:            "Carte",
+				Description:     "Most cards captured",
+				PlayerScore:     0,
+				AIScore:         0,
+				PlayerCardCount: 0,
+				AICardCount:     0,
 			},
 			{
-				Name:        "Ori",
-				Description: "Most Denari cards captured",
-				PlayerScore: 0,
-				AIScore:     0,
+				Name:            "Ori",
+				Description:     "Most Denari cards captured",
+				PlayerScore:     0,
+				AIScore:         0,
+				PlayerCardCount: 0,
+				AICardCount:     0,
 			},
 			{
-				Name:        "Primiera",
-				Description: "Most Sette cards captured",
-				PlayerScore: 0,
-				AIScore:     0,
+				Name:            "Primiera",
+				Description:     "Most Sette cards captured",
+				PlayerScore:     0,
+				AIScore:         0,
+				PlayerCardCount: 0,
+				AICardCount:     0,
 			},
 			{
-				Name:        "Settebello",
-				Description: "Captured the Sette di Denari",
-				PlayerScore: 0,
-				AIScore:     0,
+				Name:            "Settebello",
+				Description:     "Captured the Sette di Denari",
+				PlayerScore:     0,
+				AIScore:         0,
+				PlayerCardCount: 0,
+				AICardCount:     0,
 			},
 		},
 		PlayerTotal: 0,
@@ -68,6 +78,10 @@ func CalculateScore(playerCards []Card, aiCards []Card) Score {
 	playerCardCount := len(playerCards)
 	aiCardCount := len(aiCards)
 
+	// Set the card counts for display
+	score.Components[0].PlayerCardCount = playerCardCount
+	score.Components[0].AICardCount = aiCardCount
+
 	if playerCardCount > aiCardCount {
 		score.Components[0].PlayerScore = 1
 	} else if aiCardCount > playerCardCount {
@@ -78,6 +92,10 @@ func CalculateScore(playerCards []Card, aiCards []Card) Score {
 	// Calculate "Ori" - Most Denari cards captured
 	playerDenariCount := countCardsBySuit(playerCards, Denari)
 	aiDenariCount := countCardsBySuit(aiCards, Denari)
+
+	// Set the Denari counts for display
+	score.Components[1].PlayerCardCount = playerDenariCount
+	score.Components[1].AICardCount = aiDenariCount
 
 	if playerDenariCount > aiDenariCount {
 		score.Components[1].PlayerScore = 1
@@ -90,6 +108,10 @@ func CalculateScore(playerCards []Card, aiCards []Card) Score {
 	playerSetteCount := countCardsByRank(playerCards, Sette)
 	aiSetteCount := countCardsByRank(aiCards, Sette)
 
+	// Set the Sette counts for display
+	score.Components[2].PlayerCardCount = playerSetteCount
+	score.Components[2].AICardCount = aiSetteCount
+
 	if playerSetteCount > aiSetteCount {
 		score.Components[2].PlayerScore = 1
 	} else if aiSetteCount > playerSetteCount {
@@ -100,10 +122,16 @@ func CalculateScore(playerCards []Card, aiCards []Card) Score {
 	// Calculate "Settebello" - Captured the Sette di Denari
 	settebello := Card{Suit: Denari, Rank: Sette}
 
+	// For Settebello, the count is either 1 or 0
+	score.Components[3].PlayerCardCount = 0
+	score.Components[3].AICardCount = 0
+
 	if containsCard(playerCards, settebello) {
 		score.Components[3].PlayerScore = 1
+		score.Components[3].PlayerCardCount = 1
 	} else if containsCard(aiCards, settebello) {
 		score.Components[3].AIScore = 1
+		score.Components[3].AICardCount = 1
 	}
 
 	// Calculate totals
