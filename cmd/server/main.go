@@ -13,11 +13,13 @@ func main() {
 	// Initialize the application service
 	gameService := application.NewGameService()
 
-	templ := views.ParseTemplates("templates/game.html")
+	// Create template with functions
+	views.ParseTemplates("templates/game.html")
 
 	// Set up routes
-	http.HandleFunc("GET /", handlers.NewHandleIndex(gameService, templ))
+	http.HandleFunc("/", handlers.NewHandleIndex(gameService, tmpl))
 	http.HandleFunc("POST /new-game", handlers.NewHandleNewGame(gameService))
+	http.HandleFunc("POST /review-game", handlers.NewHandleReviewGame())
 	http.HandleFunc("POST /select-card", handlers.NewHandleSelectCard(gameService))
 	http.HandleFunc("POST /play-card", handlers.NewHandlePlayCard(gameService))
 	http.HandleFunc("POST /ai-turn", handlers.NewHandleAITurn(gameService))

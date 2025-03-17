@@ -58,4 +58,17 @@ Improved the template tests to make them more readable and make failures easier 
 
 At 214: implement the button to make the AI play its turn.  Had to insist on simplifying the template tests, we arrived at 221.
 
+Now we implement a new story "Deal New Cards When Hand is Empty"
+
+At 224 I ask it to refactor the two flags GameInProgress and IsPlayerTurn into a single GameStatus enumerative.  The refactor is partially successful, as it's still using multiple booleans in the UIModel, but let that be for now.
+
+We are now at 229
+
+Had an interesting conversation on why the go- rules are not applied!
+
+I think there are many non-tabular tests
+
+Next time: ask it to review the tests in the view of the testing rule
+
+
 

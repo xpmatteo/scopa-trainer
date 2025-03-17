@@ -29,6 +29,19 @@
             cursor: pointer;
             border-radius: 5px;
         }
+        .review-game-button {
+            background-color: #2196F3;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
         .card-area {
             margin-top: 20px;
             padding: 20px;
@@ -160,7 +173,67 @@
         {{end}}
     </section>
 
-    {{if .GameInProgress}}
+    {{ if .GameOver }}
+    <!-- Game Over Screen -->
+    <div class="game-over-screen">
+        <h2>Game Over!</h2>
+        
+        <section data-section="Table Cards">
+            <div class="card-area table-area">
+                <h2>Table Cards ({{len .TableCards}})</h2>
+                <div style="display: flex; flex-wrap: wrap;">
+                    {{range .TableCards}}
+                    <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}}">
+                        <div class="card-rank">{{.Rank}}</div>
+                        <div class="card-suit">{{.Name}} di {{.Suit}}</div>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </section>
+        
+        <section data-section="AI Captures">
+            <div class="card-area">
+                <h2>AI Captures ({{.AICaptureCount}})</h2>
+                <div style="display: flex; flex-wrap: wrap;">
+                    {{range .AICaptureCards}}
+                    <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}}">
+                        <div class="card-rank">{{.Rank}}</div>
+                        <div class="card-suit">{{.Name}} di {{.Suit}}</div>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </section>
+        
+        <section data-section="Player Captures">
+            <div class="card-area">
+                <h2>Your Captures ({{.PlayerCaptureCount}})</h2>
+                <div style="display: flex; flex-wrap: wrap;">
+                    {{range .PlayerCaptureCards}}
+                    <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}}">
+                        <div class="card-rank">{{.Rank}}</div>
+                        <div class="card-suit">{{.Name}} di {{.Suit}}</div>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </section>
+        
+        <section data-section="Game Actions">
+            <div style="margin-top: 20px;">
+                <form action="/new-game" method="post" style="display: inline;">
+                    <button type="submit" class="new-game-button">New Game</button>
+                </form>
+                <form action="/review-game" method="post" style="display: inline;">
+                    <button type="submit" class="review-game-button">Review Game</button>
+                </form>
+            </div>
+        </section>
+    </div>
+    {{ else }}
+    <!-- Regular Game Screen -->
+    {{ if .GameInProgress }}
     <section data-section="Game Stats">
         <div class="game-stats">
             <div class="stat-item">
@@ -228,6 +301,7 @@
         </div>
     </section>
     {{end}}
+    {{ end }}
 
     <script>
         function selectCard(suit, rank) {

@@ -13,6 +13,9 @@ type UIModel struct {
 	DeckCount           int
 	PlayerCaptureCount  int
 	AICaptureCount      int
+	GameOver            bool
+	PlayerCaptureCards  []Card
+	AICaptureCards      []Card
 }
 
 var NO_CARD_SELECTED = Card{}
@@ -31,5 +34,8 @@ func NewUIModel() UIModel {
 		DeckCount:           0,
 		PlayerCaptureCount:  0,
 		AICaptureCount:      0,
+		GameOver:            false,
+		PlayerCaptureCards:  []Card{},
+		AICaptureCards:      []Card{},
 	}
 }

@@ -7,6 +7,7 @@ const (
 	StatusGameNotStarted GameStatus = iota
 	StatusPlayerTurn
 	StatusAITurn
+	StatusGameOver
 )
 
 // String returns a string representation of the GameStatus
@@ -18,6 +19,8 @@ func (s GameStatus) String() string {
 		return "Player's Turn"
 	case StatusAITurn:
 		return "AI's Turn"
+	case StatusGameOver:
+		return "Game Over"
 	default:
 		panic("Unknown Status")
 	}

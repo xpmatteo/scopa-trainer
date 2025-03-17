@@ -36,10 +36,19 @@ func (s *GameService) GetUIModel() domain.UIModel {
 	model.PlayerTurn = s.gameState.Status == domain.StatusPlayerTurn
 	model.SelectedCard = s.selectedCard
 
-	// Set card counts
+	// Set card counts and capture cards
 	model.DeckCount = len(s.gameState.Deck.CardsAt(domain.DeckLocation))
-	model.PlayerCaptureCount = len(s.gameState.Deck.CardsAt(domain.PlayerCapturesLocation))
-	model.AICaptureCount = len(s.gameState.Deck.CardsAt(domain.AICapturesLocation))
+	model.PlayerCaptureCards = s.gameState.Deck.CardsAt(domain.PlayerCapturesLocation)
+	model.PlayerCaptureCount = len(model.PlayerCaptureCards)
+	model.AICaptureCards = s.gameState.Deck.CardsAt(domain.AICapturesLocation)
+	model.AICaptureCount = len(model.AICaptureCards)
+
+	// Check if the game is over
+	model.GameOver = s.gameState.Status == domain.StatusGameOver
+	if model.GameOver {
+		model.ShowNewGameButton = true
+		model.GamePrompt = "Game Over! Check out your captures and the AI's captures."
+	}
 
 	// Check if the selected card can be played to the table
 	if s.selectedCard != domain.NO_CARD_SELECTED {
@@ -196,19 +205,24 @@ func (s *GameService) DealNewCardsIfNeeded() bool {
 	deckCards := s.gameState.Deck.CardsAt(domain.DeckLocation)
 
 	// Check if both hands are empty and there are cards in the deck
-	if len(playerHand) == 0 && len(aiHand) == 0 && len(deckCards) > 0 {
-		// Calculate how many cards to deal to each player
-		cardsPerPlayer := 10
-		if len(deckCards) < 20 {
-			// If fewer than 20 cards, distribute evenly
-			cardsPerPlayer = len(deckCards) / 2
+	if len(playerHand) == 0 && len(aiHand) == 0 {
+		if len(deckCards) > 0 {
+			// Calculate how many cards to deal to each player
+			cardsPerPlayer := 10
+			if len(deckCards) < 20 {
+				// If fewer than 20 cards, distribute evenly
+				cardsPerPlayer = len(deckCards) / 2
+			}
+
+			// Deal cards to each player
+			s.gameState.Deck.DealCards(domain.DeckLocation, domain.PlayerHandLocation, cardsPerPlayer)
+			s.gameState.Deck.DealCards(domain.DeckLocation, domain.AIHandLocation, cardsPerPlayer)
+
+			return true
+		} else {
+			// Both hands are empty and deck is empty, game is over
+			s.gameState.Status = domain.StatusGameOver
 		}
-
-		// Deal cards to each player
-		s.gameState.Deck.DealCards(domain.DeckLocation, domain.PlayerHandLocation, cardsPerPlayer)
-		s.gameState.Deck.DealCards(domain.DeckLocation, domain.AIHandLocation, cardsPerPlayer)
-
-		return true
 	}
 
 	return false
