@@ -61,17 +61,18 @@
         .card {
             width: 80px;
             height: 120px;
-            background-color: white;
             border-radius: 5px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: black;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             cursor: pointer;
             margin: 5px;
             transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
         }
         .card.selected {
             transform: translateY(-10px);
@@ -81,17 +82,6 @@
         .card.disabled {
             opacity: 0.6;
             cursor: not-allowed;
-        }
-        .card.coppe { color: blue; }
-        .card.denari { color: gold; }
-        .card.bastoni { color: green; }
-        .card.spade { color: black; }
-        .card-rank {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .card-suit {
-            font-size: 14px;
         }
         .card.capturable {
             border: 2px dashed yellow;
@@ -183,9 +173,8 @@
                 <h2>Table Cards ({{len .TableCards}})</h2>
                 <div style="display: flex; flex-wrap: wrap;">
                     {{range .TableCards}}
-                    <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}}">
-                        <div class="card-rank">{{.Rank}}</div>
-                        <div class="card-suit">{{.Name}} di {{.Suit}}</div>
+                    <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | suitToLower}}">
+                        <img src="{{. | cardImagePath}}" alt="{{.Name}} di {{.Suit}}">
                     </div>
                     {{end}}
                 </div>
@@ -197,9 +186,8 @@
                 <h2>AI Captures ({{.AICaptureCount}})</h2>
                 <div style="display: flex; flex-wrap: wrap;">
                     {{range .AICaptureCards}}
-                    <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}}">
-                        <div class="card-rank">{{.Rank}}</div>
-                        <div class="card-suit">{{.Name}} di {{.Suit}}</div>
+                    <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | suitToLower}}">
+                        <img src="{{. | cardImagePath}}" alt="{{.Name}} di {{.Suit}}">
                     </div>
                     {{end}}
                 </div>
@@ -211,9 +199,8 @@
                 <h2>Your Captures ({{.PlayerCaptureCount}})</h2>
                 <div style="display: flex; flex-wrap: wrap;">
                     {{range .PlayerCaptureCards}}
-                    <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}}">
-                        <div class="card-rank">{{.Rank}}</div>
-                        <div class="card-suit">{{.Name}} di {{.Suit}}</div>
+                    <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | suitToLower}}">
+                        <img src="{{. | cardImagePath}}" alt="{{.Name}} di {{.Suit}}">
                     </div>
                     {{end}}
                 </div>
@@ -266,9 +253,8 @@
             <h2>Table Cards ({{len .TableCards}})</h2>
             <div style="display: flex; flex-wrap: wrap;">
                 {{range .TableCards}}
-                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)}}capturable{{end}} {{if not $.PlayerTurn}}disabled{{end}}" {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
-                    <div class="card-rank">{{.Rank}}</div>
-                    <div class="card-suit">{{.Name}} di {{.Suit}}</div>
+                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | suitToLower}} {{if and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)}}capturable{{end}} {{if not $.PlayerTurn}}disabled{{end}}" {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
+                    <img src="{{. | cardImagePath}}" alt="{{.Name}} di {{.Suit}}">
                 </div>
                 {{end}}
             </div>
@@ -292,9 +278,8 @@
             <h2>Your Hand ({{len .PlayerHand}})</h2>
             <div style="display: flex; flex-wrap: wrap;">
                 {{range .PlayerHand}}
-                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | printf "%s" | lower}} {{if eq . $.SelectedCard}}selected{{end}} {{if not $.PlayerTurn}}disabled{{end}}" {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
-                    <div class="card-rank">{{.Rank}}</div>
-                    <div class="card-suit">{{.Name}} di {{.Suit}}</div>
+                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | suitToLower}} {{if eq . $.SelectedCard}}selected{{end}} {{if not $.PlayerTurn}}disabled{{end}}" {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
+                    <img src="{{. | cardImagePath}}" alt="{{.Name}} di {{.Suit}}">
                 </div>
                 {{end}}
             </div>

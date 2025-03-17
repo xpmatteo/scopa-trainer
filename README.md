@@ -67,3 +67,7 @@ Then open your browser to http://localhost:8080
 - Add scoring system
 - Implement more sophisticated AI strategies
 - Add post-game analysis 
+
+# Credits
+
+The card images were taken from [Marco Scarpetta's Scopa repository](https://savannah.nongnu.org/projects/scopa)

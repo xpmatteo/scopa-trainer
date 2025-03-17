@@ -596,3 +596,50 @@ func extractTextHelper(n *html.Node, text *strings.Builder) {
 		extractTextHelper(c, text)
 	}
 }
+
+func TestCardImagePath(t *testing.T) {
+	tests := []struct {
+		name     string
+		card     domain.Card
+		expected string
+	}{
+		{
+			name:     "Asso di Spade",
+			card:     domain.Card{Suit: domain.Spade, Rank: domain.Asso},
+			expected: "/static/images/cards/Napoletane/1s.jpg",
+		},
+		{
+			name:     "Due di Coppe",
+			card:     domain.Card{Suit: domain.Coppe, Rank: domain.Due},
+			expected: "/static/images/cards/Napoletane/2c.jpg",
+		},
+		{
+			name:     "Tre di Bastoni",
+			card:     domain.Card{Suit: domain.Bastoni, Rank: domain.Tre},
+			expected: "/static/images/cards/Napoletane/3b.jpg",
+		},
+		{
+			name:     "Quattro di Denari",
+			card:     domain.Card{Suit: domain.Denari, Rank: domain.Quattro},
+			expected: "/static/images/cards/Napoletane/4d.jpg",
+		},
+		{
+			name:     "Re di Spade",
+			card:     domain.Card{Suit: domain.Spade, Rank: domain.Re},
+			expected: "/static/images/cards/Napoletane/10s.jpg",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			actual := CardImagePath(test.card)
+			assert.Equal(t, test.expected, actual)
+		})
+	}
+}
+
+func TestCardBackImagePath(t *testing.T) {
+	expected := "/static/images/cards/Napoletane/bg.jpg"
+	actual := CardBackImagePath()
+	assert.Equal(t, expected, actual)
+}
