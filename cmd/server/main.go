@@ -24,6 +24,10 @@ func main() {
 	http.HandleFunc("POST /play-card", handlers.NewHandlePlayCard(gameService))
 	http.HandleFunc("POST /ai-turn", handlers.NewHandleAITurn(gameService))
 
+	// Serve static files
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+
 	// Start the server
 	log.Println("Starting server on :8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
