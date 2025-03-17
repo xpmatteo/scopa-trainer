@@ -14,10 +14,10 @@ func main() {
 	gameService := application.NewGameService()
 
 	// Create template with functions
-	views.ParseTemplates("templates/game.html")
+	templates := views.ParseTemplates("templates/game.html")
 
 	// Set up routes
-	http.HandleFunc("/", handlers.NewHandleIndex(gameService, tmpl))
+	http.HandleFunc("/", handlers.NewHandleIndex(gameService, templates))
 	http.HandleFunc("POST /new-game", handlers.NewHandleNewGame(gameService))
 	http.HandleFunc("POST /review-game", handlers.NewHandleReviewGame())
 	http.HandleFunc("POST /select-card", handlers.NewHandleSelectCard(gameService))

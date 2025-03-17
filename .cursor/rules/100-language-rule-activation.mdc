@@ -1,0 +1,50 @@
+---
+description: Activate language-specific rules alongside task-specific rules when implementing features
+globs: **/*.go, **/*.js, **/*.py, **/*.ts, **/*.java
+---
+
+# Language Rule Activation
+
+## Context
+- Projects often have both task-specific rules (workflows, patterns) and language-specific rules
+- Language-specific rules ensure code quality and adherence to language idioms
+- Task-specific rules guide the implementation process
+
+## Requirements
+- When implementing features, activate both task-specific and language-specific rules
+- For Go code, explicitly activate relevant go-prefixed rules:
+  1. go-error-handling for proper error management
+  2. go-struct-design when modifying or creating structs
+  3. go-interfaces when defining or implementing interfaces
+  4. go-testing when writing tests
+  5. go-commentary when documenting code
+- For other languages, activate their respective language-specific rules
+- Mention which rules are being activated in your implementation plan
+- Review code against both task-specific and language-specific rules
+- Prioritize language idioms and best practices alongside feature requirements
+
+## Examples
+<example>
+// Good: Activating both task-specific and language-specific rules
+"I'll implement the game over feature following these rules:
+
+1. 850-game-feature-workflow for TDD approach
+2. 350-template-testing for HTML template structure
+3. go-struct-design for updating the UIModel struct
+4. go-error-handling for proper error management
+5. go-testing for writing comprehensive tests
+
+First, I'll write tests for the game over condition..."
+</example>
+
+<example type="invalid">
+// Bad: Only activating task-specific rules
+"I'll implement the game over feature following the game-feature-workflow rule.
+
+First, I'll write tests for the game over condition...
+
+// No mention of language-specific rules
+// No consideration of Go idioms and best practices
+// Missing important aspects like error handling and struct design
+"
+</example> 

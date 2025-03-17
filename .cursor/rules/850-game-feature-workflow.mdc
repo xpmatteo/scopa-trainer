@@ -1,0 +1,103 @@
+---
+description: Follow TDD workflow when implementing game features to ensure quality and maintainability
+globs: pkg/**/*.go, templates/**/*.html
+---
+
+# Game Feature Implementation Workflow
+
+## Context
+- Game features need to be implemented in a structured, testable way
+- Features should be implemented as thin vertical slices of functionality
+- Changes should maintain compatibility with existing tests
+
+## Requirements
+- Start by understanding the current codebase structure and architecture
+- Follow Test-Driven Development (TDD) approach:
+  1. Write tests first that define the expected behavior
+  2. Run tests to see them fail
+  3. Implement the minimal code to make tests pass
+  4. Refactor while keeping tests passing
+- Implement changes across all layers of the architecture:
+  1. Domain layer: Add necessary data structures and constants
+  2. Application layer: Implement business logic
+  3. UI layer: Update templates and handlers
+- Maintain template testing compatibility by:
+  1. Using `<section>` elements with `data-section` attributes
+  2. Adding `data-test-icon` attributes to elements for identification
+  3. Preserving the visualization testing pattern
+- Run all tests after implementation to ensure nothing was broken
+- Document the implementation with a clear summary
+
+## Examples
+<example>
+// Good: Following TDD for game over feature
+// 1. Write test first
+func TestGameOverWhenHandsAndDeckAreEmpty(t *testing.T) {
+    // Given a game in progress with empty hands and an empty deck
+    service := NewGameService()
+    service.StartNewGame()
+    
+    // Empty hands and deck
+    // ...
+    
+    // When we check if new cards need to be dealt
+    service.DealNewCardsIfNeeded()
+    
+    // Then the game should be over
+    assert.Equal(t, domain.StatusGameOver, service.gameState.Status)
+    
+    // And the UI model should reflect the game over state
+    model := service.GetUIModel()
+    assert.True(t, model.GameOver)
+}
+
+// 2. Implement domain changes
+// Add StatusGameOver to GameStatus enum
+const (
+    StatusGameNotStarted GameStatus = iota
+    StatusPlayerTurn
+    StatusAITurn
+    StatusGameOver
+)
+
+// 3. Update application logic
+func (s *GameService) DealNewCardsIfNeeded() bool {
+    // ...
+    if len(playerHand) == 0 && len(aiHand) == 0 {
+        if len(deckCards) > 0 {
+            // Deal cards
+            // ...
+        } else {
+            // Game over condition
+            s.gameState.Status = domain.StatusGameOver
+        }
+    }
+    // ...
+}
+
+// 4. Update UI template with proper sections
+<section data-section="Game Over">
+    <div class="game-over-screen">
+        <h2>Game Over!</h2>
+        <!-- Game over content -->
+    </div>
+</section>
+</example>
+
+<example type="invalid">
+// Bad: Implementing without tests or structure
+// Directly modifying application logic without tests
+func (s *GameService) DealNewCardsIfNeeded() bool {
+    // Add game over check without tests
+    if len(playerHand) == 0 && len(aiHand) == 0 && len(deckCards) == 0 {
+        s.gameState.Status = 3 // Magic number for game over
+    }
+    // ...
+}
+
+// Updating UI without proper section structure
+<div class="game-over">
+    Game Over!
+    <!-- No proper structure for testing -->
+</div>
+</example> 

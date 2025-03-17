@@ -1,0 +1,88 @@
+---
+description: Perform structured analysis when starting a new user story to ensure clear understanding before implementation
+globs: pkg/**/*.go, templates/**/*.html
+---
+
+# User Story Initial Analysis Workflow
+
+## Context
+- New user stories require thorough understanding before implementation
+- Proper planning reduces rework and ensures alignment with requirements
+- Clarifying ambiguities early prevents misunderstandings
+
+## Requirements
+- Begin with codebase exploration to understand the current structure:
+  1. Examine relevant directories and files
+  2. Understand domain models and business logic
+  3. Review existing UI components and templates
+- Formulate a clear, step-by-step implementation plan that includes:
+  1. Domain layer changes (data structures, enums, constants)
+  2. Application layer changes (business logic, services)
+  3. UI layer changes (templates, handlers)
+  4. Testing strategy for each component
+- Review and revise the initial plan to:
+  1. Identify potential edge cases
+  2. Ensure all requirements are covered
+  3. Consider performance and maintainability implications
+- Prepare specific clarifying questions about:
+  1. Ambiguous requirements
+  2. UI/UX details not specified in the user story
+  3. Expected behavior in edge cases
+  4. Integration with existing features
+- Wait for answers to clarifying questions before starting implementation
+- Document the final plan for reference during implementation
+
+## Examples
+<example>
+// Good: Structured analysis for a game over feature
+
+// 1. Codebase exploration
+// Examine domain models
+// pkg/domain/game_state.go - Contains game state structure
+// pkg/domain/game_status.go - Contains game status enum
+// pkg/application/service.go - Contains game logic
+// templates/game.html - Contains UI template
+
+// 2. Initial implementation plan
+// Domain Layer:
+// - Add StatusGameOver to GameStatus enum
+// - Update UIModel to include GameOver flag
+
+// Application Layer:
+// - Modify DealNewCardsIfNeeded to check for game over condition
+// - Update GetUIModel to set GameOver flag
+
+// UI Layer:
+// - Add game over screen to template
+// - Add handler for "Review Game" button
+
+// 3. Plan review and revision
+// Edge cases to consider:
+// - What if only one player's hand is empty?
+// - What if deck is empty but hands still have cards?
+// - Should we handle interruptions during game?
+
+// 4. Clarifying questions
+// - Should the game over screen completely replace the current view or overlay it?
+// - How should we display the captures - as a list or just a count?
+// - Should the "New Game" button behave the same as the current one?
+// - Are there specific styling requirements for the game over screen?
+</example>
+
+<example type="invalid">
+// Bad: Jumping straight to implementation without analysis
+
+// Immediately writing code without understanding
+func (s *GameService) DealNewCardsIfNeeded() bool {
+    // Add game over check without planning
+    if len(playerHand) == 0 && len(aiHand) == 0 && len(deckCards) == 0 {
+        s.gameState.Status = 3 // Magic number for game over
+    }
+    // ...
+}
+
+// No clarifying questions asked
+// No plan for testing
+// No consideration of UI requirements
+// No exploration of existing code structure
+</example> 
