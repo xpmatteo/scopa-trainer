@@ -71,4 +71,12 @@ I think there are many non-tabular tests
 Next time: ask it to review the tests in the view of the testing rule
 
 
+2025-03-17
 
+Refactored the AI rule names
+
+Implemented the real card images (2 requests)
+
+At 5: implement simplified scoring
+
+I'm testing the new scores.  The analysis workflow rule did not work, it did not wait for the answers to questions

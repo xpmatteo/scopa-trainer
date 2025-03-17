@@ -43,22 +43,32 @@ func (s *GameService) GetUIModel() domain.UIModel {
 	model.AICaptureCards = s.gameState.Deck.CardsAt(domain.AICapturesLocation)
 	model.AICaptureCount = len(model.AICaptureCards)
 
+	// Calculate the score (updated continuously)
+	model.Score = domain.CalculateScore(model.PlayerCaptureCards, model.AICaptureCards)
+
 	// Check if the game is over
 	model.GameOver = s.gameState.Status == domain.StatusGameOver
 	if model.GameOver {
 		model.ShowNewGameButton = true
-		model.GamePrompt = "Game Over! Check out your captures and the AI's captures."
-	}
-
-	// Check if the selected card can be played to the table
-	if s.selectedCard != domain.NO_CARD_SELECTED {
-		// Can only play to table if no capture is possible
-		model.CanPlaySelectedCard = !s.canCaptureAnyCard(s.selectedCard)
-	}
-
-	if model.PlayerTurn {
-		model.GamePrompt = "Your turn. Select a card to play."
+		model.GamePrompt = "Game Over! Check out your score and the AI's score."
+	} else if model.PlayerTurn {
+		// Player's turn
+		if s.selectedCard == domain.NO_CARD_SELECTED {
+			model.GamePrompt = "Select a card from your hand to play."
+			model.CanPlaySelectedCard = false
+		} else {
+			// Check if the selected card can capture any cards
+			if s.canCaptureAnyCard(s.selectedCard) {
+				model.GamePrompt = "Click on the table card(s) you want to capture, or select a different card."
+				// Set CanPlaySelectedCard to false when capture is possible to maintain compatibility with existing tests
+				model.CanPlaySelectedCard = false
+			} else {
+				model.GamePrompt = "This card cannot capture any cards. Click on the table to discard it, or select a different card."
+				model.CanPlaySelectedCard = true
+			}
+		}
 	} else {
+		// AI's turn
 		model.GamePrompt = "AI is thinking..."
 	}
 

@@ -16,6 +16,7 @@ type UIModel struct {
 	GameOver            bool
 	PlayerCaptureCards  []Card
 	AICaptureCards      []Card
+	Score               Score
 }
 
 var NO_CARD_SELECTED = Card{}
@@ -37,5 +38,6 @@ func NewUIModel() UIModel {
 		GameOver:            false,
 		PlayerCaptureCards:  []Card{},
 		AICaptureCards:      []Card{},
+		Score:               NewScore(),
 	}
 }

@@ -30,59 +30,7 @@ globs: pkg/**/*.go, templates/**/*.html
   3. Expected behavior in edge cases
   4. Integration with existing features
 - Wait for answers to clarifying questions before starting implementation
-- Document the final plan for reference during implementation
+- DO NOT START IMPLEMENTATION IMMEDIATELY!!
+- Ask the human if the plan is approved first
+- Use the final plan for reference during implementation
 
-## Examples
-<example>
-// Good: Structured analysis for a game over feature
-
-// 1. Codebase exploration
-// Examine domain models
-// pkg/domain/game_state.go - Contains game state structure
-// pkg/domain/game_status.go - Contains game status enum
-// pkg/application/service.go - Contains game logic
-// templates/game.html - Contains UI template
-
-// 2. Initial implementation plan
-// Domain Layer:
-// - Add StatusGameOver to GameStatus enum
-// - Update UIModel to include GameOver flag
-
-// Application Layer:
-// - Modify DealNewCardsIfNeeded to check for game over condition
-// - Update GetUIModel to set GameOver flag
-
-// UI Layer:
-// - Add game over screen to template
-// - Add handler for "Review Game" button
-
-// 3. Plan review and revision
-// Edge cases to consider:
-// - What if only one player's hand is empty?
-// - What if deck is empty but hands still have cards?
-// - Should we handle interruptions during game?
-
-// 4. Clarifying questions
-// - Should the game over screen completely replace the current view or overlay it?
-// - How should we display the captures - as a list or just a count?
-// - Should the "New Game" button behave the same as the current one?
-// - Are there specific styling requirements for the game over screen?
-</example>
-
-<example type="invalid">
-// Bad: Jumping straight to implementation without analysis
-
-// Immediately writing code without understanding
-func (s *GameService) DealNewCardsIfNeeded() bool {
-    // Add game over check without planning
-    if len(playerHand) == 0 && len(aiHand) == 0 && len(deckCards) == 0 {
-        s.gameState.Status = 3 // Magic number for game over
-    }
-    // ...
-}
-
-// No clarifying questions asked
-// No plan for testing
-// No consideration of UI requirements
-// No exploration of existing code structure
-</example> 
