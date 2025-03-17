@@ -38,9 +38,9 @@ func (s *GameService) GetUIModel() domain.UIModel {
 
 	// Set card counts and capture cards
 	model.DeckCount = len(s.gameState.Deck.CardsAt(domain.DeckLocation))
-	model.PlayerCaptureCards = s.gameState.Deck.CardsAt(domain.PlayerCapturesLocation)
+	model.PlayerCaptureCards = sortCards(s.gameState.Deck.CardsAt(domain.PlayerCapturesLocation))
 	model.PlayerCaptureCount = len(model.PlayerCaptureCards)
-	model.AICaptureCards = s.gameState.Deck.CardsAt(domain.AICapturesLocation)
+	model.AICaptureCards = sortCards(s.gameState.Deck.CardsAt(domain.AICapturesLocation))
 	model.AICaptureCount = len(model.AICaptureCards)
 
 	// Calculate the score (updated continuously)
