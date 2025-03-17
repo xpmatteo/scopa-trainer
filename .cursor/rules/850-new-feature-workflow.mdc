@@ -1,5 +1,5 @@
 ---
-description: Follow TDD workflow when implementing game features to ensure quality and maintainability
+description: Follow TDD workflow when implementing new features to ensure quality and maintainability
 globs: pkg/**/*.go, templates/**/*.html
 ---
 
