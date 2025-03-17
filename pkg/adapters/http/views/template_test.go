@@ -82,13 +82,14 @@ Welcome to Scopa Trainer! Click 'New Game' to start playing. [👆 New Game]
 				PlayerTurn:        true,
 				SelectedCard:      domain.NO_CARD_SELECTED,
 				ShowNewGameButton: false,
+				Score:             domain.NewScore(),
 			},
 			expected: `
 --- Game Prompt ---
 Your turn.
 
 --- Game Stats ---
-Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
+Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards Current Score: You 0 - 0 AI
 
 --- Table Cards ---
 Table Cards (1)
@@ -115,13 +116,14 @@ Your Hand (1)
 				SelectedCard:        domain.Card{Suit: domain.Denari, Rank: domain.Tre},
 				CanPlaySelectedCard: false, // Should show capture message
 				ShowNewGameButton:   false,
+				Score:               domain.NewScore(),
 			},
 			expected: `
 --- Game Prompt ---
 Your turn.
 
 --- Game Stats ---
-Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
+Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards Current Score: You 0 - 0 AI
 
 --- Table Cards ---
 Table Cards (2)
@@ -147,13 +149,14 @@ Your Hand (1)
 				SelectedCard:        domain.Card{Suit: domain.Denari, Rank: domain.Tre},
 				CanPlaySelectedCard: true, // Should show play to table message
 				ShowNewGameButton:   false,
+				Score:               domain.NewScore(),
 			},
 			expected: `
 --- Game Prompt ---
 Your turn.
 
 --- Game Stats ---
-Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
+Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards Current Score: You 0 - 0 AI
 
 --- Table Cards ---
 Table Cards (1)
@@ -179,13 +182,14 @@ Your Hand (1)
 				SelectedCard:        domain.Card{Suit: domain.Spade, Rank: domain.Tre},
 				CanPlaySelectedCard: false,
 				ShowNewGameButton:   false,
+				Score:               domain.NewScore(),
 			},
 			expected: `
 --- Game Prompt ---
 Your turn.
 
 --- Game Stats ---
-Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
+Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards Current Score: You 0 - 0 AI
 
 --- Table Cards ---
 Table Cards (1)
@@ -211,13 +215,14 @@ Your Hand (1)
 				SelectedCard:      domain.NO_CARD_SELECTED,
 				DeckCount:         30,
 				ShowNewGameButton: false,
+				Score:             domain.NewScore(),
 			},
 			expected: `
 --- Game Prompt ---
 Your turn.
 
 --- Game Stats ---
-Deck: 30 cards Your Captures: 0 cards AI Captures: 0 cards
+Deck: 30 cards Your Captures: 0 cards AI Captures: 0 cards Current Score: You 0 - 0 AI
 
 --- Table Cards ---
 Table Cards (0)
@@ -247,13 +252,14 @@ Your Hand (3)
 				PlayerCaptureCount:  5,
 				AICaptureCount:      3,
 				ShowNewGameButton:   false,
+				Score:               domain.NewScore(),
 			},
 			expected: `
 --- Game Prompt ---
 Your turn.
 
 --- Game Stats ---
-Deck: 20 cards Your Captures: 5 cards AI Captures: 3 cards
+Deck: 20 cards Your Captures: 5 cards AI Captures: 3 cards Current Score: You 0 - 0 AI
 
 --- Table Cards ---
 Table Cards (3)
@@ -283,13 +289,14 @@ Your Hand (1)
 				PlayerCaptureCount: 12,
 				AICaptureCount:     14,
 				ShowNewGameButton:  false,
+				Score:              domain.NewScore(),
 			},
 			expected: `
 --- Game Prompt ---
 AI played Fante di Spade and captured Fante di Denari.
 
 --- Game Stats ---
-Deck: 10 cards Your Captures: 12 cards AI Captures: 14 cards
+Deck: 10 cards Your Captures: 12 cards AI Captures: 14 cards Current Score: You 0 - 0 AI
 
 --- Table Cards ---
 Table Cards (2)
@@ -321,13 +328,14 @@ Your Hand (2)
 				PlayerCaptureCount:  8,
 				AICaptureCount:      7,
 				ShowNewGameButton:   false,
+				Score:               domain.NewScore(),
 			},
 			expected: `
 --- Game Prompt ---
 Your turn.
 
 --- Game Stats ---
-Deck: 15 cards Your Captures: 8 cards AI Captures: 7 cards
+Deck: 15 cards Your Captures: 8 cards AI Captures: 7 cards Current Score: You 0 - 0 AI
 
 --- Table Cards ---
 Table Cards (3)
@@ -354,13 +362,14 @@ Your Hand (2)
 				PlayerTurn:        false,
 				SelectedCard:      domain.NO_CARD_SELECTED,
 				ShowNewGameButton: false,
+				Score:             domain.NewScore(),
 			},
 			expected: `
 --- Game Prompt ---
 AI is thinking...
 
 --- Game Stats ---
-Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards
+Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards Current Score: You 0 - 0 AI
 
 --- AI Turn ---
 [👆 Let AI Play Its Turn]
@@ -434,26 +443,14 @@ func visualizeTemplate(htmlContent string) string {
 	}
 
 	var output strings.Builder
-	visualizeNode(doc, &output, 0, []string{"script", "style", "link", "meta"})
+	visualizeNode(doc, &output, 0, []string{"script", "style", "link", "head"})
 
-	// Remove the score information from the game stats section to maintain compatibility with existing tests
-	result := output.String()
-	result = replaceAll(result, "Current Score: You \\d+ - \\d+ AI", "")
-
-	// Remove the "Scopa Trainer" title to maintain compatibility with existing tests
-	result = replaceAll(result, "Scopa Trainer\n", "")
-
-	return normalizeWhitespace(result)
+	return normalizeWhitespace(output.String())
 }
 
 func visualizeNode(n *html.Node, output *strings.Builder, depth int, skipElements []string) {
 	// Skip elements in the skip list
 	if n.Type == html.ElementNode && slices.Contains(skipElements, n.Data) {
-		return
-	}
-
-	// Skip the title element
-	if n.Type == html.ElementNode && n.Data == "title" {
 		return
 	}
 
