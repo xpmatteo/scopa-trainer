@@ -280,3 +280,19 @@ func (s *GameService) PlayAITurn() {
 	// Check if new cards need to be dealt
 	s.DealNewCardsIfNeeded()
 }
+
+// SetGameOver sets the game state to game over
+func (s *GameService) SetGameOver() {
+	if s.gameState != nil {
+		s.gameState.Status = domain.StatusGameOver
+	}
+}
+
+// GetDeck returns the current game deck
+// Note: This method is primarily for testing purposes
+func (s *GameService) GetDeck() *domain.Deck {
+	if s.gameState == nil {
+		return nil
+	}
+	return s.gameState.Deck
+}

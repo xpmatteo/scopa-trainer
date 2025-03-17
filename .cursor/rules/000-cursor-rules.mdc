@@ -41,11 +41,9 @@ Invalid concise example with explanation
 PREFIX-name.mdc where PREFIX is:
 - 0XX: Core standards
 - 1XX: Tool configs
-- 3XX: Testing standards
 - 1XXX: Language rules
 - 2XXX: Framework rules
 - 8XX: Workflows
-- 9XX: Templates
 - _name.mdc: Private rules
 
 ### Glob Pattern Examples

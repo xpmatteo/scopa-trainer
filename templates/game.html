@@ -42,6 +42,19 @@
             cursor: pointer;
             border-radius: 5px;
         }
+        .test-game-over-button {
+            background-color: #F44336;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
         .card-area {
             margin-top: 20px;
             padding: 20px;
@@ -188,6 +201,11 @@
         <form action="/new-game" method="post">
             <button type="submit" class="new-game-button">New Game</button>
         </form>
+        {{if not .GameInProgress}}
+        <form action="/test-game-over" method="post" style="display: inline;">
+            <button type="submit" class="test-game-over-button">Test Game Over</button>
+        </form>
+        {{end}}
         {{end}}
     </section>
 
