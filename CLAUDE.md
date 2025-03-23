@@ -29,3 +29,11 @@
 - Use table-driven tests where applicable
 - Use testify/assert for assertions
 - HTTP handlers: use httptest package
+
+## Quality Assurance Checklist
+Before declaring any task complete:
+1. Run all tests with `go test ./...` to verify all tests pass
+2. Attempt a full build with `make build` or `go build -o scopa-trainer cmd/server/main.go`
+3. If the application has UI changes, manually test the affected functionality
+4. Check for edge cases in the implemented functionality
+5. Ensure code follows project conventions and style guidelines

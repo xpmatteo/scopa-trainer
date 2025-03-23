@@ -67,6 +67,7 @@ func TestGameStates_TableDriven(t *testing.T) {
 --- Game Prompt ---
 Welcome to Scopa Trainer! Click 'New Game' to start playing. [👆 New Game]
 [👆 Test Game Over]
+[👆 Test Combination Capture]
 `,
 		},
 		{
