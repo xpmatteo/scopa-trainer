@@ -23,8 +23,10 @@ func main() {
 	http.HandleFunc("POST /review-game", handlers.NewHandleReviewGame())
 	http.HandleFunc("POST /select-card", handlers.NewHandleSelectCard(gameService))
 	http.HandleFunc("POST /play-card", handlers.NewHandlePlayCard(gameService))
+	http.HandleFunc("POST /confirm-capture", handlers.NewHandleConfirmCapture(gameService))
 	http.HandleFunc("POST /ai-turn", handlers.NewHandleAITurn(gameService))
 	http.HandleFunc("POST /test-game-over", handlers.NewHandleTestGameOver(gameService))
+	http.HandleFunc("POST /test-combination", handlers.NewHandleTestCombination(gameService))
 
 	// Serve static files
 	fs := http.FileServer(http.Dir("static"))

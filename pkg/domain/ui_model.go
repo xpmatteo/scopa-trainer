@@ -17,7 +17,9 @@ type UIModel struct {
 	PlayerCaptureCards  []Card
 	AICaptureCards      []Card
 	Score               Score
-	CaptureOptions      [][]Card // All possible capture combinations for selected card
+	CaptureOptions      [][]Card  // All possible capture combinations for selected card
+	SelectedTableCards  []Card    // Currently selected table cards for combination capture
+	CanConfirmCapture   bool      // Whether player can confirm the current capture selection
 }
 
 var NO_CARD_SELECTED = Card{}
@@ -41,5 +43,7 @@ func NewUIModel() UIModel {
 		AICaptureCards:      []Card{},
 		Score:               NewScore(),
 		CaptureOptions:      [][]Card{},
+		SelectedTableCards:  []Card{},
+		CanConfirmCapture:   false,
 	}
 }

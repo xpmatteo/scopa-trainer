@@ -1,22 +1,26 @@
 package application
 
 import (
+	"fmt"
 	"sort"
+	"strconv"
 
 	"github.com/xpmatteo/scopa-trainer/pkg/domain"
 )
 
 // GameService handles the application logic for the game
 type GameService struct {
-	gameState    *domain.GameState
-	selectedCard domain.Card
+	gameState          *domain.GameState
+	selectedCard       domain.Card
+	selectedTableCards []domain.Card // Cards selected for combination capture
 }
 
 // NewGameService creates a new game service with initial state
 func NewGameService() *GameService {
 	return &GameService{
-		gameState:    nil,
-		selectedCard: domain.NO_CARD_SELECTED,
+		gameState:          nil,
+		selectedCard:       domain.NO_CARD_SELECTED,
+		selectedTableCards: []domain.Card{},
 	}
 }
 
@@ -35,6 +39,7 @@ func (s *GameService) GetUIModel() domain.UIModel {
 	model.GameInProgress = s.gameState.Status != domain.StatusGameNotStarted
 	model.PlayerTurn = s.gameState.Status == domain.StatusPlayerTurn
 	model.SelectedCard = s.selectedCard
+	model.SelectedTableCards = s.selectedTableCards
 
 	// Set card counts and capture cards
 	model.DeckCount = len(s.gameState.Deck.CardsAt(domain.DeckLocation))
@@ -61,14 +66,28 @@ func (s *GameService) GetUIModel() domain.UIModel {
 			captureOptions := s.findCaptureOptions(s.selectedCard)
 			model.CaptureOptions = captureOptions
 			
+			// Check if we can confirm the current capture selection
+			model.CanConfirmCapture = s.canCompleteCaptureSelection()
+			
 			if len(captureOptions) > 0 {
 				// We have capture options
 				if len(captureOptions) == 1 && len(captureOptions[0]) == 1 {
 					// Single card capture
 					model.GamePrompt = "Click on the matching card to capture it, or select a different card."
+				} else if len(s.selectedTableCards) > 0 {
+					// Some table cards are selected for combination capture
+					if model.CanConfirmCapture {
+						model.GamePrompt = "Click 'Confirm Capture' to complete the capture, or select different cards."
+					} else {
+						sum := 0
+						for _, card := range s.selectedTableCards {
+							sum += card.Value()
+						}
+						model.GamePrompt = fmt.Sprintf("Selected cards sum to %d (need %d). Select more cards or click a selected card to deselect it.", sum, s.selectedCard.Value())
+					}
 				} else {
-					// Combination capture
-					model.GamePrompt = "Click on a card in a valid capture combination, or select a different card."
+					// Combination capture, nothing selected yet
+					model.GamePrompt = "Select table cards that sum to " + strconv.Itoa(s.selectedCard.Value()) + "."
 				}
 				// Set CanPlaySelectedCard to false when capture is possible
 				model.CanPlaySelectedCard = false
@@ -97,6 +116,49 @@ func (s *GameService) canCaptureAnyCard(card domain.Card) bool {
 	
 	// If there are any options, a capture is possible
 	return len(options) > 0
+}
+
+// isValidCaptureSelection checks if the currently selected table cards form a valid capture
+// with the selected hand card
+func (s *GameService) isValidCaptureSelection() bool {
+	// If no card is selected from hand, or no table cards selected, not valid
+	if s.selectedCard == domain.NO_CARD_SELECTED || len(s.selectedTableCards) == 0 {
+		return false
+	}
+	
+	// If just one card is selected, it must match the rank of the hand card
+	if len(s.selectedTableCards) == 1 && s.selectedTableCards[0].Rank == s.selectedCard.Rank {
+		return true
+	}
+	
+	// For multiple cards, calculate the sum of their values
+	sum := 0
+	for _, card := range s.selectedTableCards {
+		sum += card.Value()
+	}
+	
+	// The sum must equal the hand card's value
+	return sum == s.selectedCard.Value()
+}
+
+// toggleTableCardSelection adds or removes a card from the selectedTableCards slice
+func (s *GameService) toggleTableCardSelection(card domain.Card) {
+	// Check if the card is already selected
+	for i, selectedCard := range s.selectedTableCards {
+		if selectedCard == card {
+			// Card is already selected, so remove it
+			s.selectedTableCards = append(s.selectedTableCards[:i], s.selectedTableCards[i+1:]...)
+			return
+		}
+	}
+	
+	// If we've gotten here, card was not already selected, so add it
+	s.selectedTableCards = append(s.selectedTableCards, card)
+}
+
+// canCompleteCaptureSelection checks if we have a valid capture selection that can be confirmed
+func (s *GameService) canCompleteCaptureSelection() bool {
+	return s.isValidCaptureSelection()
 }
 
 // findCaptureOptions returns all possible card combinations that can be captured
@@ -203,8 +265,9 @@ func (s *GameService) CaptureCombination(tableCards []domain.Card) {
 		s.gameState.Deck.MoveCard(card, domain.TableLocation, domain.PlayerCapturesLocation)
 	}
 	
-	// Clear the selected card
+	// Clear the selected card and table card selection
 	s.selectedCard = domain.NO_CARD_SELECTED
+	s.selectedTableCards = []domain.Card{}
 	
 	// Switch turn to AI
 	s.gameState.Status = domain.StatusAITurn
@@ -213,12 +276,24 @@ func (s *GameService) CaptureCombination(tableCards []domain.Card) {
 	s.DealNewCardsIfNeeded()
 }
 
+// ConfirmCapture confirms the current capture selection
+func (s *GameService) ConfirmCapture() {
+	// Verify that we have a valid capture selection
+	if !s.isValidCaptureSelection() {
+		return
+	}
+	
+	// Use the existing CaptureCombination method with our selected table cards
+	s.CaptureCombination(s.selectedTableCards)
+}
+
 // StartNewGame initializes a new game and returns the updated UI model
 func (s *GameService) StartNewGame() {
 	// Initialize a new game state
 	gameState := domain.NewGameState()
 	s.gameState = &gameState
 	s.selectedCard = domain.NO_CARD_SELECTED
+	s.selectedTableCards = []domain.Card{}
 }
 
 // sortCards sorts the cards by rank and suit
@@ -266,29 +341,29 @@ func (s *GameService) SelectCard(suit domain.Suit, rank domain.Rank) {
 	if isTableCard && s.selectedCard != domain.NO_CARD_SELECTED {
 		// Check if the ranks match for capture (direct match - priority rule)
 		if clickedCard.Rank == s.selectedCard.Rank {
-			// Capture the single card
+			// Direct rank match takes precedence - capture immediately
 			s.CaptureCombination([]domain.Card{clickedCard})
 			return
 		}
 		
-		// Check for combination captures
+		// For combination captures, toggle the selection of this card
 		options := s.findCaptureOptions(s.selectedCard)
 		if len(options) > 0 {
-			// For simplicity in this implementation, if the clicked card is part of any valid combination,
-			// we capture the first valid combination containing that card
-			for _, combo := range options {
-				// Check if the clicked card is in this combination
-				for _, card := range combo {
-					if card == clickedCard {
-						// Found a valid combination containing the clicked card
-						s.CaptureCombination(combo)
-						return
-					}
-				}
-			}
+			// Toggle this card's selection
+			s.toggleTableCardSelection(clickedCard)
+			
+			// If the selection is now valid, user can confirm it
+			// The UI will show a confirmation button
+			return
 		}
 		
-		// If no valid capture with this table card, keep the hand card selected
+		// If no valid capture options, keep the hand card selected
+		return
+	}
+	
+	// If table card clicked without a hand card selected, do nothing
+	if isTableCard && s.selectedCard == domain.NO_CARD_SELECTED {
+		// Don't change the selected card
 		return
 	}
 
@@ -447,4 +522,66 @@ func (s *GameService) GetDeck() *domain.Deck {
 		return nil
 	}
 	return s.gameState.Deck
+}
+
+// SetupCombinationTest sets up a test scenario for combination captures
+// It creates a game state with specific cards for testing the capture combinations:
+// - Cards on the table: Ranks 1, 2, 3, 4 of different suits
+// - Card in player's hand: Rank 7
+// This allows testing of capturing combinations like 3+4=7 or 1+2+4=7
+func (s *GameService) SetupCombinationTest() {
+	// Start with a new game to initialize the game state
+	s.StartNewGame()
+	
+	// Clear the table
+	tableCards := s.gameState.Deck.CardsAt(domain.TableLocation)
+	for _, card := range tableCards {
+		s.gameState.Deck.MoveCard(card, domain.TableLocation, domain.DeckLocation)
+	}
+	
+	// Clear the player's hand
+	playerCards := s.gameState.Deck.CardsAt(domain.PlayerHandLocation)
+	for _, card := range playerCards {
+		s.gameState.Deck.MoveCard(card, domain.PlayerHandLocation, domain.DeckLocation)
+	}
+	
+	// Clear the AI's hand
+	aiCards := s.gameState.Deck.CardsAt(domain.AIHandLocation)
+	for _, card := range aiCards {
+		s.gameState.Deck.MoveCard(card, domain.AIHandLocation, domain.DeckLocation)
+	}
+	
+	// Add specific cards to the table (1, 2, 3, 4)
+	rankSuitPairs := []struct{
+		rank domain.Rank
+		suit domain.Suit
+	}{
+		{domain.Asso, domain.Coppe},      // 1
+		{domain.Due, domain.Bastoni},     // 2
+		{domain.Tre, domain.Spade},       // 3
+		{domain.Quattro, domain.Denari},  // 4
+	}
+	
+	// Find and move cards to the table
+	for _, pair := range rankSuitPairs {
+		// Check each card in the deck
+		deckCards := s.gameState.Deck.CardsAt(domain.DeckLocation)
+		for _, card := range deckCards {
+			if card.Rank == pair.rank && card.Suit == pair.suit {
+				s.gameState.Deck.MoveCard(card, domain.DeckLocation, domain.TableLocation)
+				break
+			}
+		}
+	}
+	
+	// Add a card with rank 7 to player's hand
+	for _, card := range s.gameState.Deck.CardsAt(domain.DeckLocation) {
+		if card.Rank == domain.Sette {
+			s.gameState.Deck.MoveCard(card, domain.DeckLocation, domain.PlayerHandLocation)
+			break
+		}
+	}
+	
+	// Set game state to player's turn
+	s.gameState.Status = domain.StatusPlayerTurn
 }

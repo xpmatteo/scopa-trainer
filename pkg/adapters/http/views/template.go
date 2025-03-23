@@ -19,6 +19,16 @@ func CardInCaptureOptions(card domain.Card, captureOptions [][]domain.Card) bool
 	return false
 }
 
+// IsCardInSlice checks if a card is in the given slice of cards
+func IsCardInSlice(card domain.Card, cards []domain.Card) bool {
+	for _, c := range cards {
+		if c.Suit == card.Suit && c.Rank == card.Rank {
+			return true
+		}
+	}
+	return false
+}
+
 // ParseTemplates parses the template files and adds custom functions
 func ParseTemplates(files ...string) *template.Template {
 	funcMap := template.FuncMap{
@@ -27,6 +37,7 @@ func ParseTemplates(files ...string) *template.Template {
 		"cardBackImagePath":    CardBackImagePath,
 		"suitToLower":          SuitToLower,
 		"cardInCaptureOptions": CardInCaptureOptions,
+		"isCardInSlice":        IsCardInSlice,
 	}
 	templ, err := template.New("game.html").Funcs(funcMap).ParseFiles(files...)
 	if err != nil {

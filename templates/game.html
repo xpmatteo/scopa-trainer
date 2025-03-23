@@ -16,6 +16,20 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             margin-bottom: 20px;
         }
+        .confirm-capture-button {
+            background-color: #FF9800;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 0;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
+        }
         .new-game-button {
             background-color: #4CAF50;
             border: none;
@@ -98,6 +112,11 @@
         }
         .card.capturable {
             border: 2px dashed yellow;
+        }
+        .card.selected-for-capture {
+            border: 3px solid #FF9800;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
         }
         .play-area {
             margin-top: 20px;
@@ -208,6 +227,9 @@
         {{if not .GameInProgress}}
         <form action="/test-game-over" method="post" style="display: inline;">
             <button type="submit" class="test-game-over-button">Test Game Over</button>
+        </form>
+        <form action="/test-combination" method="post" style="display: inline;">
+            <button type="submit" class="test-game-over-button" style="background-color: #9C27B0;">Test Combination Capture</button>
         </form>
         {{end}}
         {{end}}
@@ -339,13 +361,23 @@
             <h2>Table Cards ({{len .TableCards}})</h2>
             <div style="display: flex; flex-wrap: wrap;">
                 {{range .TableCards}}
-                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | suitToLower}} {{if or (and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)) (cardInCaptureOptions . $.CaptureOptions)}}capturable{{end}} {{if not $.PlayerTurn}}disabled{{end}}" {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
+                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | suitToLower}} 
+                    {{if isCardInSlice . $.SelectedTableCards}}selected-for-capture{{end}}
+                    {{if or (and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)) (cardInCaptureOptions . $.CaptureOptions)}}capturable{{end}} 
+                    {{if not $.PlayerTurn}}disabled{{end}}" 
+                    {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
                     <img src="{{. | cardImagePath}}" alt="{{.Name}} di {{.Suit}}">
                 </div>
                 {{end}}
             </div>
 
             {{if ne .SelectedCard.Rank 0}}
+                {{if .CanConfirmCapture}}
+                <div class="confirm-capture-button" onclick="confirmCapture()">
+                    Confirm Capture Selection
+                </div>
+                {{end}}
+                
                 {{if .CanPlaySelectedCard}}
                 <div class="play-area {{if not $.PlayerTurn}}disabled{{end}}" {{if $.PlayerTurn}}onclick="playCard()"{{end}}>
                     <p>Click here to play the selected card to the table</p>
@@ -405,6 +437,17 @@
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '/play-card';
+
+            // Submit the form
+            document.body.appendChild(form);
+            form.submit();
+        }
+
+        function confirmCapture() {
+            // Create a form and submit it
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/confirm-capture';
 
             // Submit the form
             document.body.appendChild(form);
