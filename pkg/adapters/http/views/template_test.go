@@ -128,7 +128,7 @@ Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards Current Score: You 0 -
 
 --- Table Cards ---
 Table Cards (2)
-[👆 Tre-di-Coppe ⭐] [👆 Quattro-di-Bastoni] [👆 You must capture a card with the same rank]
+[👆 Tre-di-Coppe ⭐] [👆 Quattro-di-Bastoni] [👆 You must capture cards highlighted in yellow]
 
 --- Player Hand ---
 Your Hand (1)
@@ -194,7 +194,7 @@ Deck: 0 cards Your Captures: 0 cards AI Captures: 0 cards Current Score: You 0 -
 
 --- Table Cards ---
 Table Cards (1)
-[👆 Sette-di-Coppe] [👆 You must capture a card with the same rank]
+[👆 Sette-di-Coppe] [👆 You must capture cards highlighted in yellow]
 
 --- Player Hand ---
 Your Hand (1)
@@ -264,7 +264,7 @@ Deck: 20 cards Your Captures: 5 cards AI Captures: 3 cards Current Score: You 0 
 
 --- Table Cards ---
 Table Cards (3)
-[👆 Sette-di-Denari ⭐] [👆 Sette-di-Coppe ⭐] [👆 Due-di-Bastoni] [👆 You must capture a card with the same rank]
+[👆 Sette-di-Denari ⭐] [👆 Sette-di-Coppe ⭐] [👆 Due-di-Bastoni] [👆 You must capture cards highlighted in yellow]
 
 --- Player Hand ---
 Your Hand (1)
@@ -340,7 +340,7 @@ Deck: 15 cards Your Captures: 8 cards AI Captures: 7 cards Current Score: You 0 
 
 --- Table Cards ---
 Table Cards (3)
-[👆 Sette-di-Coppe ⭐] [👆 Sette-di-Denari ⭐] [👆 Due-di-Bastoni] [👆 You must capture a card with the same rank]
+[👆 Sette-di-Coppe ⭐] [👆 Sette-di-Denari ⭐] [👆 Due-di-Bastoni] [👆 You must capture cards highlighted in yellow]
 
 --- Player Hand ---
 Your Hand (2)

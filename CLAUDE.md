@@ -1,0 +1,31 @@
+# CLAUDE.md - Scopa Trainer Project Guidelines
+
+## Commands
+- Build: `make build`
+- Run server: `make serve` or `go run cmd/server/main.go`
+- Run all tests: `make test` or `go test ./...`
+- Run specific test: `go test ./pkg/path/to/package -run TestName -v`
+- Run specific package tests: `go test ./pkg/domain -v`
+- Clean: `make clean`
+
+## Go Coding Style
+- Use MixedCaps (CamelCase) for names, not underscores
+- Package names: short, lowercase, single words
+- Interfaces: use -er suffix for single-method interfaces
+- Error handling: always check errors, use fmt.Errorf for context
+- Tests: use table-driven tests with testify assertions
+- Follow domain-driven design (pkg/domain, pkg/application, pkg/adapters)
+
+## Project Structure
+- `/cmd`: Application entry points
+- `/pkg/domain`: Core domain models and logic
+- `/pkg/application`: Application services and business logic
+- `/pkg/adapters`: External interfaces (HTTP, templates)
+- `/templates`: HTML templates
+- `/static`: Static assets (images, CSS, JS)
+
+## Testing Guidelines
+- Test files alongside implementation
+- Use table-driven tests where applicable
+- Use testify/assert for assertions
+- HTTP handlers: use httptest package

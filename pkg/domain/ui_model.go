@@ -17,6 +17,7 @@ type UIModel struct {
 	PlayerCaptureCards  []Card
 	AICaptureCards      []Card
 	Score               Score
+	CaptureOptions      [][]Card // All possible capture combinations for selected card
 }
 
 var NO_CARD_SELECTED = Card{}
@@ -39,5 +40,6 @@ func NewUIModel() UIModel {
 		PlayerCaptureCards:  []Card{},
 		AICaptureCards:      []Card{},
 		Score:               NewScore(),
+		CaptureOptions:      [][]Card{},
 	}
 }

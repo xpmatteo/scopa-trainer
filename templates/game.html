@@ -339,7 +339,7 @@
             <h2>Table Cards ({{len .TableCards}})</h2>
             <div style="display: flex; flex-wrap: wrap;">
                 {{range .TableCards}}
-                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | suitToLower}} {{if and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)}}capturable{{end}} {{if not $.PlayerTurn}}disabled{{end}}" {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
+                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | suitToLower}} {{if or (and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)) (cardInCaptureOptions . $.CaptureOptions)}}capturable{{end}} {{if not $.PlayerTurn}}disabled{{end}}" {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
                     <img src="{{. | cardImagePath}}" alt="{{.Name}} di {{.Suit}}">
                 </div>
                 {{end}}
@@ -352,7 +352,7 @@
                 </div>
                 {{else}}
                 <div class="play-area disabled">
-                    <p>You must capture a card with the same rank</p>
+                    <p>You must capture cards highlighted in yellow</p>
                 </div>
                 {{end}}
             {{end}}

@@ -28,7 +28,7 @@ func main() {
 
 	// Serve static files
 	fs := http.FileServer(http.Dir("static"))
-	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	http.Handle("GET /static/", http.StripPrefix("/static/", fs))
 
 	// Get the port from environment variables or use default
 	port := os.Getenv("PORT")
