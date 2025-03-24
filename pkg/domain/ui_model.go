@@ -17,9 +17,12 @@ type UIModel struct {
 	PlayerCaptureCards  []Card
 	AICaptureCards      []Card
 	Score               Score
-	CaptureOptions      [][]Card  // All possible capture combinations for selected card
-	SelectedTableCards  []Card    // Currently selected table cards for combination capture
-	CanConfirmCapture   bool      // Whether player can confirm the current capture selection
+	CaptureOptions      [][]Card // All possible capture combinations for selected card
+	SelectedTableCards  []Card   // Currently selected table cards for combination capture
+	CanConfirmCapture   bool     // Whether player can confirm the current capture selection
+	LastAICardPlayed    Card     // The card the AI played in its last move
+	LastAICapture       []Card   // The cards the AI captured in its last move
+	ShowAIMove          bool     // Whether to show the AI's last move
 }
 
 var NO_CARD_SELECTED = Card{}
@@ -45,5 +48,8 @@ func NewUIModel() UIModel {
 		CaptureOptions:      [][]Card{},
 		SelectedTableCards:  []Card{},
 		CanConfirmCapture:   false,
+		LastAICardPlayed:    NO_CARD_SELECTED,
+		LastAICapture:       []Card{},
+		ShowAIMove:          false,
 	}
 }

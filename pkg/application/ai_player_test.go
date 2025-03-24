@@ -195,3 +195,58 @@ func TestRandomAIPlayerNoCapture(t *testing.T) {
 	// Verify that it's now the player's turn
 	assert.Equal(t, domain.StatusPlayerTurn, service.gameState.Status, "It should be player's turn after AI move")
 }
+
+func TestAILastMoveTracking(t *testing.T) {
+	// Create a new game service
+	service := NewGameService()
+	service.StartNewGame()
+
+	// Set up a known game state for testing
+	// Clear existing cards from AI hand and add a specific card
+	aiCards := service.gameState.Deck.CardsAt(domain.AIHandLocation)
+	for _, card := range aiCards {
+		service.gameState.Deck.MoveCard(card, domain.AIHandLocation, domain.DeckLocation)
+	}
+
+	// Add a specific card to AI hand
+	aiCard := domain.Card{Suit: domain.Coppe, Rank: domain.Sette}
+	addCardToAIHand(service, aiCard)
+
+	// Clear the table
+	tableCards := service.gameState.Deck.CardsAt(domain.TableLocation)
+	for _, card := range tableCards {
+		service.gameState.Deck.MoveCard(card, domain.TableLocation, domain.DeckLocation)
+	}
+
+	// Add a matching card to the table
+	tableCard := domain.Card{Suit: domain.Denari, Rank: domain.Sette}
+	addCardToTable(service, tableCard)
+
+	// Set it to AI's turn
+	service.gameState.Status = domain.StatusAITurn
+
+	// Verify initial state - no AI move should be shown yet
+	initialModel := service.GetUIModel()
+	assert.False(t, initialModel.ShowAIMove, "AI move should not be shown before AI plays")
+	assert.Equal(t, domain.NO_CARD_SELECTED, initialModel.LastAICardPlayed, "No AI card should be tracked yet")
+	assert.Empty(t, initialModel.LastAICapture, "No AI capture should be tracked yet")
+
+	// Execute AI turn
+	service.PlayAITurn()
+
+	// Verify AI's move is tracked
+	updatedModel := service.GetUIModel()
+	assert.True(t, updatedModel.ShowAIMove, "AI move should be shown after AI plays")
+	assert.Equal(t, aiCard, updatedModel.LastAICardPlayed, "The AI's played card should be tracked")
+	assert.Equal(t, 1, len(updatedModel.LastAICapture), "AI's capture should be tracked")
+	assert.Equal(t, tableCard, updatedModel.LastAICapture[0], "The captured card should match the table card")
+
+	// Simulate player selecting a card - should clear AI move
+	playerHand := service.gameState.Deck.CardsAt(domain.PlayerHandLocation)
+	assert.NotEmpty(t, playerHand, "Player should have cards")
+	service.SelectCard(playerHand[0].Suit, playerHand[0].Rank)
+
+	// Verify AI move is cleared
+	afterSelectionModel := service.GetUIModel()
+	assert.False(t, afterSelectionModel.ShowAIMove, "AI move should be hidden after player selects a card")
+}

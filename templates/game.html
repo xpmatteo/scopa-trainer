@@ -212,6 +212,55 @@
         .score-table .total-row td {
             border-top: 2px solid #ddd;
         }
+        
+        /* Styles for highlighting AI moves */
+        .ai-last-move {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e1f5fe;
+            border-radius: 10px;
+            border: 2px solid #4fc3f7;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .ai-last-move-title {
+            color: #0277bd;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .ai-move-card {
+            border: 3px solid #29b6f6;
+            box-shadow: 0 0 10px rgba(41, 182, 246, 0.5);
+            transform: translateY(-5px);
+        }
+        
+        .ai-capture-area {
+            background-color: #e8f5e9;
+            border: 2px solid #66bb6a;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+        
+        .ai-capture-title {
+            color: #2e7d32;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        /* Animation for AI move */
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(41, 182, 246, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(41, 182, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(41, 182, 246, 0); }
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
     </style>
 </head>
 <body>
@@ -356,16 +405,51 @@
     </section>
     {{end}}
 
+    {{if and .ShowAIMove .GameInProgress}}
+    <section data-section="AI Last Move">
+        <div class="ai-last-move">
+            <h3 class="ai-last-move-title">AI's Last Move:</h3>
+            <div style="display: flex; flex-wrap: wrap;">
+                <div data-test-icon="{{.LastAICardPlayed.Name}}-di-{{.LastAICardPlayed.Suit}}" 
+                     class="card {{.LastAICardPlayed.Suit | suitToLower}} ai-move-card pulse">
+                    <img src="{{.LastAICardPlayed | cardImagePath}}" 
+                         alt="{{.LastAICardPlayed.Name}} di {{.LastAICardPlayed.Suit}}">
+                </div>
+                
+                {{if gt (len .LastAICapture) 0}}
+                <div class="ai-capture-area">
+                    <h4 class="ai-capture-title">Captured:</h4>
+                    <div style="display: flex; flex-wrap: wrap;">
+                        {{range .LastAICapture}}
+                        <div data-test-icon="{{.Name}}-di-{{.Suit}}" 
+                             class="card {{.Suit | suitToLower}} ai-move-card">
+                            <img src="{{. | cardImagePath}}" alt="{{.Name}} di {{.Suit}}">
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+                {{else}}
+                <div style="margin-left: 20px; align-self: center;">
+                    <p>AI played this card to the table.</p>
+                </div>
+                {{end}}
+            </div>
+        </div>
+    </section>
+    {{end}}
+
     <section data-section="Table Cards">
         <div class="card-area table-area">
             <h2>Table Cards ({{len .TableCards}})</h2>
             <div style="display: flex; flex-wrap: wrap;">
                 {{range .TableCards}}
-                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | suitToLower}} 
-                    {{if isCardInSlice . $.SelectedTableCards}}selected-for-capture{{end}}
-                    {{if or (and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)) (cardInCaptureOptions . $.CaptureOptions)}}capturable{{end}} 
-                    {{if not $.PlayerTurn}}disabled{{end}}" 
-                    {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
+                <div data-test-icon="{{.Name}}-di-{{.Suit}}" 
+                     class="card {{.Suit | suitToLower}} 
+                        {{if isCardInSlice . $.SelectedTableCards}}selected-for-capture{{end}}
+                        {{if or (and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)) (cardInCaptureOptions . $.CaptureOptions)}}capturable{{end}} 
+                        {{if and $.ShowAIMove (eq . $.LastAICardPlayed)}}ai-move-card pulse{{end}}
+                        {{if not $.PlayerTurn}}disabled{{end}}" 
+                     {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
                     <img src="{{. | cardImagePath}}" alt="{{.Name}} di {{.Suit}}">
                 </div>
                 {{end}}

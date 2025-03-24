@@ -13,6 +13,9 @@ type GameService struct {
 	gameState          *domain.GameState
 	selectedCard       domain.Card
 	selectedTableCards []domain.Card // Cards selected for combination capture
+	lastAICardPlayed   domain.Card   // The card the AI played in its last move
+	lastAICapture      []domain.Card // The cards the AI captured in its last move
+	showAIMove         bool          // Whether to show the AI's last move
 }
 
 // NewGameService creates a new game service with initial state
@@ -21,6 +24,9 @@ func NewGameService() *GameService {
 		gameState:          nil,
 		selectedCard:       domain.NO_CARD_SELECTED,
 		selectedTableCards: []domain.Card{},
+		lastAICardPlayed:   domain.NO_CARD_SELECTED,
+		lastAICapture:      []domain.Card{},
+		showAIMove:         false,
 	}
 }
 
@@ -40,6 +46,9 @@ func (s *GameService) GetUIModel() domain.UIModel {
 	model.PlayerTurn = s.gameState.Status == domain.StatusPlayerTurn
 	model.SelectedCard = s.selectedCard
 	model.SelectedTableCards = s.selectedTableCards
+	model.LastAICardPlayed = s.lastAICardPlayed
+	model.LastAICapture = s.lastAICapture
+	model.ShowAIMove = s.showAIMove
 
 	// Set card counts and capture cards
 	model.DeckCount = len(s.gameState.Deck.CardsAt(domain.DeckLocation))
@@ -278,6 +287,9 @@ func (s *GameService) CaptureCombination(tableCards []domain.Card) {
 
 // ConfirmCapture confirms the current capture selection
 func (s *GameService) ConfirmCapture() {
+	// Clear AI move highlighting when player confirms a capture
+	s.showAIMove = false
+
 	// Verify that we have a valid capture selection
 	if !s.isValidCaptureSelection() {
 		return
@@ -294,6 +306,11 @@ func (s *GameService) StartNewGame() {
 	s.gameState = &gameState
 	s.selectedCard = domain.NO_CARD_SELECTED
 	s.selectedTableCards = []domain.Card{}
+
+	// Clear AI move information
+	s.lastAICardPlayed = domain.NO_CARD_SELECTED
+	s.lastAICapture = []domain.Card{}
+	s.showAIMove = false
 }
 
 // sortCards sorts the cards by rank and suit
@@ -311,6 +328,9 @@ func sortCards(cards []domain.Card) []domain.Card {
 
 // SelectCard handles the selection of a card from the player's hand or capturing a card from the table
 func (s *GameService) SelectCard(suit domain.Suit, rank domain.Rank) {
+	// Clear AI move highlighting when player selects a card
+	s.showAIMove = false
+
 	// Find the card that was clicked
 	clickedCard := domain.Card{
 		Suit: suit,
@@ -388,6 +408,9 @@ func (s *GameService) PlaySelectedCard() {
 		return
 	}
 
+	// Clear AI move highlighting when player plays a card
+	s.showAIMove = false
+
 	// Check if a capture is possible
 	if s.canCaptureAnyCard(s.selectedCard) {
 		// Cannot play to table if capture is possible
@@ -460,6 +483,11 @@ func (s *GameService) PlayAITurn() {
 	// Select the first card
 	aiCard := aiCards[0]
 
+	// Store the card the AI is about to play
+	s.lastAICardPlayed = aiCard
+	s.lastAICapture = []domain.Card{} // Clear previous capture
+	s.showAIMove = true               // Show the AI move
+
 	// Find all possible capture options for this card
 	options := s.findAICaptureOptions(aiCard)
 
@@ -467,6 +495,9 @@ func (s *GameService) PlayAITurn() {
 		// AI has at least one capture option
 		// For simplicity, always choose the first option
 		captureCards := options[0]
+
+		// Store the cards the AI is about to capture
+		s.lastAICapture = append([]domain.Card{}, captureCards...)
 
 		// Move AI card to captures
 		s.gameState.Deck.MoveCard(aiCard, domain.AIHandLocation, domain.AICapturesLocation)
