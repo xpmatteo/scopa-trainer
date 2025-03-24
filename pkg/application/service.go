@@ -2,8 +2,10 @@ package application
 
 import (
 	"fmt"
+	"math/rand"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/xpmatteo/scopa-trainer/pkg/domain"
 )
@@ -16,6 +18,8 @@ type GameService struct {
 	lastAICardPlayed   domain.Card   // The card the AI played in its last move
 	lastAICapture      []domain.Card // The cards the AI captured in its last move
 	showAIMove         bool          // Whether to show the AI's last move
+	playerScopaCount   int           // Count of scopas scored by the player
+	aiScopaCount       int           // Count of scopas scored by the AI
 }
 
 // NewGameService creates a new game service with initial state
@@ -27,6 +31,8 @@ func NewGameService() *GameService {
 		lastAICardPlayed:   domain.NO_CARD_SELECTED,
 		lastAICapture:      []domain.Card{},
 		showAIMove:         false,
+		playerScopaCount:   0,
+		aiScopaCount:       0,
 	}
 }
 
@@ -59,6 +65,15 @@ func (s *GameService) GetUIModel() domain.UIModel {
 
 	// Calculate the score (updated continuously)
 	model.Score = domain.CalculateScore(model.PlayerCaptureCards, model.AICaptureCards)
+
+	// Update scopa scores
+	model.Score.Components[4].PlayerScore = s.playerScopaCount
+	model.Score.Components[4].PlayerCardCount = s.playerScopaCount
+	model.Score.Components[4].AIScore = s.aiScopaCount
+	model.Score.Components[4].AICardCount = s.aiScopaCount
+
+	// Recalculate totals after updating scopa scores
+	model.Score.CalculateTotals()
 
 	// Check if the game is over
 	model.GameOver = s.gameState.Status == domain.StatusGameOver
@@ -274,6 +289,31 @@ func (s *GameService) CaptureCombination(tableCards []domain.Card) {
 		s.gameState.Deck.MoveCard(card, domain.TableLocation, domain.PlayerCapturesLocation)
 	}
 
+	// Check if this capture cleared the table
+	tableCardsAfterCapture := s.gameState.Deck.CardsAt(domain.TableLocation)
+	// Check if this was the last card in the hand of the last player
+	playerHand := s.gameState.Deck.CardsAt(domain.PlayerHandLocation)
+	deckCards := s.gameState.Deck.CardsAt(domain.DeckLocation)
+
+	// Debug output (in real code, use a logger)
+	fmt.Printf("Debug CaptureCombination: tableEmpty=%v, playerHand=%d, deckEmpty=%v\n",
+		len(tableCardsAfterCapture) == 0, len(playerHand), len(deckCards) == 0)
+
+	// Award scopa point if table is empty and not the last hand of the game
+	if len(tableCardsAfterCapture) == 0 {
+		// Check the last card exception:
+		// No scopa if this is the last card in player's hand and the deck is empty
+		isLastCardException := len(playerHand) == 0 && len(deckCards) == 0
+
+		if !isLastCardException {
+			// Award a scopa point to the player
+			s.playerScopaCount++
+			fmt.Printf("Debug: Award scopa to player. Count=%d\n", s.playerScopaCount)
+		} else {
+			fmt.Println("Debug: No scopa awarded (last card exception)")
+		}
+	}
+
 	// Clear the selected card and table card selection
 	s.selectedCard = domain.NO_CARD_SELECTED
 	s.selectedTableCards = []domain.Card{}
@@ -311,6 +351,10 @@ func (s *GameService) StartNewGame() {
 	s.lastAICardPlayed = domain.NO_CARD_SELECTED
 	s.lastAICapture = []domain.Card{}
 	s.showAIMove = false
+
+	// Reset scopa counts
+	s.playerScopaCount = 0
+	s.aiScopaCount = 0
 }
 
 // sortCards sorts the cards by rank and suit
@@ -383,7 +427,6 @@ func (s *GameService) SelectCard(suit domain.Suit, rank domain.Rank) {
 
 	// If table card clicked without a hand card selected, do nothing
 	if isTableCard && s.selectedCard == domain.NO_CARD_SELECTED {
-		// Don't change the selected card
 		return
 	}
 
@@ -397,8 +440,6 @@ func (s *GameService) SelectCard(suit domain.Suit, rank domain.Rank) {
 			s.selectedCard = clickedCard
 		}
 	}
-	// If a table card was clicked without a hand card selected, do nothing
-	// The selected card remains unchanged
 }
 
 // PlaySelectedCard moves the currently selected card from the player's hand to the table
@@ -466,52 +507,88 @@ func (s *GameService) DealNewCardsIfNeeded() bool {
 	return false
 }
 
-// PlayAITurn handles the AI's turn
+// PlayAITurn plays a turn for the AI player
 func (s *GameService) PlayAITurn() {
-	// Check if it's the AI's turn
 	if s.gameState.Status != domain.StatusAITurn {
 		return
 	}
 
-	// Get the first card from AI's hand
+	// Get AI's cards
 	aiCards := s.gameState.Deck.CardsAt(domain.AIHandLocation)
 	if len(aiCards) == 0 {
-		// No cards in AI hand, nothing to do
 		return
 	}
 
-	// Select the first card
-	aiCard := aiCards[0]
+	// Try to find a capture
+	for _, aiCard := range aiCards {
+		captureOptions := s.findCaptureOptions(aiCard)
+		if len(captureOptions) > 0 {
+			// Choose the first capture option
+			captureCards := captureOptions[0]
 
-	// Store the card the AI is about to play
-	s.lastAICardPlayed = aiCard
-	s.lastAICapture = []domain.Card{} // Clear previous capture
-	s.showAIMove = true               // Show the AI move
+			// Move the AI card to captures
+			s.gameState.Deck.MoveCard(aiCard, domain.AIHandLocation, domain.AICapturesLocation)
 
-	// Find all possible capture options for this card
-	options := s.findAICaptureOptions(aiCard)
+			// Move the captured table cards to AI captures
+			for _, card := range captureCards {
+				s.gameState.Deck.MoveCard(card, domain.TableLocation, domain.AICapturesLocation)
+			}
 
-	if len(options) > 0 {
-		// AI has at least one capture option
-		// For simplicity, always choose the first option
-		captureCards := options[0]
+			// Record the AI's move for display
+			s.lastAICardPlayed = aiCard
+			s.lastAICapture = captureCards
+			s.showAIMove = true // Show AI's move to the player
 
-		// Store the cards the AI is about to capture
-		s.lastAICapture = append([]domain.Card{}, captureCards...)
+			// Debug info
+			fmt.Printf("Debug AI capture: card=%v, capturing=%v\n", aiCard, captureCards)
 
-		// Move AI card to captures
-		s.gameState.Deck.MoveCard(aiCard, domain.AIHandLocation, domain.AICapturesLocation)
+			// Check if the AI captured a scopa (cleared the table)
+			tableAfterCapture := s.gameState.Deck.CardsAt(domain.TableLocation)
+			aiHandAfterCapture := s.gameState.Deck.CardsAt(domain.AIHandLocation)
+			deckCards := s.gameState.Deck.CardsAt(domain.DeckLocation)
 
-		// Move all table cards in the combination to AI captures
-		for _, card := range captureCards {
-			s.gameState.Deck.MoveCard(card, domain.TableLocation, domain.AICapturesLocation)
+			fmt.Printf("Debug AI scopa check: tableEmpty=%v, aiHand=%d, deckEmpty=%v\n",
+				len(tableAfterCapture) == 0, len(aiHandAfterCapture), len(deckCards) == 0)
+
+			if len(tableAfterCapture) == 0 {
+				// Check the last card exception:
+				// No scopa if this is the last card in AI's hand and the deck is empty
+				isLastCardException := len(aiHandAfterCapture) == 0 && len(deckCards) == 0
+
+				if !isLastCardException {
+					// Award a scopa point to the AI
+					s.aiScopaCount++
+					fmt.Printf("Debug: Award scopa to AI. Count=%d\n", s.aiScopaCount)
+				} else {
+					fmt.Println("Debug: No scopa awarded to AI (last card exception)")
+				}
+			}
+
+			// It's the player's turn now
+			s.gameState.Status = domain.StatusPlayerTurn
+
+			// Check if new cards need to be dealt
+			s.DealNewCardsIfNeeded()
+			return
 		}
-	} else {
-		// No captures possible, play card to table
-		s.gameState.Deck.MoveCard(aiCard, domain.AIHandLocation, domain.TableLocation)
 	}
 
-	// Switch turn to player
+	// If no capture is possible, play a random card to the table
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	randomCardIndex := r.Intn(len(aiCards))
+	randomCard := aiCards[randomCardIndex]
+
+	// Move the random card to the table
+	s.gameState.Deck.MoveCard(randomCard, domain.AIHandLocation, domain.TableLocation)
+
+	// Record the AI's move for display
+	s.lastAICardPlayed = randomCard
+	s.lastAICapture = []domain.Card{}
+	s.showAIMove = true // Show AI's move to the player
+
+	fmt.Printf("Debug: AI played card to table: %v\n", randomCard)
+
+	// It's the player's turn now
 	s.gameState.Status = domain.StatusPlayerTurn
 
 	// Check if new cards need to be dealt
@@ -555,14 +632,12 @@ func (s *GameService) GetDeck() *domain.Deck {
 	return s.gameState.Deck
 }
 
-// SetupCombinationTest sets up a test scenario for combination captures
-// It creates a game state with specific cards for testing the capture combinations:
-// - Cards on the table: Ranks 1, 2, 3, 4 of different suits
-// - Card in player's hand: Rank 7
-// This allows testing of capturing combinations like 3+4=7 or 1+2+4=7
+// SetupCombinationTest creates a fresh game with specific cards for testing
 func (s *GameService) SetupCombinationTest() {
-	// Start with a new game to initialize the game state
+	// Start a fresh game
 	s.StartNewGame()
+
+	// Clear the table, player hand, and AI hand to set up a clean test environment
 
 	// Clear the table
 	tableCards := s.gameState.Deck.CardsAt(domain.TableLocation)
@@ -570,27 +645,43 @@ func (s *GameService) SetupCombinationTest() {
 		s.gameState.Deck.MoveCard(card, domain.TableLocation, domain.DeckLocation)
 	}
 
-	// Clear the player's hand
+	// Clear player hand
 	playerCards := s.gameState.Deck.CardsAt(domain.PlayerHandLocation)
 	for _, card := range playerCards {
 		s.gameState.Deck.MoveCard(card, domain.PlayerHandLocation, domain.DeckLocation)
 	}
 
-	// Clear the AI's hand
+	// Clear AI hand
 	aiCards := s.gameState.Deck.CardsAt(domain.AIHandLocation)
 	for _, card := range aiCards {
 		s.gameState.Deck.MoveCard(card, domain.AIHandLocation, domain.DeckLocation)
 	}
 
-	// Find and move cards to the table
-	s.gameState.Deck.MoveCardMatching(domain.DeckLocation, domain.TableLocation, domain.Asso, domain.Coppe)
-	s.gameState.Deck.MoveCardMatching(domain.DeckLocation, domain.TableLocation, domain.Due, domain.Bastoni)
-	s.gameState.Deck.MoveCardMatching(domain.DeckLocation, domain.TableLocation, domain.Tre, domain.Spade)
-	s.gameState.Deck.MoveCardMatching(domain.DeckLocation, domain.TableLocation, domain.Quattro, domain.Denari)
+	// Reset scopa counts
+	s.playerScopaCount = 0
+	s.aiScopaCount = 0
 
-	// Add a card with rank 7 to player's hand
-	s.gameState.Deck.MoveCardMatching(domain.DeckLocation, domain.PlayerHandLocation, domain.Sette, domain.Denari)
-
-	// Set game state to player's turn
+	// Set game status to player's turn
 	s.gameState.Status = domain.StatusPlayerTurn
+
+	fmt.Println("Test combination setup complete - ready for testing specific scenarios")
+}
+
+// SetupScopaTestScenario creates a test scenario with a 2 and 3 on the table and a 5 in player's hand
+// This allows manual testing of the combination capture logic
+func (s *GameService) SetupScopaTestScenario() {
+	// Start with a clean slate
+	s.SetupCombinationTest()
+
+	// Place specific cards: 2 and 3 on table
+	s.gameState.Deck.MoveCardMatching(domain.DeckLocation, domain.TableLocation, domain.Due, domain.Bastoni) // 2 of Clubs
+	s.gameState.Deck.MoveCardMatching(domain.DeckLocation, domain.TableLocation, domain.Tre, domain.Spade)   // 3 of Spades
+
+	// Add a rank 5 card to player's hand (5 = 2 + 3 for capture combination)
+	s.gameState.Deck.MoveCardMatching(domain.DeckLocation, domain.PlayerHandLocation, domain.Cinque, domain.Coppe) // 5 of Cups
+
+	// Set game status to player's turn
+	s.gameState.Status = domain.StatusPlayerTurn
+
+	fmt.Println("Scopa test scenario set up: 2 and 3 on table, 5 in player's hand")
 }

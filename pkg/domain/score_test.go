@@ -10,11 +10,12 @@ func TestNewScore(t *testing.T) {
 	score := NewScore()
 
 	// Verify initial state
-	assert.Equal(t, 4, len(score.Components), "Should have 4 scoring components")
+	assert.Equal(t, 5, len(score.Components), "Should have 5 scoring components")
 	assert.Equal(t, "Carte", score.Components[0].Name)
 	assert.Equal(t, "Ori", score.Components[1].Name)
 	assert.Equal(t, "Primiera", score.Components[2].Name)
 	assert.Equal(t, "Settebello", score.Components[3].Name)
+	assert.Equal(t, "Scope", score.Components[4].Name)
 	assert.Equal(t, 0, score.PlayerTotal)
 	assert.Equal(t, 0, score.AITotal)
 }
@@ -27,12 +28,13 @@ func TestCalculateTotals(t *testing.T) {
 	score.Components[1].AIScore = 1     // Ori
 	score.Components[2].PlayerScore = 1 // Primiera
 	score.Components[3].AIScore = 1     // Settebello
+	score.Components[4].PlayerScore = 2 // Scope
 
 	// Calculate totals
 	score.CalculateTotals()
 
 	// Verify totals
-	assert.Equal(t, 2, score.PlayerTotal)
+	assert.Equal(t, 4, score.PlayerTotal)
 	assert.Equal(t, 2, score.AITotal)
 }
 
@@ -67,6 +69,7 @@ func TestCalculateScore(t *testing.T) {
 				"Ori":        {1, 0},
 				"Primiera":   {1, 0},
 				"Settebello": {1, 0},
+				"Scope":      {0, 0}, // Scope component should be initialized as 0
 			},
 		},
 		{
@@ -90,6 +93,7 @@ func TestCalculateScore(t *testing.T) {
 				"Ori":        {0, 1},
 				"Primiera":   {0, 1},
 				"Settebello": {0, 1},
+				"Scope":      {0, 0}, // Scope component should be initialized as 0
 			},
 		},
 		{
@@ -111,6 +115,7 @@ func TestCalculateScore(t *testing.T) {
 				"Ori":        {1, 0}, // Player has 1 Denari, AI has 0 Denari
 				"Primiera":   {0, 0}, // Tie in Sette cards (1 each)
 				"Settebello": {1, 0}, // Player has Settebello
+				"Scope":      {0, 0}, // Scope component should be initialized as 0
 			},
 		},
 	}

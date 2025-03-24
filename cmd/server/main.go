@@ -27,6 +27,7 @@ func main() {
 	http.HandleFunc("POST /ai-turn", handlers.NewHandleAITurn(gameService))
 	http.HandleFunc("POST /test-game-over", handlers.NewHandleTestGameOver(gameService))
 	http.HandleFunc("POST /test-combination", handlers.NewHandleTestCombination(gameService))
+	http.HandleFunc("POST /test-scopa", handlers.NewHandleTestScopa(gameService))
 
 	// Serve static files
 	fs := http.FileServer(http.Dir("static"))

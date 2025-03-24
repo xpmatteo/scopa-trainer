@@ -12,62 +12,54 @@ func TestCannotPlayCardWhenCaptureIsPossible(t *testing.T) {
 	service := NewGameService()
 	service.StartNewGame()
 
-	// Get a card from the player's hand
-	playerHand := service.gameState.Deck.CardsAt(domain.PlayerHandLocation)
-	selectedCard := playerHand[0]
+	// Use our test combination setup for a clean test environment
+	service.SetupCombinationTest()
 
-	// Create a card with the same rank to put on the table (making capture possible)
-	tableCard := domain.Card{
-		Suit: domain.Coppe,
-		Rank: selectedCard.Rank,
+	// Add a specific card to the table that can be captured
+	service.gameState.Deck.MoveCardMatching(domain.DeckLocation, domain.TableLocation, domain.Quattro, domain.Coppe)
+
+	// Add a matching card to the player's hand
+	service.gameState.Deck.MoveCardMatching(domain.DeckLocation, domain.PlayerHandLocation, domain.Quattro, domain.Spade)
+
+	// Get the player card for our test
+	playerHandCards := service.gameState.Deck.CardsAt(domain.PlayerHandLocation)
+	if len(playerHandCards) != 1 {
+		t.Fatalf("Expected 1 card in player's hand, got %d", len(playerHandCards))
 	}
+	playerCard := playerHandCards[0]
 
-	// Find this card in the deck and move it to the table
-	found := false
-	for _, card := range service.gameState.Deck.CardsAt(domain.DeckLocation) {
-		if card.Rank == tableCard.Rank && card.Suit == tableCard.Suit {
-			service.gameState.Deck.MoveCard(card, domain.DeckLocation, domain.TableLocation)
-			tableCard = card // Use the actual card from the deck
-			found = true
-			break
-		}
-	}
-	if !found {
-		// Try to find any card with the same rank
-		for _, card := range service.gameState.Deck.CardsAt(domain.DeckLocation) {
-			if card.Rank == tableCard.Rank {
-				service.gameState.Deck.MoveCard(card, domain.DeckLocation, domain.TableLocation)
-				tableCard = card // Use the actual card from the deck
-				break
-			}
-		}
-	}
+	// Verify initial state
+	tableCardCount := len(service.gameState.Deck.CardsAt(domain.TableLocation))
+	playerHandCount := len(service.gameState.Deck.CardsAt(domain.PlayerHandLocation))
 
-	// Manually set the selected card
-	service.selectedCard = selectedCard
+	t.Logf("Initial state: table=%d, playerHand=%d", tableCardCount, playerHandCount)
+	assert.Equal(t, 1, tableCardCount, "Table should have one card")
+	assert.Equal(t, 1, playerHandCount, "Player should have one card")
 
-	// When we get the UI model
-	model := service.GetUIModel()
+	// Make sure it's player's turn
+	service.gameState.Status = domain.StatusPlayerTurn
 
-	// Then the model should indicate that the card cannot be played to the table
-	assert.False(t, model.CanPlaySelectedCard, "Should not be able to play card when capture is possible")
+	// Select the card from hand
+	service.selectedCard = playerCard
 
-	// Get the state before trying to play
-	beforeTableCount := len(model.TableCards)
-	beforeHandCount := len(model.PlayerHand)
-	beforeStatus := service.gameState.Status
+	// When the player tries to play the card to the table instead of capturing
+	canPlay := !service.canCaptureAnyCard(service.selectedCard)
+	assert.False(t, canPlay, "Should not be able to play card when capture is possible")
 
-	// And when we try to play the card to the table
+	// Play card despite capture being possible (directly testing the PlaySelectedCard method)
 	service.PlaySelectedCard()
 
-	// Get the updated model
-	playModel := service.GetUIModel()
+	// Then the card should not be played (nothing should change)
+	postTableCardCount := len(service.gameState.Deck.CardsAt(domain.TableLocation))
+	postPlayerHandCount := len(service.gameState.Deck.CardsAt(domain.PlayerHandLocation))
 
-	// Then the card should not be played
-	assert.Equal(t, beforeTableCount, len(playModel.TableCards), "Table card count should not change")
-	assert.Equal(t, beforeHandCount, len(playModel.PlayerHand), "Hand card count should not change")
-	assert.Equal(t, selectedCard, playModel.SelectedCard, "Selected card should remain selected")
-	assert.Equal(t, beforeStatus, service.gameState.Status, "Game status should not change")
+	t.Logf("After attempted play: table=%d, playerHand=%d, selectedCard=%v, status=%v",
+		postTableCardCount, postPlayerHandCount, service.selectedCard, service.gameState.Status)
+
+	assert.Equal(t, tableCardCount, postTableCardCount, "Table card count should not change")
+	assert.Equal(t, playerHandCount, postPlayerHandCount, "Hand card count should not change")
+	assert.Equal(t, playerCard, service.selectedCard, "Selected card should remain selected")
+	assert.Equal(t, domain.StatusPlayerTurn, service.gameState.Status, "Game status should not change")
 }
 
 func TestCanPlayCardWhenNoCaptureIsPossible(t *testing.T) {

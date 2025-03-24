@@ -53,6 +53,14 @@ func NewScore() Score {
 				PlayerCardCount: 0,
 				AICardCount:     0,
 			},
+			{
+				Name:            "Scope",
+				Description:     "Cleared the table",
+				PlayerScore:     0,
+				AIScore:         0,
+				PlayerCardCount: 0,
+				AICardCount:     0,
+			},
 		},
 		PlayerTotal: 0,
 		AITotal:     0,
@@ -133,6 +141,9 @@ func CalculateScore(playerCards []Card, aiCards []Card) Score {
 		score.Components[3].AIScore = 1
 		score.Components[3].AICardCount = 1
 	}
+
+	// Note: "Scope" component (score.Components[4]) is updated during gameplay
+	// and isn't recalculated here, as it depends on the history of captures
 
 	// Calculate totals
 	score.CalculateTotals()

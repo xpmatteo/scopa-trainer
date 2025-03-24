@@ -22,6 +22,12 @@ func TestCaptureCard(t *testing.T) {
 		Rank: selectedCard.Rank,
 	}
 
+	// Clear the table first - there might be initial cards there
+	tableCardsInitial := service.gameState.Deck.CardsAt(domain.TableLocation)
+	for _, card := range tableCardsInitial {
+		service.gameState.Deck.MoveCard(card, domain.TableLocation, domain.DeckLocation)
+	}
+
 	// Find this card in the deck and move it to the table
 	found := false
 	for _, card := range service.gameState.Deck.CardsAt(domain.DeckLocation) {
@@ -71,6 +77,9 @@ func TestCaptureCard(t *testing.T) {
 
 	// And it should be the AI's turn
 	assert.Equal(t, domain.StatusAITurn, service.gameState.Status, "It should be the AI's turn after capture")
+
+	// And player should have been awarded a scopa (cleared the table)
+	assert.Equal(t, 1, service.playerScopaCount, "Player should have been awarded a scopa")
 }
 
 func TestCannotCaptureNonMatchingCard(t *testing.T) {
