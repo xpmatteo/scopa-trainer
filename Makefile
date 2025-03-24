@@ -26,3 +26,10 @@ clean:
 # Install repomix with `npm install -g repomix`
 bundle:
 	repomix -i spec.md
+
+save-prompts:
+	cat ~/.claude.json | jq '.projects."/Users/matteo/dojo/2025-03-01-scopa-trainer-take-2/scopa"' > human-docs/claude.json
+	pushd /tmp; \
+		cursor-export -w '/Users/matteo/Library/Application Support/Cursor/User/workspaceStorage' \
+		popd \
+		cp -r /tmp/cursor-export-output/markdown/scopa human-docs

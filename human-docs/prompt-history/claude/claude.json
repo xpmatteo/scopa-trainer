@@ -1,0 +1,52 @@
+{
+  "allowedTools": [
+    "Bash(git add:*)",
+    "Bash(go build:*)",
+    "Bash(go run:*)",
+    "Bash(go test:*)"
+  ],
+  "history": [
+    "/compact ",
+    "/allowed-tools ",
+    "/doctor ",
+    "/cost ",
+    "add instructions to CLAUDE.md so that the tests are always run, and a full build is always attempted, before declaring a task done",
+    "commit",
+    "let's change the interaction when we have multiple options.  For instance:\n\non the table we have cards with ranks 1,2,3,4\nthe player selects a rank 7 from their hand -- now all four cards in the table are selected\nthe player clicks on the 4: we don't know yet if they will choose the 3, or the 1+2.  We must let the player continue the selection until they have totalled 7\n",
+    "did you run all the tests?",
+    "there are build errors",
+    "I would like to have an easier way to test the program than playing a game by the rules.  Please set up test buttons in the initial screens that open the game to a predetermined state that allows me to manual test the game logic.\n\nthe first such button should present me with the following cards on the table: rank 1, 2, 3, 4.  In the hand I should have a card rank 7.  This will make it possible for me to check how I'm given the choice to capture 1+2+4 or 3+4",
+    "please commit now",
+    "I don't like these tests.  You can set up an arbitrary GameState for the tests; you don't need to have for loops in the tests.  Try to structure your tests this way:\n\n1. Arrange: set up the game state\n2. Act: execute an operation on the game service\n3. Assert: check results",
+    "start with updating the tests",
+    "There is a rule that says that if you can capture a single card, then you must capture the single card, and you can't capture a combination.\n\nWhen a card that is played can capture, it must capture.\n\nDo not worry about score for scopa for now; we proceed through thin vertical slices of functionality",
+    "When multiple capture combinations are possible, the player should choose.",
+    "currently, the card captures can only capture cards with the same rank. Think how we could implement the correct Scopa rule, that a card played from the hand can capture a set of cards from the table whose ranks summed together equal the rank of the card being played.  Think both about the game logic, and the interaction logic.  Feel free to ask clarifying questions",
+    "/config ",
+    "/cost ",
+    "/terminal-setup ",
+    "/init "
+  ],
+  "dontCrawlDirectory": false,
+  "mcpContextUris": [],
+  "mcpServers": {},
+  "enabledMcpjsonServers": [],
+  "disabledMcpjsonServers": [],
+  "hasTrustDialogAccepted": true,
+  "ignorePatterns": [],
+  "exampleFiles": [
+    "service.go",
+    "game.html",
+    "main.go",
+    "handlers.go",
+    "model.go"
+  ],
+  "exampleFilesGeneratedAt": 1742731452962,
+  "hasCompletedProjectOnboarding": true,
+  "lastCost": 5.072579699999999,
+  "lastAPIDuration": 1085532,
+  "lastDuration": 6417743,
+  "lastLinesAdded": 852,
+  "lastLinesRemoved": 102,
+  "lastSessionId": "0f191ca6-1030-4f43-8598-1922369609ec"
+}
