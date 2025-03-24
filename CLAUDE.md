@@ -16,6 +16,11 @@
 - Tests: use table-driven tests with testify assertions
 - Follow domain-driven design (pkg/domain, pkg/application, pkg/adapters)
 
+## Http handlers:
+- Define small, focused interfaces for each handler's dependencies
+- Create handler factory functions that accept these interfaces
+- Return http.HandlerFunc from factory functions, not methods on structs
+
 ## Project Structure
 - `/cmd`: Application entry points
 - `/pkg/domain`: Core domain models and logic
@@ -29,6 +34,8 @@
 - Use table-driven tests where applicable
 - Use testify/assert for assertions
 - HTTP handlers: use httptest package
+- Avoid logic in test setup: initialize data structures directly
+- Afoid logic in test assertions: make a simple assertion for the values we expect
 
 ## Quality Assurance Checklist
 Before declaring any task complete:
