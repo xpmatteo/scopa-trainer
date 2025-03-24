@@ -215,7 +215,8 @@
         
         /* Styles for highlighting AI moves */
         .ai-last-move {
-            margin: 20px 0;
+            margin: 0;
+            height: 100%;
             padding: 15px;
             background-color: #e1f5fe;
             border-radius: 10px;
@@ -226,8 +227,9 @@
         .ai-last-move-title {
             color: #0277bd;
             margin-top: 0;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             font-size: 1.2em;
+            text-align: center;
         }
         
         .ai-move-card {
@@ -236,12 +238,24 @@
             transform: translateY(-5px);
         }
         
+        .ai-move-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .ai-played-card {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
         .ai-capture-area {
             background-color: #e8f5e9;
             border: 2px solid #66bb6a;
-            padding: 15px;
+            padding: 12px;
             border-radius: 10px;
-            margin-top: 10px;
+            width: 100%;
+            box-sizing: border-box;
         }
         
         .ai-capture-title {
@@ -249,6 +263,29 @@
             margin-top: 0;
             margin-bottom: 10px;
             font-size: 1.1em;
+            text-align: center;
+        }
+        
+        .ai-capture-cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        /* Make cards smaller in the sidebar */
+        .game-sidebar .card {
+            width: 70px;
+            height: 105px;
+            margin: 3px;
+        }
+        
+        /* No-capture message */
+        .ai-played-to-table {
+            margin-top: 10px;
+            text-align: center;
+            color: #0277bd;
+            font-style: italic;
         }
         
         /* Animation for AI move */
@@ -260,6 +297,41 @@
         
         .pulse {
             animation: pulse 1.5s infinite;
+        }
+        
+        /* Layout styles for game content */
+        .game-content-container {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .game-main-content {
+            flex: 7; /* 70% of the space */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .game-sidebar {
+            flex: 3; /* 30% of the space */
+            position: sticky;
+            top: 20px;
+            align-self: flex-start;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        
+        /* Responsive layout */
+        @media (max-width: 900px) {
+            .game-content-container {
+                flex-direction: column;
+            }
+            
+            .game-sidebar {
+                position: static;
+                max-height: none;
+            }
         }
     </style>
 </head>
@@ -405,88 +477,99 @@
     </section>
     {{end}}
 
-    {{if and .ShowAIMove .GameInProgress}}
-    <section data-section="AI Last Move">
-        <div class="ai-last-move">
-            <h3 class="ai-last-move-title">AI's Last Move:</h3>
-            <div style="display: flex; flex-wrap: wrap;">
-                <div data-test-icon="{{.LastAICardPlayed.Name}}-di-{{.LastAICardPlayed.Suit}}" 
-                     class="card {{.LastAICardPlayed.Suit | suitToLower}} ai-move-card pulse">
-                    <img src="{{.LastAICardPlayed | cardImagePath}}" 
-                         alt="{{.LastAICardPlayed.Name}} di {{.LastAICardPlayed.Suit}}">
-                </div>
-                
-                {{if gt (len .LastAICapture) 0}}
-                <div class="ai-capture-area">
-                    <h4 class="ai-capture-title">Captured:</h4>
+    <!-- Game content container with flex layout -->
+    <div class="game-content-container">
+        <!-- Left side - Game elements -->
+        <div class="game-main-content">
+            <section data-section="Table Cards">
+                <div class="card-area table-area">
+                    <h2>Table Cards ({{len .TableCards}})</h2>
                     <div style="display: flex; flex-wrap: wrap;">
-                        {{range .LastAICapture}}
+                        {{range .TableCards}}
                         <div data-test-icon="{{.Name}}-di-{{.Suit}}" 
-                             class="card {{.Suit | suitToLower}} ai-move-card">
+                             class="card {{.Suit | suitToLower}} 
+                                {{if isCardInSlice . $.SelectedTableCards}}selected-for-capture{{end}}
+                                {{if or (and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)) (cardInCaptureOptions . $.CaptureOptions)}}capturable{{end}} 
+                                {{if and $.ShowAIMove (eq . $.LastAICardPlayed)}}ai-move-card pulse{{end}}
+                                {{if not $.PlayerTurn}}disabled{{end}}" 
+                             {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
+                            <img src="{{. | cardImagePath}}" alt="{{.Name}} di {{.Suit}}">
+                        </div>
+                        {{end}}
+                    </div>
+
+                    {{if ne .SelectedCard.Rank 0}}
+                        {{if .CanConfirmCapture}}
+                        <div class="confirm-capture-button" onclick="confirmCapture()">
+                            Confirm Capture Selection
+                        </div>
+                        {{end}}
+                        
+                        {{if .CanPlaySelectedCard}}
+                        <div class="play-area {{if not $.PlayerTurn}}disabled{{end}}" {{if $.PlayerTurn}}onclick="playCard()"{{end}}>
+                            <p>Click here to play the selected card to the table</p>
+                        </div>
+                        {{else}}
+                        <div class="play-area disabled">
+                            <p>You must capture cards highlighted in yellow</p>
+                        </div>
+                        {{end}}
+                    {{end}}
+                </div>
+            </section>
+
+            <section data-section="Player Hand">
+                <div class="card-area hand-area">
+                    <h2>Your Hand ({{len .PlayerHand}})</h2>
+                    <div style="display: flex; flex-wrap: wrap;">
+                        {{range .PlayerHand}}
+                        <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | suitToLower}} {{if eq . $.SelectedCard}}selected{{end}} {{if not $.PlayerTurn}}disabled{{end}}" {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
                             <img src="{{. | cardImagePath}}" alt="{{.Name}} di {{.Suit}}">
                         </div>
                         {{end}}
                     </div>
                 </div>
-                {{else}}
-                <div style="margin-left: 20px; align-self: center;">
-                    <p>AI played this card to the table.</p>
-                </div>
-                {{end}}
-            </div>
+            </section>
         </div>
-    </section>
-    {{end}}
 
-    <section data-section="Table Cards">
-        <div class="card-area table-area">
-            <h2>Table Cards ({{len .TableCards}})</h2>
-            <div style="display: flex; flex-wrap: wrap;">
-                {{range .TableCards}}
-                <div data-test-icon="{{.Name}}-di-{{.Suit}}" 
-                     class="card {{.Suit | suitToLower}} 
-                        {{if isCardInSlice . $.SelectedTableCards}}selected-for-capture{{end}}
-                        {{if or (and (ne $.SelectedCard.Rank 0) (eq .Rank $.SelectedCard.Rank)) (cardInCaptureOptions . $.CaptureOptions)}}capturable{{end}} 
-                        {{if and $.ShowAIMove (eq . $.LastAICardPlayed)}}ai-move-card pulse{{end}}
-                        {{if not $.PlayerTurn}}disabled{{end}}" 
-                     {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
-                    <img src="{{. | cardImagePath}}" alt="{{.Name}} di {{.Suit}}">
+        <!-- Right side - AI move information -->
+        <div class="game-sidebar">
+            {{if and .ShowAIMove .GameInProgress}}
+            <section data-section="AI Last Move">
+                <div class="ai-last-move">
+                    <h3 class="ai-last-move-title">AI's Last Move</h3>
+                    <div class="ai-move-display">
+                        <div class="ai-played-card">
+                            <div data-test-icon="{{.LastAICardPlayed.Name}}-di-{{.LastAICardPlayed.Suit}}" 
+                                 class="card {{.LastAICardPlayed.Suit | suitToLower}} ai-move-card pulse">
+                                <img src="{{.LastAICardPlayed | cardImagePath}}" 
+                                     alt="{{.LastAICardPlayed.Name}} di {{.LastAICardPlayed.Suit}}">
+                            </div>
+                        </div>
+                        
+                        {{if gt (len .LastAICapture) 0}}
+                        <div class="ai-capture-area">
+                            <h4 class="ai-capture-title">Captured:</h4>
+                            <div class="ai-capture-cards">
+                                {{range .LastAICapture}}
+                                <div data-test-icon="{{.Name}}-di-{{.Suit}}" 
+                                     class="card {{.Suit | suitToLower}} ai-move-card">
+                                    <img src="{{. | cardImagePath}}" alt="{{.Name}} di {{.Suit}}">
+                                </div>
+                                {{end}}
+                            </div>
+                        </div>
+                        {{else}}
+                        <div class="ai-played-to-table">
+                            <p>AI played this card to the table</p>
+                        </div>
+                        {{end}}
+                    </div>
                 </div>
-                {{end}}
-            </div>
-
-            {{if ne .SelectedCard.Rank 0}}
-                {{if .CanConfirmCapture}}
-                <div class="confirm-capture-button" onclick="confirmCapture()">
-                    Confirm Capture Selection
-                </div>
-                {{end}}
-                
-                {{if .CanPlaySelectedCard}}
-                <div class="play-area {{if not $.PlayerTurn}}disabled{{end}}" {{if $.PlayerTurn}}onclick="playCard()"{{end}}>
-                    <p>Click here to play the selected card to the table</p>
-                </div>
-                {{else}}
-                <div class="play-area disabled">
-                    <p>You must capture cards highlighted in yellow</p>
-                </div>
-                {{end}}
+            </section>
             {{end}}
         </div>
-    </section>
-
-    <section data-section="Player Hand">
-        <div class="card-area hand-area">
-            <h2>Your Hand ({{len .PlayerHand}})</h2>
-            <div style="display: flex; flex-wrap: wrap;">
-                {{range .PlayerHand}}
-                <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | suitToLower}} {{if eq . $.SelectedCard}}selected{{end}} {{if not $.PlayerTurn}}disabled{{end}}" {{if $.PlayerTurn}}onclick="selectCard('{{.Suit}}', '{{.Value}}')"{{end}}>
-                    <img src="{{. | cardImagePath}}" alt="{{.Name}} di {{.Suit}}">
-                </div>
-                {{end}}
-            </div>
-        </div>
-    </section>
+    </div>
     {{end}}
     {{ end }}
 
