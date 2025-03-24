@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -109,4 +110,14 @@ func (d *Deck) Shuffle() {
 
 	// Replace the ordered cards
 	d.orderedCards = newOrder
+}
+
+func (d *Deck) MoveCardMatching(locationFrom Location, locationTo Location, rank Rank, suit Suit) {
+	for _, card := range d.CardsAt(locationFrom) {
+		if card.Rank == rank && card.Suit == suit {
+			d.MoveCard(card, locationFrom, locationTo)
+			return
+		}
+	}
+	panic(fmt.Sprintf("card not found: %v di %v", rank, suit))
 }
