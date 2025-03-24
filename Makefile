@@ -27,6 +27,7 @@ clean:
 bundle:
 	repomix -i spec.md
 
+# Incomplete!!!
 save-prompts:
 	cat ~/.claude.json | jq '.projects."/Users/matteo/dojo/2025-03-01-scopa-trainer-take-2/scopa"' > human-docs/claude.json
 	pushd /tmp; \
