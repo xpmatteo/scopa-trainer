@@ -399,19 +399,6 @@
             </div>
         </section>
         
-        <section data-section="Table Cards">
-            <div class="card-area table-area">
-                <h2>Table Cards ({{len .TableCards}})</h2>
-                <div style="display: flex; flex-wrap: wrap;">
-                    {{range .TableCards}}
-                    <div data-test-icon="{{.Name}}-di-{{.Suit}}" class="card {{.Suit | suitToLower}}">
-                        <img src="{{. | cardImagePath}}" alt="{{.Name}} di {{.Suit}}">
-                    </div>
-                    {{end}}
-                </div>
-            </div>
-        </section>
-        
         <section data-section="AI Captures">
             <div class="card-area">
                 <h2>AI Captures ({{.AICaptureCount}})</h2>
